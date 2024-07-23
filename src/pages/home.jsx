@@ -1,18 +1,10 @@
 import React from 'react';
+import Header from '../components/header';
 
 const Home = () => {
     return (
         <div className="container mx-auto p-4">
-            <header className="flex justify-between items-center bg-gray-100 p-4">
-                <div className="text-2xl font-bold">Logo</div>
-                <div className="flex items-center">
-                    <select className="border rounded p-2 mx-2">
-                        <option>Option 1</option>
-                        <option>Option 2</option>
-                    </select>
-                    <button className="bg-yellow-400 text-white px-4 py-2 rounded">Tìm KIẾM</button>
-                </div>
-            </header>
+            <Header/>
             <main className="mt-4">
                 <h1 className="text-xl font-semibold">Kênh thông tin Phòng Trọ số 1 Việt Nam</h1>
                 <div className="mt-4">
