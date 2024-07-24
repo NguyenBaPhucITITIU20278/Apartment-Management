@@ -7,6 +7,9 @@ const Header = () => {
     const goToLogin = () => {
         navigate('/login');
     }
+    const goToRegister = () => {
+        navigate('/register');
+    }
   return (
     <header className="flex items-center justify-between bg-blue-600 p-4">
       <div className="text-white text-2xl mr-10">
@@ -33,7 +36,7 @@ const Header = () => {
           <div class="absolute z-10 w-32 h-32 rounded-full group-hover:scale-150 transition-all  duration-500 ease-in-out bg-sky-700 delay-150 group-hover:delay-150"></div>
           <div class="absolute z-10 w-24 h-24 rounded-full group-hover:scale-150 transition-all  duration-500 ease-in-out bg-sky-600 delay-150 group-hover:delay-200"></div>
           <div class="absolute z-10 w-16 h-16 rounded-full group-hover:scale-150 transition-all  duration-500 ease-in-out bg-sky-500 delay-150 group-hover:delay-300"></div>
-          <p class="z-10">Register</p>
+          <p class="z-10" onClick={goToRegister}>Register</p>
         </button>
       </div>
     </header>
