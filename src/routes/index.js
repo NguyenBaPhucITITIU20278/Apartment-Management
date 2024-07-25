@@ -1,6 +1,7 @@
 import home from '../pages/home';
 import login from '../pages/login';
 import register from '../pages/register';
+import rentroom from '../pages/rentroom';
 
 export const routes = [
     {
@@ -28,6 +29,15 @@ export const routes = [
         description: 'Register page',
         header: false,
         background: false,
+        role: 'user'
+    },
+    {
+        path: '/rentroom',
+        page: rentroom,
+        title: 'Rent Room Page',
+        description: 'Rent Room page',
+        header: true,
+        background: true,
         role: 'user'
     }
 ]

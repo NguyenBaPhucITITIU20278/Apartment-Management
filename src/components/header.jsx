@@ -10,6 +10,9 @@ const Header = () => {
     const goToRegister = () => {
         navigate('/register');
     }
+    const goToRentRoom = () => {
+        navigate('/rentroom');
+    }
   return (
     <header className="flex items-center justify-between bg-blue-600 p-4">
       <div className="text-white text-2xl mr-10">
@@ -17,7 +20,7 @@ const Header = () => {
       </div>
       <nav className="flex-grow">
         <ul className="flex space-x-6">
-          <button className="text-white">Rent Room</button>
+          <button className="text-white" onClick={goToRentRoom}>Rent Room</button>
           <button className="text-white">Rent House</button>
           <button className="text-white">Rent Apartment</button>
           <button className="text-white">Rent Land</button>
