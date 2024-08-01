@@ -32,3 +32,7 @@ export const getUser = async (id, token) => {
     })
     return res.data
 }
+export const registerUser = async (data) => {
+    const res = await axiosJWT.post(`${API_URL}/create`, data);
+    return res.data;
+}

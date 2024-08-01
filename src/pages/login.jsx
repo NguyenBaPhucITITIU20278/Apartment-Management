@@ -13,15 +13,15 @@ import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
     const navigate = useNavigate();
-    const [id, setId] = useState('');
+    const [userName, setUserName] = useState('');
     const [password, setPassword] = useState('');
 
     const mutation = useMutationHook(
         data => loginUser(data)
     );
     const { data, isError, isSuccess } = mutation;
-    const handleIdChange = (e) => {
-        setId(e.target.value);
+    const handleUserNameChange = (e) => {
+        setUserName(e.target.value);
     };
     const handlePasswordChange = (e) => {
         setPassword(e.target.value);
@@ -29,7 +29,7 @@ const Login = () => {
     const handleSignIn = (event) => {
         event.preventDefault(); 
         mutation.mutate({
-            id,
+            userName,
             password,
         });
     };
@@ -48,12 +48,12 @@ const Login = () => {
                 localStorage.setItem('accessToken', data.accessToken);
                 localStorage.setItem('refreshToken', data.refreshToken);
                 localStorage.setItem('role', 'user');
-                localStorage.setItem('id', id);
+                localStorage.setItem('userName', userName);
                 const decode = jwtDecode(data.accessToken);
-                if (decode && decode.id) {
-                    handleGetDetailUser(decode.id, data.accessToken, data.refreshToken);
-                    console.log(decode.id);
-                    localStorage.setItem('id', decode.id); 
+                if (decode && decode.userName) {
+                    handleGetDetailUser(decode.userName, data.accessToken, data.refreshToken);
+                    console.log(decode.userName);
+                    localStorage.setItem('userName', decode.userName); 
                 }
             } else {
                 message.error("Invalid response from server");
@@ -71,7 +71,7 @@ const Login = () => {
                     <h2 id="form-title" className="text-center text-3xl font-bold mb-10 text-gray-800">Welcome to Rent Room</h2>
                     <form className="space-y-5" onSubmit={handleSignIn}>
                         <input
-                            className="w-full h-12 border border-gray-800 px-3 rounded-lg" placeholder="ID" type="text" onChange={handleIdChange} />
+                            className="w-full h-12 border border-gray-800 px-3 rounded-lg" placeholder="UserName" type="text" onChange={handleUserNameChange} />
                         <input
                             className="w-full h-12 border border-gray-800 px-3 rounded-lg" placeholder="Password" type="password" onChange={handlePasswordChange} />
                         <button type="submit" className="w-full h-12 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Sign in</button>
