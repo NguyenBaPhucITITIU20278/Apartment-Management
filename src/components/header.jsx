@@ -4,19 +4,19 @@ import { useSelector } from "react-redux";
 
 const Header = ({ title, role }) => {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState('');
+  const [id, setId] = useState('');
   const userState = useSelector(state => state);
   let user = role === "user" ? userState.user : userState.admin;
 
   useEffect(() => {
-    const storedUserName = localStorage.getItem('userName');
-    if (storedUserName) {
-      setUserName(storedUserName);
+    const storedId = localStorage.getItem('id');
+    if (storedId) {
+      setId(storedId);
     }
 
     const handleStorageChange = () => {
-      const updatedUserName = localStorage.getItem('userName');
-      setUserName(updatedUserName);
+      const updatedId = localStorage.getItem('id');
+      setId(updatedId);
     };
 
     window.addEventListener('storage', handleStorageChange);
@@ -67,9 +67,9 @@ const Header = ({ title, role }) => {
         </ul>
       </nav>
       <div className="flex space-x-2 ml-auto">
-        {userName ? (
+        {id ? (
           <>
-            <span className="text-white">Welcome, {userName}</span>
+            <span className="text-white">Welcome, {id}</span>
             <button className="text-white" onClick={signOut}>Sign Out</button>
           </>
         ) : (
