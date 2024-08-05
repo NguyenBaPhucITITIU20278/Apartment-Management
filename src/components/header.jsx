@@ -4,25 +4,25 @@ import { useSelector } from "react-redux";
 
 const Header = ({ title, role }) => {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState('');
-  const userState = useSelector(state => state);
+  const [userName, setUserName] = useState("");
+  const userState = useSelector((state) => state);
   let user = role === "user" ? userState.user : userState.admin;
 
   useEffect(() => {
-    const storedUserName = localStorage.getItem('userName');
+    const storedUserName = localStorage.getItem("userName");
     if (storedUserName) {
       setUserName(storedUserName);
     }
 
     const handleStorageChange = () => {
-      const updatedUserName = localStorage.getItem('userName');
+      const updatedUserName = localStorage.getItem("userName");
       setUserName(updatedUserName);
     };
 
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
@@ -38,28 +38,37 @@ const Header = ({ title, role }) => {
 
   const goToLogin = () => {
     if (!isLoginPage && !isRegisterPage) {
-      navigate('/login');
+      navigate("/login");
     }
   };
 
   const goToRegister = () => {
     if (!isLoginPage && !isRegisterPage) {
-      navigate('/register');
+      navigate("/register");
     }
   };
 
   const goToRentRoom = () => {
     if (!isLoginPage && !isRegisterPage) {
-      navigate('/rentroom');
+      navigate("/rentroom");
     }
+  };
+
+  const goToMainPage = () => {
+    navigate("/");
   };
 
   return (
     <header className="flex items-center justify-between bg-blue-600 p-4">
       <nav className="flex-grow">
         <ul className="flex space-x-6">
-          <button className="text-white" onClick={goToRentRoom}>Rent Room</button>
-          <button className="text-white">Rent House</button>
+          <button className="text-white" onClick={goToMainPage}>
+            Main Page
+          </button>
+          <button className="text-white" onClick={goToRentRoom}>
+            Rent Room
+          </button>
+
           <button className="text-white">Rent Apartment</button>
           <button className="text-white">Rent Land</button>
           <button className="text-white">News</button>
@@ -70,7 +79,9 @@ const Header = ({ title, role }) => {
         {userName ? (
           <>
             <span className="text-white">Welcome, {userName}</span>
-            <button className="text-white" onClick={signOut}>Sign Out</button>
+            <button className="text-white" onClick={signOut}>
+              Sign Out
+            </button>
           </>
         ) : (
           <>
@@ -84,7 +95,9 @@ const Header = ({ title, role }) => {
               <div className="absolute z-10 w-32 h-32 rounded-full group-hover:scale-150 transition-all  duration-500 ease-in-out bg-sky-700 delay-150 group-hover:delay-150"></div>
               <div className="absolute z-10 w-24 h-24 rounded-full group-hover:scale-150 transition-all  duration-500 ease-in-out bg-sky-600 delay-150 group-hover:delay-200"></div>
               <div className="absolute z-10 w-16 h-16 rounded-full group-hover:scale-150 transition-all  duration-500 ease-in-out bg-sky-500 delay-150 group-hover:delay-300"></div>
-              <p className="z-10" onClick={goToRegister}>Register</p>
+              <p className="z-10" onClick={goToRegister}>
+                Register
+              </p>
             </button>
           </>
         )}
