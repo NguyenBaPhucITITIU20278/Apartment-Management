@@ -2,6 +2,7 @@ import home from '../pages/home';
 import login from '../pages/login';
 import register from '../pages/register';
 import rentroom from '../pages/rentroom';
+import resetpassword from '../pages/resetPassword';
 
 export const routes = [
     {
@@ -38,6 +39,15 @@ export const routes = [
         description: 'Rent Room page',
         header: true,
         background: true,
+        role: 'user'
+    },
+    {
+        path: '/resetpassword',
+        page: resetpassword,
+        title: 'Reset Password Page',
+        description: 'Reset Password page',
+        header: false,
+        background: false,
         role: 'user'
     }
 ]

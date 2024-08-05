@@ -11,6 +11,7 @@ import { login } from "../redux/slice/Authslice.jsx";
 import { getUser } from "../services/user.js";
 import { jwtDecode } from "jwt-decode";
 
+
 const Login = () => {
     const navigate = useNavigate();
     const [userName, setUserName] = useState('');
@@ -75,7 +76,7 @@ const Login = () => {
                         <input
                             className="w-full h-12 border border-gray-800 px-3 rounded-lg" placeholder="Password" type="password" onChange={handlePasswordChange} />
                         <button type="submit" className="w-full h-12 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Sign in</button>
-                        <a className="text-blue-500 hover:text-blue-800 text-sm" href="#">Forgot Password?</a>
+                        <a className="text-blue-500 hover:text-blue-800 text-sm" href="/resetPassword">Forgot Password?</a>
                         <p className="text-blue-500 hover:text-blue-800 text-sm">
                             Don't have an account?{" "}
                             <a className="font-bold text-slate-700" href="/register">Sign up</a>
