@@ -9,6 +9,7 @@ const RoomCard = ({ room }) => {
                 <p className='price font-bold'> Price: <span className= 'font-normal'>{room.price}</span></p>
                 <p className='bedrooms font-bold'> Bedrooms: <span className='font-normal'>{room.numberOfBedrooms}</span></p>
                 <p className='description font-bold'> Description: <span className='font-normal'>{room.description}</span></p>
+                <p className='address font-bold'> Address: <span className='font-normal'>{room.address}</span></p>
                 <button style={{ backgroundColor: '#FFD700', border: 'none', padding: '10px', borderRadius: '5px', cursor: 'pointer' }}>
                     Call: {room.phoneNumber}
                 </button>
