@@ -36,3 +36,15 @@ export const registerUser = async (data) => {
     const res = await axiosJWT.post(`${API_URL}/create`, data);
     return res.data;
 }
+
+export const sendOtp = async (data) => {
+    const res = await axiosJWT.post(`${API_URL}/sendOtp`, data);
+    return res.data;
+}
+
+export const resetPassword = async (data) => {
+    const res = await axiosJWT.post(`${API_URL}/resetPassword`, data);
+    return res.data;
+}
+
+

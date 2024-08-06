@@ -34,7 +34,6 @@ const ResetPassword = () => {
 
   useEffect(() => {
     if (sendOtpMutation.isSuccess) {
-      message.success("OTP sent successfully");
       setStep(2);
     }
   }, [sendOtpMutation.isSuccess]);
