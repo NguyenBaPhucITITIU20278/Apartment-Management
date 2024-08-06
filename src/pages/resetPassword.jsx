@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
+
+import { useMutation } from "@tanstack/react-query";
 import { resetPassword, sendOtp } from "../services/user";
 import { useMutationHook } from "../hooks/useMutationHook";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/header.jsx";
-import { message } from "antd";
+
 
 const ResetPassword = () => {
   const [step, setStep] = useState(1);
@@ -21,7 +25,7 @@ const ResetPassword = () => {
 
   const handleResetPasswordClick = () => {
     if (newPassword !== confirmPassword) {
-      message.error("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
     console.log("Resetting password for:", email);
@@ -37,7 +41,7 @@ const ResetPassword = () => {
 
   useEffect(() => {
     if (resetPasswordMutation.isSuccess) {
-      message.success("Password reset successfully");
+      toast.success("Password reset successfully");
       setStep(1);
     }
   }, [resetPasswordMutation.isSuccess]);
