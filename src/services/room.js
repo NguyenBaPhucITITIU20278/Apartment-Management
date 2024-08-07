@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const API_URL = 'http://localhost:8080/api/rooms';
 
 export const getAllRooms = async () => {
@@ -12,3 +14,13 @@ export const getAllRooms = async () => {
         throw error;
     }
 };
+
+export const getRoomByAddress = async (address) => {
+    try {
+      const response = await axios.post(`${API_URL}/rooms-by-address`, { address });
+      return response.data;
+    } catch (error) {
+      console.error('There was an error fetching the room!', error);
+      throw error;
+    }
+  };
