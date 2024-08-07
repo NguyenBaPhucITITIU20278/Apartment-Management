@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import RoomCard from "../components/RoomCard";
-import { getAllRooms, getRoomByAddress } from "../services/room";
+import { getAllRooms } from "../services/room";
 import { useMutationHook } from "../hooks/useMutationHook";
 import { message } from "antd";
+import { getRoomByAddress } from '../services/room'; // Import the new service
 
 const Home = () => {
-  const [room, setRoom] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
 
@@ -14,7 +15,7 @@ const Home = () => {
       try {
         const data = await getAllRooms();
         if (Array.isArray(data)) {
-          setRoom(data);
+          setRooms(data);
         } else {
           console.error("Expected an array but got:", data);
         }
@@ -26,17 +27,21 @@ const Home = () => {
     fetchRooms();
   }, []);
   
-  const mutation = useMutationHook((data) => getRoomByAddress(data));
-  const { data, isError, isSuccess } = mutation;
-  
   const handleSearch = async (event) => {
     event.preventDefault();
+    setError(""); // Clear previous errors
     try {
       const roomData = await getRoomByAddress(address);
-      setRoom([roomData]); // Assuming the API returns a single room object
-      message.success("Room found");
+      if (roomData) {
+        setRooms([roomData]); // Assuming the API returns a single room object
+        message.success("Room found");
+      } else {
+        setRooms([]); // Clear rooms if no room is found
+        message.error("Room not found");
+      }
     } catch (error) {
       setError(error.message);
+      setRooms([]); // Clear rooms on error
       message.error("Room not found");
     }
     console.log(address);
@@ -71,7 +76,7 @@ const Home = () => {
         />
         <input
           type="text"
-          placeholder="2 adults · 0 children · 1 room"
+          placeholder="number of "
           className="p-2 border border-gray-300 rounded-md flex-1"
         />
         <button
@@ -84,8 +89,8 @@ const Home = () => {
       </div>
       {error ? (
         <p className="text-red-500">Error: {error}</p>
-      ) : Array.isArray(room) ? (
-        room.map((room) => <RoomCard key={room.id} room={room} />)
+      ) : Array.isArray(rooms) && rooms.length > 0 ? (
+        rooms.map((room) => <RoomCard key={room.id} room={room} />)
       ) : (
         <p>No rooms available</p>
       )}

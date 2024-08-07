@@ -38,21 +38,15 @@ const Header = ({ title, role }) => {
   const isHomePage = location.pathname === "/";
 
   const goToLogin = () => {
-    if (!isLoginPage && !isRegisterPage) {
-      navigate("/login");
-    }
+    navigate("/login"); 
   };
 
   const goToRegister = () => {
-    if (!isLoginPage && !isRegisterPage) {
-      navigate("/register");
-    }
+    navigate("/register");
   };
 
   const goToRentRoom = () => {
-    if (!isLoginPage && !isRegisterPage) {
-      navigate("/rentroom");
-    }
+    navigate("/rentroom");
   };
 
   const goToMainPage = () => {
