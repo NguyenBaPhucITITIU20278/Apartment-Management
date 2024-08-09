@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import RoomCard from "../components/RoomCard";
-import { getAllRooms } from "../services/room";
+import { getAllRooms, getRoomByAddressAndBedroom, addRoom } from "../services/room";
 import { useMutationHook } from "../hooks/useMutationHook";
 import { message } from "antd";
-import { getRoomByAddress } from '../services/room'; // Import the new service
 
 const Home = () => {
   const [rooms, setRooms] = useState([]);
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
+  const [bedroom, setBedroom] = useState(0);
+  const [id, setId] = useState(""); // Thêm state cho id
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -26,25 +27,37 @@ const Home = () => {
 
     fetchRooms();
   }, []);
-  
-  const handleSearch = async (event) => {
+
+  const searchMutation = useMutationHook(
+    data => getRoomByAddressAndBedroom(data));
+  const addRoomMutation = useMutationHook(addRoom);
+  const { data: searchData, isError: isSearchError, isSuccess: isSearchSuccess } = searchMutation;
+  const { isError: isAddError, isSuccess: isAddSuccess } = addRoomMutation;
+
+  const handleSearch = (event) => {
     event.preventDefault();
-    setError(""); // Clear previous errors
-    try {
-      const roomData = await getRoomByAddress(address);
-      if (roomData) {
-        setRooms([roomData]); // Assuming the API returns a single room object
-        message.success("Room found");
-      } else {
-        setRooms([]); // Clear rooms if no room is found
-        message.error("Room not found");
-      }
-    } catch (error) {
-      setError(error.message);
-      setRooms([]); // Clear rooms on error
-      message.error("Room not found");
+    const parsedBedroom = parseInt(bedroom, 10);
+    if (isNaN(parsedBedroom)) {
+      console.error('Invalid number of bedrooms:', bedroom);
+      setError('Invalid number of bedrooms');
+      return;
     }
-    console.log(address);
+    console.log({ address, bedroom: parsedBedroom });
+    searchMutation.mutate({ address, bedroom: parsedBedroom });
+    if (isSearchSuccess) {
+      setRooms(searchData); // Cập nhật rooms khi tìm kiếm thành công
+    }
+  };
+
+  const handleAddRoom = () => {
+    const parsedBedroom = parseInt(bedroom, 10);
+    console.log("dfsfs");
+    if (isNaN(parsedBedroom)) {
+      console.error('Invalid number of bedrooms:', bedroom);
+      setError('Invalid number of bedrooms');
+      return;
+    }
+    addRoomMutation.mutate({ id, address, bedroom: parsedBedroom }); // Thêm id vào payload
   };
 
   return (
@@ -56,6 +69,13 @@ const Home = () => {
         Search for your dream home and book it now!
       </p>
       <div className="bg-white p-4 border-2 border-yellow-400 rounded-lg mb-6 flex gap-4">
+        <input
+          type="text"
+          placeholder="Room ID"
+          className="p-2 border border-gray-300 rounded-md flex-1"
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+        />
         <input
           type="text"
           placeholder="Where would you like to stay?"
@@ -75,9 +95,11 @@ const Home = () => {
           className="p-2 border border-gray-300 rounded-md"
         />
         <input
-          type="text"
-          placeholder="number of "
+          type="number"
+          placeholder="Number of bedrooms"
           className="p-2 border border-gray-300 rounded-md flex-1"
+          value={bedroom}
+          onChange={(e) => setBedroom(e.target.value)}
         />
         <button
           type="button"
@@ -85,6 +107,13 @@ const Home = () => {
           onClick={handleSearch}
         >
           Search
+        </button>
+        <button
+          type="button"
+          className="p-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+          onClick={handleAddRoom}
+        >
+          Add Room
         </button>
       </div>
       {error ? (

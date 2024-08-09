@@ -46,7 +46,7 @@ const Login = () => {
             message.success("Login successful");
             // Kiểm tra dữ liệu trước khi sử dụng
             if (data && data.accessToken) {
-                localStorage.setItem('accessToken', data.accessToken);
+                localStorage.setItem('Authorization', data.accessToken);
                 localStorage.setItem('refreshToken', data.refreshToken);
                 localStorage.setItem('role', 'user');
                 localStorage.setItem('userName', userName);
