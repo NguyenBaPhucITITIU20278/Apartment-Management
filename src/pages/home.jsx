@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import RoomCard from "../components/RoomCard";
-import { getAllRooms, getRoomByAddressAndBedroom, addRoom } from "../services/room";
+import { getAllRooms, getRoomByAddress, addRoom } from "../services/room";
 import { useMutationHook } from "../hooks/useMutationHook";
 import { message } from "antd";
 
@@ -14,7 +14,12 @@ const Home = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const data = await getAllRooms();
+        let data;
+        if (address) {
+          data = await getRoomByAddress({ address });
+        } else {
+          data = await getAllRooms();
+        }
         if (Array.isArray(data)) {
           setRooms(data);
         } else {
@@ -26,32 +31,22 @@ const Home = () => {
     };
 
     fetchRooms();
-  }, []);
+  }, [address]);
 
   const searchMutation = useMutationHook(
-    data => getRoomByAddressAndBedroom(data));
+    data => getRoomByAddress(data));
   const addRoomMutation = useMutationHook(addRoom);
   const { data: searchData, isError: isSearchError, isSuccess: isSearchSuccess } = searchMutation;
   const { isError: isAddError, isSuccess: isAddSuccess } = addRoomMutation;
 
   const handleSearch = (event) => {
     event.preventDefault();
-    const parsedBedroom = parseInt(bedroom, 10);
-    if (isNaN(parsedBedroom)) {
-      console.error('Invalid number of bedrooms:', bedroom);
-      setError('Invalid number of bedrooms');
-      return;
-    }
-    console.log({ address, bedroom: parsedBedroom });
-    searchMutation.mutate({ address, bedroom: parsedBedroom });
-    if (isSearchSuccess) {
-      setRooms(searchData); // Cập nhật rooms khi tìm kiếm thành công
-    }
+    console.log({ address });
+    searchMutation.mutate({ address });
   };
 
   const handleAddRoom = () => {
     const parsedBedroom = parseInt(bedroom, 10);
-    console.log("dfsfs");
     if (isNaN(parsedBedroom)) {
       console.error('Invalid number of bedrooms:', bedroom);
       setError('Invalid number of bedrooms');
@@ -71,13 +66,6 @@ const Home = () => {
       <div className="bg-white p-4 border-2 border-yellow-400 rounded-lg mb-6 flex gap-4">
         <input
           type="text"
-          placeholder="Room ID"
-          className="p-2 border border-gray-300 rounded-md flex-1"
-          value={id}
-          onChange={(e) => setId(e.target.value)}
-        />
-        <input
-          type="text"
           placeholder="Where would you like to stay?"
           className="p-2 border border-gray-300 rounded-md flex-1"
           name="address"
@@ -85,21 +73,20 @@ const Home = () => {
           onChange={(e) => setAddress(e.target.value)}
         />
         <input
-          type="date"
-          placeholder="Check-in"
-          className="p-2 border border-gray-300 rounded-md"
-        />
-        <input
-          type="date"
-          placeholder="Check-out"
-          className="p-2 border border-gray-300 rounded-md"
-        />
-        <input
           type="number"
           placeholder="Number of bedrooms"
           className="p-2 border border-gray-300 rounded-md flex-1"
+          name="bedroom"
           value={bedroom}
           onChange={(e) => setBedroom(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Room ID"
+          className="p-2 border border-gray-300 rounded-md flex-1"
+          name="id"
+          value={id}
+          onChange={(e) => setId(e.target.value)}
         />
         <button
           type="button"
