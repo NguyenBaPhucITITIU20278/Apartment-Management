@@ -1,21 +1,34 @@
 import axios from 'axios';
 
 export const axiosJWT = axios.create();
-const API_URL = 'http://localhost:8080/api/users';
+const API_URL = 'http://localhost:8080/api/admin';
 
-export const findUser = async (data) => {
+export const findUser = async (name) => {
     try {
-        const response = await axiosJWT.post(`${API_URL}/findUser`, data);
+        const accessToken = localStorage.getItem('Authorization');
+        if (!accessToken) {
+            throw new Error('Missing access token');
+        }
+        const userName = localStorage.getItem('userName');
+        const userData = {
+            userName: name,
+            accessToken: accessToken
+        };
+        const response = await axiosJWT.post(`${API_URL}/find-user`, userData, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
+                'username': `${userName}`
+            }
+        });
         return response.data;
+        
     } catch (error) {
         if (error.response) {
-            // Server responded with a status other than 2xx
             console.error('Error response:', error.response.data);
         } else if (error.request) {
-            // Request was made but no response received
             console.error('Error request:', error.request);
         } else {
-            // Something else happened while setting up the request
             console.error('Error message:', error.message);
         }
         throw error;

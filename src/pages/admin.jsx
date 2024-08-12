@@ -1,42 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/header';
 import { useMutation } from '@tanstack/react-query';
-import {findUser} from '../services/admin';
-import { useEffect } from 'react';  
+import { findUser } from '../services/admin';
+import { useMutationHook } from '../hooks/useMutationHook';
 
 const AdminPage = () => {
-    const [userName, setUserName] = useState('');
-    const [foundUser, setFoundUser] = useState(null);
+    const [name, setName] = useState('');
+    const [foundUser, setFoundUser] = useState('');
     const navigate = useNavigate();
 
-   
-    const {data, isSuccess, isError, error} = useMutation({
-        mutationFn: findUser,
-    });
+    const mutation = useMutationHook(
+        data => findUser(name)
+    );
 
     const handleSearch = () => {
-        console.log(userName);
-        findUser(userName);
+        mutation.mutate({ name: name });
     };
 
     useEffect(() => {
-        console.log(data);
-        if (isSuccess) {    
-            setFoundUser(data);
+        if (mutation.isSuccess) {
+            setFoundUser(mutation.data);
         }
-        if (isError) {
-            console.error('Error fetching user:', error);
-        }
-    }, [data, isSuccess, isError, error]);
+    }, [mutation.data, mutation.isSuccess]);
 
     return (
         <div>
             <h1>Admin Page</h1>
             <input 
                 type="text" 
-                value={userName} 
-                onChange={(e) => setUserName(e.target.value)} 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
                 placeholder="Search by username" 
             />
             <button onClick={handleSearch}>Find User</button>
@@ -44,7 +38,7 @@ const AdminPage = () => {
                 <div>
                     <h2>User Details</h2>
                     <p>ID: {foundUser.id}</p>
-                    <p>Username: {foundUser.username}</p>
+                    <p>Username: {foundUser.userName}</p>
                     <p>Email: {foundUser.email}</p>
                 </div>
             )}
