@@ -1,33 +1,36 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
+import homelogo from "../assets/homelogo.jpg";
 
-const Header = ({ title, role }) => {
+
+
+const Header = ({ title }) => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
-  const userState = useSelector((state) => state);
-  let user = role === "user" ? userState.user : userState.admin;
+  const [role, setRole] = useState("");
+  const user = useSelector((state) => state.user);
+  const admin = useSelector((state) => state.admin);
 
   useEffect(() => {
-    const storedUserName = localStorage.getItem("userName");
-    if (storedUserName) {
-      setUserName(storedUserName);
-    }
-
-    const handleStorageChange = () => {
-      const updatedUserName = localStorage.getItem("userName");
-      setUserName(updatedUserName);
+    const fetchUserData = async () => {
+      const storedUserName = localStorage.getItem('userName');
+      const storedRole = localStorage.getItem('role');
+      if (storedUserName) {
+        setUserName(storedUserName);
+      }
+      if (storedRole) {
+        setRole(storedRole);
+      }
     };
 
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
+    fetchUserData();
+  }, [user, admin]);
 
   const signOut = () => {
     localStorage.clear();
+    window.location.reload();
+    navigate("/");
     window.location.reload();
   };
 
@@ -37,67 +40,66 @@ const Header = ({ title, role }) => {
   const isHomePage = location.pathname === "/";
 
   const goToLogin = () => {
-    if (!isLoginPage && !isRegisterPage) {
-      navigate("/login");
-    }
+    navigate("/login"); 
   };
 
   const goToRegister = () => {
-    if (!isLoginPage && !isRegisterPage) {
-      navigate("/register");
-    }
+    navigate("/register");
   };
 
   const goToRentRoom = () => {
-    if (!isLoginPage && !isRegisterPage) {
-      navigate("/rentroom");
-    }
+    navigate("/rentroom");
   };
 
   const goToMainPage = () => {
     navigate("/");
+  };
+  const goToControlUser = () => {
+    navigate("/adminControlUser");
   };
 
   return (
     <header className="flex items-center justify-between bg-blue-600 p-4">
       <nav className="flex-grow">
         <ul className="flex space-x-6">
-          <button className="text-white" onClick={goToMainPage}>
-            Main Page
-          </button>
-          <button className="text-white" onClick={goToRentRoom}>
-            Rent Room
-          </button>
+          <img className="w-14 h-14 cursor-pointer" onClick={goToMainPage} src={homelogo} alt="home" />
 
-          <button className="text-white">Rent Apartment</button>
-          <button className="text-white">Rent Land</button>
-          <button className="text-white">News</button>
-          <button className="text-white">Price</button>
+          {role === "user" || role === "" ? (
+            <>
+              <button className="text-white" onClick={goToRentRoom}>
+                Rent Room
+              </button>
+              <button className="text-white">Rent  Apartment</button>
+              <button className="text-white">Rent Land</button>
+              <button className="text-white">News</button>
+              <button className="text-white">Price</button>
+            </>
+          ) : (
+            <button className="text-white" onClick={goToControlUser}>Control User</button>
+          )}
         </ul>
       </nav>
       <div className="flex space-x-2 ml-auto">
         {userName ? (
           <>
-            <span className="text-white">Welcome, {userName}</span>
-            <button className="text-white" onClick={signOut}>
+            <span className="text-white text-2xl">Welcome, <span className="font-bold">{userName}</span></span>
+            <button className="text-white text-2xl" onClick={signOut}>
               Sign Out
             </button>
           </>
         ) : (
           <>
-            <button className="bg-red-950 text-red-400 border border-red-400 border-b-4 font-medium overflow-hidden relative px-4 py-2 rounded-md hover:brightness-150 hover:border-t-4 hover:border-b active:opacity-75 outline-none duration-300 group">
-              <span className="bg-red-400 shadow-red-400 absolute -top-[150%] left-0 inline-flex w-80 h-[5px] rounded-md opacity-50 group-hover:top-[150%] duration-500 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)]"></span>
-              <button onClick={goToLogin}>Login</button>
+            <button
+              className="bg-white text-blue-700 border border-blue-700 rounded-md px-4 py-2 hover:bg-blue-700 hover:text-white transition"
+              onClick={goToRegister}
+            >
+              Sign Up
             </button>
-            <button className="relative border hover:border-sky-600 duration-500 group cursor-pointer text-sky-50  overflow-hidden h-14 w-32 rounded-md bg-sky-800 p-2 flex justify-center items-center font-extrabold">
-              <div className="absolute z-10 w-48 h-48 rounded-full group-hover:scale-150 transition-all  duration-500 ease-in-out bg-sky-900 delay-150 group-hover:delay-75"></div>
-              <div className="absolute z-10 w-40 h-40 rounded-full group-hover:scale-150 transition-all  duration-500 ease-in-out bg-sky-800 delay-150 group-hover:delay-100"></div>
-              <div className="absolute z-10 w-32 h-32 rounded-full group-hover:scale-150 transition-all  duration-500 ease-in-out bg-sky-700 delay-150 group-hover:delay-150"></div>
-              <div className="absolute z-10 w-24 h-24 rounded-full group-hover:scale-150 transition-all  duration-500 ease-in-out bg-sky-600 delay-150 group-hover:delay-200"></div>
-              <div className="absolute z-10 w-16 h-16 rounded-full group-hover:scale-150 transition-all  duration-500 ease-in-out bg-sky-500 delay-150 group-hover:delay-300"></div>
-              <p className="z-10" onClick={goToRegister}>
-                Register
-              </p>
+            <button
+              className="bg-white text-blue-700 border border-blue-700 rounded-md px-4 py-2 hover:bg-blue-700 hover:text-white transition"
+              onClick={goToLogin}
+            >
+              Sign In
             </button>
           </>
         )}
