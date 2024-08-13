@@ -46,8 +46,8 @@ export const resetPassword = async (data) => {
     const res = await axiosJWT.post(`${API_URL}/resetPassword`, data);
     return res.data;
 }
-export const checkUser = async () => {
-    const res = await axiosJWT.get(`${API_URL}/checkUser`);
+export const checkUser = async (data) => {
+    const res = await axiosJWT.post(`${API_URL}/checkUser`, data);
     return res.data;
 }
 

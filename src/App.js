@@ -52,9 +52,9 @@ export default function App() {
                       <div className="flex flex-col w-full h-svh">
                         {route.header && <Header title={route.title} role={route.role} />}
                         <Page />
-                        <Footer />
+                        
                       </div>
-                      
+                      <Footer />
                     </AuthWrapper>
                   } />
                 );

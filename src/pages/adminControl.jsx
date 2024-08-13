@@ -1,76 +1,172 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import { findUser } from '../services/admin';
-import { useMutationHook } from '../hooks/useMutationHook';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import {
+  findUser,
+  deleteUser as deleteUserService,
+  updateUser,
+} from "../services/admin";
+
+import { useMutationHook } from "../hooks/useMutationHook";
+import { message } from "antd";
 
 const AdminPage = () => {
-    const [name, setName] = useState('');
-    const [foundUser, setFoundUser] = useState('');
-    const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [foundUser, setFoundUser] = useState("");
+  const navigate = useNavigate();
 
-    const mutation = useMutationHook(
-        data => findUser(name)
-    );
+  const mutation = useMutationHook((data) => findUser(name));
 
-    const handleSearch = () => {
-        mutation.mutate({ name: name });
-    };
+  const handleSearch = () => {
+    mutation.mutate({ name: name });
+    if (mutation.isSuccess) {
+      setFoundUser(mutation.data);
+      message.success("User found successfully");
+    } else {
+      message.error("User not found");
+    }
+  };
 
-    useEffect(() => {
-        if (mutation.isSuccess) {
-            setFoundUser(mutation.data);
-        }
-    }, [mutation.data, mutation.isSuccess]);
+  useEffect(() => {
+    if (mutation.isSuccess) {
+      setFoundUser(mutation.data);
+    }
+  }, [mutation.data, mutation.isSuccess]);
 
-    return (
-        <div>   
-            <div className="container mx-auto p-4">
-            
-            <h1 className="text-2xl font-bold mb-4">Admin Page</h1>
-            <div className="mb-4">
-                <input 
-                    type="text" 
-                    value={name} 
-                    onChange={(e) => setName(e.target.value)} 
-                    placeholder="Search by username" 
-                    className="border p-2 w-full"
+  const handleDeleteUser = () => {
+    deleteUserService(foundUser.userName);
+    if (mutation.isSuccess) {
+      setFoundUser("");
+      setName("");
+      message.success("User deleted successfully");
+      navigate(0);
+    }
+  };
+
+  const handleUpdateUser = () => {
+    updateUser(foundUser);
+    if (mutation.isSuccess) {
+      setFoundUser("");
+      setName("");
+      message.success("User updated successfully");
+    } else {
+      message.error("User not updated");
+    }
+  };
+
+  return (
+    <div>
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Admin Page</h1>
+        <div className="mb-4">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Search by username"
+            className="border p-2 w-full"
+          />
+        </div>
+        <button
+          onClick={handleSearch}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Find User
+        </button>
+        {foundUser && (
+          <div className="mt-6 p-4 border rounded-lg shadow-lg">
+            <div className="flex">
+              <div className="w-1/3 bg-gray-200 rounded-lg p-4">
+                {/* Placeholder for user image */}
+              </div>
+              <div className="w-2/3 pl-4">
+                <h2 className="text-xl font-bold mb-2">User Details</h2>
+                <p className="mb-1">
+                  <strong>ID:</strong> {foundUser.id}
+                </p>
+                <input
+                  type="text"
+                  value={foundUser.userName}
+                  onChange={(e) =>
+                    setFoundUser({ ...foundUser, userName: e.target.value })
+                  }
+                  className="border p-2 w-full mb-1"
                 />
+                <input
+                  type="text"
+                  value={foundUser.firstName}
+                  onChange={(e) =>
+                    setFoundUser({ ...foundUser, firstName: e.target.value })
+                  }
+                  className="border p-2 w-full mb-1"
+                />
+                <input
+                  type="text"
+                  value={foundUser.lastName}
+                  onChange={(e) =>
+                    setFoundUser({ ...foundUser, lastName: e.target.value })
+                  }
+                  className="border p-2 w-full mb-1"
+                />
+                <input
+                  type="email"
+                  value={foundUser.email}
+                  onChange={(e) =>
+                    setFoundUser({ ...foundUser, email: e.target.value })
+                  }
+                  className="border p-2 w-full mb-1"
+                />
+                <input
+                  type="password"
+                  value={foundUser.password}
+                  onChange={(e) =>
+                    setFoundUser({ ...foundUser, password: e.target.value })
+                  }
+                  className="border p-2 w-full mb-1"
+                />
+                <input
+                  type="text"
+                  value={foundUser.phone}
+                  onChange={(e) =>
+                    setFoundUser({ ...foundUser, phone: e.target.value })
+                  }
+                  className="border p-2 w-full mb-1"
+                />
+                <input
+                  type="text"
+                  value={foundUser.role}
+                  onChange={(e) =>
+                    setFoundUser({ ...foundUser, role: e.target.value })
+                  }
+                  className="border p-2 w-full mb-1"
+                />
+              </div>
             </div>
-            <button 
-                onClick={handleSearch} 
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-            >
-                Find User
-            </button>
-            {foundUser && (
-                <div className="mt-6 p-4 border rounded-lg shadow-lg">
-                    <div className="flex">
-                        <div className="w-1/3 bg-gray-200 rounded-lg p-4">
-                            {/* Placeholder for user image */}
-                        </div>
-                        <div className="w-2/3 pl-4">
-                            <h2 className="text-xl font-bold mb-2">User Details</h2>
-                            <p className="mb-1"><strong>ID:</strong> {foundUser.id}</p>
-                            <p className="mb-1"><strong>Username:</strong> {foundUser.userName}</p>
-                            <p className="mb-1"><strong>First Name:</strong> {foundUser.firstName}</p>
-                            <p className="mb-1"><strong>Last Name:</strong> {foundUser.lastName}</p>
-                            <p className="mb-1"><strong>Email:</strong> {foundUser.email}</p>
-                            <p className="mb-1"><strong>Password:</strong> {foundUser.password}</p>
-                            <p className="mb-1"><strong>Phone:</strong> {foundUser.phone}</p>
-                            <p className="mb-1"><strong>Role:</strong> {foundUser.role}</p>
-                        </div>
-                    </div>
-                    <div className="flex mt-4 space-x-4">
-                        <button className="bg-gray-200 p-2 rounded-lg w-1/3">Action 1</button>
-                        <button className="bg-gray-200 p-2 rounded-lg w-1/3">Action 2</button>
-                        <button className="bg-gray-200 p-2 rounded-lg w-1/3">Action 3</button>
-                    </div>
-                </div>
-            )}
-        </div>
-        </div>
-    );
+            <div className="flex mt-4 justify-center space-x-4  ">
+              <button
+                className="cursor-pointer transition-all bg-blue-500 text-white px-8 py-4 rounded-lg
+  border-blue-600
+  border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px]
+  active:border-b-[2px] active:brightness-90 active:translate-y-[2px]"
+                onClick={handleDeleteUser}
+              >
+                Delete User
+              </button>
+              <button
+                className="cursor-pointer transition-all bg-blue-500 text-white px-8 py-4 rounded-lg
+  border-blue-600
+                border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px]
+                active:border-b-[2px] active:brightness-90 active:translate-y-[2px]"
+                onClick={handleUpdateUser}
+              >
+                Update User
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default AdminPage;

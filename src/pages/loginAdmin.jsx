@@ -11,13 +11,14 @@ import { login } from "../redux/slice/Authslice.jsx";
 import { getUser } from "../services/user.js";
 import { jwtDecode } from "jwt-decode";
 import Header from "../components/header.jsx";
+import { loginAdmin } from "../services/admin.js";
 
 const Login = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
 
-  const mutation = useMutationHook((data) => loginUser(data));
+  const mutation = useMutationHook((data) => loginAdmin(data));
   const { data, isError, isSuccess } = mutation;
   const handleUserNameChange = (e) => {
     setUserName(e.target.value);
@@ -41,14 +42,14 @@ const Login = () => {
   };
   useEffect(() => {
     if (isSuccess) {
-      navigate("/");
+      navigate("/adminControlUser");
       message.success("Login successful");
       // Kiểm tra dữ liệu trước khi sử dụng
       if (data && data.accessToken) {
         localStorage.setItem("Authorization", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
         localStorage.setItem("userName", userName);
-        localStorage.setItem("role", "user");
+        localStorage.setItem("role", "admin");
         const decode = jwtDecode(data.accessToken);
         if (decode && decode.userName) {
           handleGetDetailUser(
@@ -64,7 +65,7 @@ const Login = () => {
       }
     }
     if (isError) {
-      message.error("Login failed.Please check your username and password or change to admin");
+      message.error("Login failed");
     }
   }, [data, isSuccess, isError]);
   return (
@@ -117,11 +118,8 @@ const Login = () => {
             </form>
             <p className="text-blue-500 hover:text-blue-800 text-sm">
               {" "}
-              <a
-                className="font-bold text-slate-700 bg-white px-2 py-1 rounded hover:bg-yellow-300 transition duration-300 ease-in-out"
-                href="/loginAdmin"
-              >
-                Login as admin
+              <a className="font-bold text-slate-700" href="/login">
+                Login as user
               </a>
             </p>
           </div>

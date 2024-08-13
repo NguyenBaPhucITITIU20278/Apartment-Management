@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import homelogo from "../assets/homelogo.jpg";
-import { checkUser } from "../services/user"; // Import the getUser service
+
 
 
 const Header = ({ title }) => {
@@ -30,6 +30,8 @@ const Header = ({ title }) => {
   const signOut = () => {
     localStorage.clear();
     window.location.reload();
+    navigate("/");
+    window.location.reload();
   };
 
   const location = useLocation();
@@ -52,6 +54,9 @@ const Header = ({ title }) => {
   const goToMainPage = () => {
     navigate("/");
   };
+  const goToControlUser = () => {
+    navigate("/adminControlUser");
+  };
 
   return (
     <header className="flex items-center justify-between bg-blue-600 p-4">
@@ -70,7 +75,7 @@ const Header = ({ title }) => {
               <button className="text-white">Price</button>
             </>
           ) : (
-            <button className="text-white">Control User</button>
+            <button className="text-white" onClick={goToControlUser}>Control User</button>
           )}
         </ul>
       </nav>
