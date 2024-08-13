@@ -51,9 +51,10 @@ export default function App() {
                       </Helmet>
                       <div className="flex flex-col w-full h-svh">
                         {route.header && <Header title={route.title} role={route.role} />}
-                          <Page />
+                        <Page />
+                        <Footer />
                       </div>
-                      <Footer />
+                      
                     </AuthWrapper>
                   } />
                 );

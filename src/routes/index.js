@@ -1,10 +1,9 @@
 import home from '../pages/home';
-import login from '../pages/login';
+import login from '../pages/loginUser';
 import register from '../pages/register';
 import rentroom from '../pages/rentroom';
 import resetpassword from '../pages/resetPassword';
-import admin from '../pages/admin';
-
+import adminControl from '../pages/adminControl';
 export const routes = [
     {
         path: '/',
@@ -52,8 +51,8 @@ export const routes = [
         role: 'user'
     },
     {
-        path: '/admin',
-        page: admin,
+        path: '/adminControlUser',
+        page: adminControl,
         title: 'Admin Page',
         description: 'Admin page',
         header: true,

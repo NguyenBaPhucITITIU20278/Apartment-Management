@@ -2,30 +2,34 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import homelogo from "../assets/homelogo.jpg";
+import { checkUser } from "../services/user"; // Import the getUser service
 
-const Header = ({ title, role }) => {
+
+const Header = ({ title }) => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
-  const userState = useSelector((state) => state);
-  let user = role === "user" ? userState.user : userState.admin;
+  const [role, setRole] = useState("");
+  const user = useSelector((state) => state.user);
+  const admin = useSelector((state) => state.admin);
 
+
+
+  
   useEffect(() => {
-    const storedUserName = localStorage.getItem("userName");
-    if (storedUserName) {
-      setUserName(storedUserName);
-    }
-
-    const handleStorageChange = () => {
-      const updatedUserName = localStorage.getItem("userName");
-      setUserName(updatedUserName);
+    const fetchUserData = async () => {
+      const storedUserName = localStorage.getItem('userName');
+      if (storedUserName) {
+        setUserName(storedUserName);
+      } else if (localStorage.getItem('accessToken')) {
+        const userData = await checkUser(); // Fetch user data from the service
+        setUserName(userData.name);
+        setRole(userData.role); // Set the role based on fetched data
+        console.log("Current role:", userData.role); // Log the current role
+      }
     };
 
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
+    fetchUserData();
+  }, [user, admin]);
 
   const signOut = () => {
     localStorage.clear();
@@ -59,14 +63,19 @@ const Header = ({ title, role }) => {
         <ul className="flex space-x-6">
           <img className="w-14 h-14 cursor-pointer" onClick={goToMainPage} src={homelogo} alt="home" />
 
-          <button className="text-white" onClick={goToRentRoom}>
-            Rent Room
-          </button>
-
-          <button className="text-white">Rent Apartment</button>
-          <button className="text-white">Rent Land</button>
-          <button className="text-white">News</button>
-          <button className="text-white">Price</button>
+          {role === "user" ? (
+            <>
+              <button className="text-white" onClick={goToRentRoom}>
+                Rent Room
+              </button>
+              <button className="text-white">Rent Apartment</button>
+              <button className="text-white">Rent Land</button>
+              <button className="text-white">News</button>
+              <button className="text-white">Price</button>
+            </>
+          ) : (
+            <button className="text-white">Control User</button>
+          )}
         </ul>
       </nav>
       <div className="flex space-x-2 ml-auto">
