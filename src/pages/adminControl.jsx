@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HeaderAdmin from '../components/headerAdmin';
 import { useMutation } from '@tanstack/react-query';
 import { findUser } from '../services/admin';
 import { useMutationHook } from '../hooks/useMutationHook';

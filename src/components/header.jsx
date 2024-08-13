@@ -12,19 +12,15 @@ const Header = ({ title }) => {
   const user = useSelector((state) => state.user);
   const admin = useSelector((state) => state.admin);
 
-
-
-  
   useEffect(() => {
     const fetchUserData = async () => {
       const storedUserName = localStorage.getItem('userName');
+      const storedRole = localStorage.getItem('role');
       if (storedUserName) {
         setUserName(storedUserName);
-      } else if (localStorage.getItem('accessToken')) {
-        const userData = await checkUser(); // Fetch user data from the service
-        setUserName(userData.name);
-        setRole(userData.role); // Set the role based on fetched data
-        console.log("Current role:", userData.role); // Log the current role
+      }
+      if (storedRole) {
+        setRole(storedRole);
       }
     };
 
@@ -63,12 +59,12 @@ const Header = ({ title }) => {
         <ul className="flex space-x-6">
           <img className="w-14 h-14 cursor-pointer" onClick={goToMainPage} src={homelogo} alt="home" />
 
-          {role === "user" ? (
+          {role === "user" || role === "" ? (
             <>
               <button className="text-white" onClick={goToRentRoom}>
                 Rent Room
               </button>
-              <button className="text-white">Rent Apartment</button>
+              <button className="text-white">Rent  Apartment</button>
               <button className="text-white">Rent Land</button>
               <button className="text-white">News</button>
               <button className="text-white">Price</button>
