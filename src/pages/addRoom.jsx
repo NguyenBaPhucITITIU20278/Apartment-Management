@@ -12,15 +12,23 @@ const AddRoom = () => {
   const [status, setStatus] = useState("");
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
- 
-  
+  const [image, setImage] = useState("");
 
   const mutation = useMutationHook((data) => addRoom(data));
   const { isError: isAddError, isSuccess: isAddSuccess } = mutation;
 
   const handleAddRoom = async (e) => {
     e.preventDefault();
-    mutation.mutate({ name, address, bedroom, phoneNumber, price, status, description });
+    mutation.mutate({
+      name,
+      address,
+      bedroom,
+      phoneNumber,
+      price,
+      status,
+      description,
+      image,
+    });
   };
 
   useEffect(() => {
@@ -52,7 +60,7 @@ const AddRoom = () => {
                 className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
                 type="text"
                 onChange={(e) => setName(e.target.value)}
-                />
+              />
               <input
                 placeholder="Address"
                 className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
@@ -64,7 +72,7 @@ const AddRoom = () => {
                 className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
                 type="number"
                 onChange={(e) => setBedroom(e.target.value)}
-                />
+              />
               <input
                 placeholder="Phone Number"
                 className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
@@ -89,12 +97,12 @@ const AddRoom = () => {
                 name="cover_letter"
                 onChange={(e) => setDescription(e.target.value)}
               ></textarea>
-              {/* <input
+              <input
                 placeholder="Image"
                 className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
                 type="file"
                 onChange={(e) => setImage(e.target.value)}
-              /> */}
+              />
               <button
                 className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150"
                 type="submit"
@@ -110,4 +118,3 @@ const AddRoom = () => {
 };
 
 export default AddRoom;
-
