@@ -65,7 +65,7 @@ const Login = () => {
       }
     }
     if (isError) {
-      message.error("Login failed");
+      message.error("Login failed.Please check your username and password");
     }
   }, [data, isSuccess, isError]);
   return (
