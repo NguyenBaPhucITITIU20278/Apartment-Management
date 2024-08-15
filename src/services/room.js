@@ -36,17 +36,15 @@ export const getRoomByAddress = async (data) => {
   console.log("Payload being sent:", data); // Log the payload
 
   try {
-    const headers = getHeaders();
-
     // Check if data is correctly formed
     if (!data) {
       throw new Error("Data is missing or undefined");
     }
+    console.log("Data being sent:", data); // Log the data
 
-    const response = await axios.post(`${API_URL}/find-rooms`, {
-      params: data,
-      headers: headers
-    });
+    const headers = getHeaders(); // Get headers including Authorization
+
+    const response = await axios.post(`${API_URL}/rooms-by-address`, data, { headers });
 
     console.log("Response received:", response); // Log the response
 

@@ -63,16 +63,16 @@ const Home = () => {
       <p className="text-gray-500 mb-4">
         Search for your dream home and book it now!
       </p>
-      <div className="bg-white p-4 border-2 border-yellow-400 rounded-lg mb-6 flex gap-4">
+      <div className="p-2 text-base border border-yellow-300 rounded-md flex-1 w-3/12">
         <input
           type="text"
           placeholder="Where would you like to stay?"
-          className="p-2 border border-gray-300 rounded-md flex-1"
+          className="p-2 border border-gray-300 rounded-md flex-1 w-4/6"
           name="address"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
         />
-        <input
+        {/* <input
           type="number"
           placeholder="Number of bedrooms"
           className="p-2 border border-gray-300 rounded-md flex-1"
@@ -87,21 +87,21 @@ const Home = () => {
           name="id"
           value={id}
           onChange={(e) => setId(e.target.value)}
-        />
+        /> */}
         <button
           type="button"
-          className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 ml-6"
           onClick={handleSearch}
         >
           Search
         </button>
-        <button
+        {/* <button
           type="button"
           className="p-2 bg-green-600 text-white rounded-md hover:bg-green-700"
           onClick={handleAddRoom}
         >
           Add Room
-        </button>
+        </button> */}
       </div>
       {error ? (
         <p className="text-red-500">Error: {error}</p>
