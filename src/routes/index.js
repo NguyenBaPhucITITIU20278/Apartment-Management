@@ -5,6 +5,8 @@ import rentroom from '../pages/rentroom';
 import resetpassword from '../pages/resetPassword';
 import adminControl from '../pages/adminControl';
 import loginAdmin from '../pages/loginAdmin';
+import News from '../pages/News'
+import NewsDetail from '../pages/NewsDetail'
 export const routes = [
     {
         path: '/',
@@ -68,7 +70,24 @@ export const routes = [
         header: true,
         background: true,
         role: 'admin'
+    },
+    {
+        path: '/news',
+        page: News,
+        tittle: 'News',
+        description: 'News',
+        header: true,
+        background: true,
+        role: 'user'
+    },
+    {
+        path: '/news/:id',
+        page: NewsDetail,
+        tittle: 'News Detail',
+        description: 'News Detail',
+        header: true,
+        background: true,
+        role: 'user'
     }
-    
 
 ]

@@ -57,6 +57,9 @@ const Header = ({ title }) => {
   const goToControlUser = () => {
     navigate("/adminControlUser");
   };
+  const goToNews = () => {
+    navigate("/news");
+  };
 
   return (
     <header className="flex items-center justify-between bg-blue-600 p-4">
@@ -71,7 +74,7 @@ const Header = ({ title }) => {
               </button>
               <button className="text-white">Rent  Apartment</button>
               <button className="text-white">Rent Land</button>
-              <button className="text-white">News</button>
+              <button className="text-white" onClick={goToNews}>News</button>
               <button className="text-white">Price</button>
             </>
           ) : (
