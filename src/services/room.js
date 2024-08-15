@@ -59,12 +59,12 @@ export const getRoomByAddress = async (data) => {
   }
 };
 
-export const addRoom = async (room) => {
-  console.log("Room being sent:", room); // Log the room data
+export const addRoom = async (data) => {
+  console.log("Room being sent:", data); // Log the room data
   try {
     const headers = getHeaders();
-
-    const response = await axios.post(`${API_URL}/add-room`, room, { headers });
+    console.log(data);
+    const response = await axios.post(`${API_URL}/add-room`, data, { headers });
 
     console.log("Response received:", response); // Log the response
 
