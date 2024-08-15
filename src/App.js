@@ -45,31 +45,33 @@ export default function App() {
               <title>Apartment Control</title>
               <meta name="description" content="Apartment Control" />
             </Helmet>
-            <Routes>
-              {routes.map((route) => {
-                const Page = route.page;
-                return (
-                  <Route
-                    key={route.path}
-                    path={route.path}
-                    element={
-                      <AuthWrapper title={route.title}>
-                        <Helmet>
-                          <title>{route.title}</title>
-                        </Helmet>
-                        <div className="flex flex-col w-full h-svh">
-                          {route.header && (
-                            <Header title={route.title} role={route.role} />
-                          )}
-                          <Page />
-                          <Footer />
-                        </div>
-                      </AuthWrapper>
-                    }
-                  />
-                );
-              })}
-            </Routes>
+            <div className="flex flex-col min-h-screen">
+              <Routes>
+                {routes.map((route) => {
+                  const Page = route.page;
+                  return (
+                    <Route
+                      key={route.path}
+                      path={route.path}
+                      element={
+                        <AuthWrapper title={route.title}>
+                          <Helmet>
+                            <title>{route.title}</title>
+                          </Helmet>
+                          <div className="flex flex-col flex-grow">
+                            {route.header && (
+                              <Header title={route.title} role={route.role} />
+                            )}
+                            <Page />
+                          </div>
+                          <Footer className="w-full bg-gray-200 text-center py-4 mt-auto" />
+                        </AuthWrapper>
+                      }
+                    />
+                  );
+                })}
+              </Routes>
+            </div>
           </Router>
         </HelmetProvider>
       </QueryClientProvider>
