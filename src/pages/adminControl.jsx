@@ -21,12 +21,15 @@ const AdminPage = () => {
     mutation.mutate({ name: name });
     if (mutation.isSuccess) {
       setFoundUser(mutation.data);
-      message.success("User found successfully");
+      setTimeout(() => {
+        message.success("User found successfully");
+      }, 500); 
     } else {
-      message.error("User not found");
+      setTimeout(() => {
+        message.error("User not found");
+      }, 500); 
     }
   };
-
   useEffect(() => {
     if (mutation.isSuccess) {
       setFoundUser(mutation.data);
