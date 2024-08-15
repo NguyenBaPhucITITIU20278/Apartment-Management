@@ -71,7 +71,7 @@ const Login = () => {
   return (
     <div>
       <Header />
-      <div className="h-full w-full flex items-center justify-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
+      <div className="min-h-screen h-full w-full flex items-center justify-center bg-gradient-to-r from-purple-400 via-pink-5000 to-red-500">
         <div className="relative">
           <div className="absolute -top-2 -left-2 -right-2 -bottom-2 rounded-lg bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 shadow-lg animate-pulse"></div>
           <div
