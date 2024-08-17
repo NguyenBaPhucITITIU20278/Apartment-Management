@@ -6,29 +6,29 @@ import { message } from "antd";
 const AddRoom = () => {
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
-  const [bedroom, setBedroom] = useState(0);
+  const [numberOfBedrooms, setBedroom] = useState(0);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [price, setPrice] = useState("");
   const [status, setStatus] = useState("");
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
-  const [image, setImage] = useState("");
+  const [imagePath, setImage] = useState(null); // Change to null to handle file
 
   const mutation = useMutationHook((data) => addRoom(data));
   const { isError: isAddError, isSuccess: isAddSuccess } = mutation;
 
   const handleAddRoom = async (e) => {
     e.preventDefault();
-    mutation.mutate({
+    const roomData = {
       name,
       address,
-      bedroom,
+      numberOfBedrooms,
       phoneNumber,
       price,
       status,
       description,
-      image,
-    });
+    };
+    mutation.mutate({ data: roomData, file: imagePath });
   };
 
   useEffect(() => {
@@ -101,7 +101,7 @@ const AddRoom = () => {
                 placeholder="Image"
                 className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
                 type="file"
-                onChange={(e) => setImage(e.target.value)}
+                onChange={(e) => setImage(e.target.files[0])} // Change to handle file
               />
               <button
                 className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150"
