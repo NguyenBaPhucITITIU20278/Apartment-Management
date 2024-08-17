@@ -19,7 +19,7 @@ const News = () => {
 
     return (
         <div className="p-6">
-            <h1 className="text-3xl font-bold text-center mb-6">Danh sách tin tức</h1>
+            <h1 className="text-3xl font-bold text-center mb-6">News</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {news.map((item, index) => (
                     <div key={index} className="border rounded-lg p-4 bg-white shadow-md cursor-pointer" onClick={() => handleNewsClick(item, index)}>
