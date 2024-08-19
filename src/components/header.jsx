@@ -34,11 +34,6 @@ const Header = ({ title }) => {
     window.location.reload();
   };
 
-  const location = useLocation();
-  const isLoginPage = location.pathname === "/login";
-  const isRegisterPage = location.pathname === "/register";
-  const isHomePage = location.pathname === "/";
-
   const goToLogin = () => {
     navigate("/login"); 
   };
@@ -46,19 +41,16 @@ const Header = ({ title }) => {
   const goToRegister = () => {
     navigate("/register");
   };
-
-  const goToRentRoom = () => {
-    navigate("/rentroom");
-  };
-
   const goToMainPage = () => {
     navigate("/");
   };
   const goToControlUser = () => {
     navigate("/adminControlUser");
   };
+
   const goToNews = () => {
     navigate("/news");
+
   };
 
   return (
@@ -69,10 +61,9 @@ const Header = ({ title }) => {
 
           {role === "user" || role === "" ? (
             <>
-              <button className="text-white" onClick={goToRentRoom}>
-                Rent Room
-              </button>
-              <button className="text-white">Rent  Apartment</button>
+              
+              <button className="text-white" onClick={goToAddRoom}>Add Room</button>
+
               <button className="text-white">Rent Land</button>
               <button className="text-white" onClick={goToNews}>News</button>
               <button className="text-white">Price</button>
@@ -104,6 +95,12 @@ const Header = ({ title }) => {
             >
               Sign In
             </button>
+            {/* <button
+              className="bg-white text-blue-700 border border-blue-700 rounded-md px-4 py-2 hover:bg-blue-700 hover:text-white transition"
+              onClick={goToLogin}
+            >
+              Free Posting
+            </button> */}
           </>
         )}
       </div>

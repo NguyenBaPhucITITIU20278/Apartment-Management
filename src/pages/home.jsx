@@ -9,7 +9,9 @@ const Home = () => {
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
   const [bedroom, setBedroom] = useState(0);
-  const [id, setId] = useState(""); // Thêm state cho id
+  const [id, setId] = useState("");
+  const [currentPage, setCurrentPage] = useState(1); // Thêm state cho trang hiện tại
+  const roomsPerPage = 6; // Số lượng RoomCard trên mỗi trang
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -33,10 +35,13 @@ const Home = () => {
     fetchRooms();
   }, [address]);
 
-  const searchMutation = useMutationHook(
-    data => getRoomByAddress(data));
+  const searchMutation = useMutationHook((data) => getRoomByAddress(data));
   const addRoomMutation = useMutationHook(addRoom);
-  const { data: searchData, isError: isSearchError, isSuccess: isSearchSuccess } = searchMutation;
+  const {
+    data: searchData,
+    isError: isSearchError,
+    isSuccess: isSearchSuccess,
+  } = searchMutation;
   const { isError: isAddError, isSuccess: isAddSuccess } = addRoomMutation;
 
   const handleSearch = (event) => {
@@ -48,12 +53,19 @@ const Home = () => {
   const handleAddRoom = () => {
     const parsedBedroom = parseInt(bedroom, 10);
     if (isNaN(parsedBedroom)) {
-      console.error('Invalid number of bedrooms:', bedroom);
-      setError('Invalid number of bedrooms');
+      console.error("Invalid number of bedrooms:", bedroom);
+      setError("Invalid number of bedrooms");
       return;
     }
-    addRoomMutation.mutate({ id, address, bedroom: parsedBedroom }); // Thêm id vào payload
+    addRoomMutation.mutate({ id, address, bedroom: parsedBedroom });
   };
+
+  // Tính toán các RoomCard cần hiển thị dựa trên trang hiện tại
+  const indexOfLastRoom = currentPage * roomsPerPage;
+  const indexOfFirstRoom = indexOfLastRoom - roomsPerPage;
+  const currentRooms = rooms.slice(indexOfFirstRoom, indexOfLastRoom);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="p-4">
@@ -72,22 +84,6 @@ const Home = () => {
           value={address}
           onChange={(e) => setAddress(e.target.value)}
         />
-        {/* <input
-          type="number"
-          placeholder="Number of bedrooms"
-          className="p-2 border border-gray-300 rounded-md flex-1"
-          name="bedroom"
-          value={bedroom}
-          onChange={(e) => setBedroom(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Room ID"
-          className="p-2 border border-gray-300 rounded-md flex-1"
-          name="id"
-          value={id}
-          onChange={(e) => setId(e.target.value)}
-        /> */}
         <button
           type="button"
           className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 ml-6"
@@ -95,21 +91,32 @@ const Home = () => {
         >
           Search
         </button>
-        {/* <button
-          type="button"
-          className="p-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-          onClick={handleAddRoom}
-        >
-          Add Room
-        </button> */}
       </div>
       {error ? (
         <p className="text-red-500">Error: {error}</p>
-      ) : Array.isArray(rooms) && rooms.length > 0 ? (
-        rooms.map((room) => <RoomCard key={room.id} room={room} />)
+      ) : Array.isArray(currentRooms) && currentRooms.length > 0 ? (
+        currentRooms.map((room) => <RoomCard key={room.id} room={room} />)
       ) : (
         <p>No rooms available</p>
       )}
+      <div className="pagination">
+        {Array.from(
+          { length: Math.ceil(rooms.length / roomsPerPage) },
+          (_, index) => (
+            <button
+              key={index + 1}
+              onClick={() => paginate(index + 1)}
+              className={`p-2 ${
+                currentPage === index + 1
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200"
+              }`}
+            >
+              {index + 1}
+            </button>
+          )
+        )}
+      </div>
     </div>
   );
 };

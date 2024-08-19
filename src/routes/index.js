@@ -1,12 +1,13 @@
 import home from '../pages/home';
 import login from '../pages/loginUser';
 import register from '../pages/register';
-import rentroom from '../pages/rentroom';
 import resetpassword from '../pages/resetPassword';
 import adminControl from '../pages/adminControl';
 import loginAdmin from '../pages/loginAdmin';
+
 import News from '../pages/News'
 import NewsDetail from '../pages/NewsDetail'
+
 export const routes = [
     {
         path: '/',
@@ -45,15 +46,6 @@ export const routes = [
         role: 'user'
     },
     {
-        path: '/rentroom',
-        page: rentroom,
-        title: 'Rent Room Page',
-        description: 'Rent Room page',
-        header: true,
-        background: true,
-        role: 'user'
-    },
-    {
         path: '/resetpassword',
         page: resetpassword,
         title: 'Reset Password Page',
@@ -72,6 +64,7 @@ export const routes = [
         role: 'admin'
     },
     {
+
         path: '/news',
         page: News,
         tittle: 'News',
@@ -89,5 +82,15 @@ export const routes = [
         background: true,
         role: 'user'
     }
+
+        path: '/addRoom',
+        page: addRoom,
+        title: 'Add Room Page',
+        description: 'Add Room page',
+        header: true,
+        background: true,
+        role: 'admin'
+    },
+
 
 ]
