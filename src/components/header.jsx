@@ -52,6 +52,9 @@ const Header = ({ title }) => {
     navigate("/news");
 
   };
+  const goToAddRoom = () => {
+    navigate("/addRoom");
+  };
 
   return (
     <header className="flex items-center justify-between bg-blue-600 p-4">
