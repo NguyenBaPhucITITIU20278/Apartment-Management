@@ -14,7 +14,7 @@ const RoomCard = ({ room }) => {
     >
       {room.imagePath && (
         <img
-          src={`http://localhost:8080/${room.imagePath}`}
+          src={`http://localhost:8080${room.imagePath}`}
           alt="Room"
           style={{ width: "100px", height: "100px", marginRight: "16px" }}
         />
