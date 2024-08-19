@@ -4,8 +4,9 @@ import register from '../pages/register';
 import resetpassword from '../pages/resetPassword';
 import adminControl from '../pages/adminControl';
 import loginAdmin from '../pages/loginAdmin';
-import addRoom from '../pages/addRoom';
 
+import News from '../pages/News'
+import NewsDetail from '../pages/NewsDetail'
 
 export const routes = [
     {
@@ -63,6 +64,25 @@ export const routes = [
         role: 'admin'
     },
     {
+
+        path: '/news',
+        page: News,
+        tittle: 'News',
+        description: 'News',
+        header: true,
+        background: true,
+        role: 'user'
+    },
+    {
+        path: '/news/:id',
+        page: NewsDetail,
+        tittle: 'News Detail',
+        description: 'News Detail',
+        header: true,
+        background: true,
+        role: 'user'
+    }
+
         path: '/addRoom',
         page: addRoom,
         title: 'Add Room Page',
@@ -71,6 +91,6 @@ export const routes = [
         background: true,
         role: 'admin'
     },
-    
+
 
 ]

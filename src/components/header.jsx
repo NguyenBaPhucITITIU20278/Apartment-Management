@@ -47,8 +47,10 @@ const Header = ({ title }) => {
   const goToControlUser = () => {
     navigate("/adminControlUser");
   };
-  const goToAddRoom = () => {
-    navigate("/addRoom");
+
+  const goToNews = () => {
+    navigate("/news");
+
   };
 
   return (
@@ -63,7 +65,7 @@ const Header = ({ title }) => {
               <button className="text-white" onClick={goToAddRoom}>Add Room</button>
 
               <button className="text-white">Rent Land</button>
-              <button className="text-white">News</button>
+              <button className="text-white" onClick={goToNews}>News</button>
               <button className="text-white">Price</button>
             </>
           ) : (

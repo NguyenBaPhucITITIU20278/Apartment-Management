@@ -11,6 +11,8 @@ import {
 import Footer from "./components/Footer";
 import Header from "./components/header";
 import Home from "./pages/home";
+import News from "./pages/News"; // Import trang News
+import NewsDetail from "./pages/NewsDetail"; // Import trang NewsDetail
 import { useSelector } from "react-redux";
 import { Fragment, useEffect, useState } from "react";
 
@@ -70,6 +72,8 @@ export default function App() {
                     />
                   );
                 })}
+                <Route path="/news" element={<News />} />
+                <Route path="/news/:id" element={<NewsDetail />} />
               </Routes>
             </div>
           </Router>

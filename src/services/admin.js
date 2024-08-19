@@ -36,11 +36,24 @@ export const findUser = async (name) => {
 };
 
 export const loginAdmin = async (data) => {
-  const response = await axiosJWT.post(`${API_URL}/loginAdmin`, data);
-
-  return response.data;
+  try {
+    const response = await axiosJWT.post(`${API_URL}/loginAdmin`, data, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      console.error('Error response:', error.response.data);
+    } else if (error.request) {
+      console.error('Error request:', error.request);
+    } else {
+      console.error('Error message:', error.message);
+    }
+    throw error;
+  }
 };
-
 export const deleteUser = async (userName) => {
   try {
     const accessToken = localStorage.getItem("Authorization");

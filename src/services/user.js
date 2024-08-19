@@ -1,4 +1,5 @@
 import axios from 'axios';
+// import bcrypt from 'bcrypt';
 
 export const axiosJWT = axios.create();
 const API_URL = 'http://localhost:8080/api/users';
@@ -33,9 +34,18 @@ export const getUser = async (id, token) => {
     return res.data
 }
 export const registerUser = async (data) => {
-    const res = await axiosJWT.post(`${API_URL}/create`, data);
-    return res.data;
-}
+    try {
+        // Hash the password before sending it to the server
+        // const hashedPassword = await bcrypt.hash(data.password, 10);
+        // const newData = { ...data, password: hashedPassword };
+
+        const res = await axiosJWT.post(`${API_URL}/create`,data);
+        return res.data;
+    } catch (error) {
+        console.error('Error registering user:', error);
+        throw error;
+    }
+};
 
 export const sendOtp = async (data) => {
     const res = await axiosJWT.post(`${API_URL}/sendOtp`, data);
