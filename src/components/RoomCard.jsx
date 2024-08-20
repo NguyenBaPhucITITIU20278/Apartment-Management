@@ -1,6 +1,9 @@
 import React from "react";
 
 const RoomCard = ({ room }) => {
+  // Đảm bảo imagePath chỉ chứa tên tệp hình ảnh
+  const imagePath = `/images/room/${room.imagePath}`;
+
   return (
     <div
       style={{
@@ -14,7 +17,7 @@ const RoomCard = ({ room }) => {
     >
       {room.imagePath && (
         <img
-          src={`http://localhost:8080${room.imagePath}`}
+          src={`http://localhost:8080${imagePath}`}
           alt="Room"
           style={{ width: "100px", height: "100px", marginRight: "16px" }}
         />
