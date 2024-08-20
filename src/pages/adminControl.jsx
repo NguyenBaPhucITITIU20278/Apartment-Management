@@ -87,7 +87,8 @@ const AdminPage = () => {
                 <p className="mb-1">
                   <strong>ID:</strong> {foundUser.id}
                 </p>
-                <input
+                <input 
+                  placeholder="User Name"
                   type="text"
                   value={foundUser.userName}
                   onChange={(e) =>
@@ -96,6 +97,7 @@ const AdminPage = () => {
                   className="border p-2 w-full mb-1"
                 />
                 <input
+                  placeholder="First Name"
                   type="text"
                   value={foundUser.firstName}
                   onChange={(e) =>
@@ -104,6 +106,7 @@ const AdminPage = () => {
                   className="border p-2 w-full mb-1"
                 />
                 <input
+                  placeholder="Last Name"
                   type="text"
                   value={foundUser.lastName}
                   onChange={(e) =>
@@ -112,18 +115,11 @@ const AdminPage = () => {
                   className="border p-2 w-full mb-1"
                 />
                 <input
+                  placeholder="Email"
                   type="email"
                   value={foundUser.email}
                   onChange={(e) =>
                     setFoundUser({ ...foundUser, email: e.target.value })
-                  }
-                  className="border p-2 w-full mb-1"
-                />
-                <input
-                  type="password"
-                  value={foundUser.password}
-                  onChange={(e) =>
-                    setFoundUser({ ...foundUser, password: e.target.value })
                   }
                   className="border p-2 w-full mb-1"
                 />

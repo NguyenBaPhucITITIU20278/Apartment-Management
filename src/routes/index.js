@@ -7,6 +7,7 @@ import loginAdmin from "../pages/loginAdmin";
 import addRoom from "../pages/addRoom";
 import News from "../pages/News";
 import NewsDetail from "../pages/NewsDetail";
+import updateUser from "../pages/updateUser";
 
 export const routes = [
   {
@@ -90,5 +91,14 @@ export const routes = [
     header: true,
     background: true,
     role: "admin",
+  },
+  {
+    path: "/updateUser",
+    page: updateUser,
+    title: "Update User Page",
+    description: "Update User page",
+    header: true,
+    background: true,
+    role: "user",
   },
 ];

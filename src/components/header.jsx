@@ -55,6 +55,9 @@ const Header = ({ title }) => {
   const goToAddRoom = () => {
     navigate("/addRoom");
   };
+  const goToUpdateUser = () => {
+    navigate("/updateUser");
+  };
 
   return (
     <header className="flex items-center justify-between bg-blue-600 p-4">
@@ -79,7 +82,7 @@ const Header = ({ title }) => {
       <div className="flex space-x-2 ml-auto">
         {userName ? (
           <>
-            <span className="text-white text-2xl">Welcome, <span className="font-bold">{userName}</span></span>
+            <span className="text-white text-2xl">Welcome, <span className="font-bold cursor-pointer" onClick={goToUpdateUser}>{userName}</span></span>
             <button className="text-white text-2xl" onClick={signOut}>
               Sign Out
             </button>
