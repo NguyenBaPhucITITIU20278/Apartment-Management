@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-
 import { useMutation } from "@tanstack/react-query";
 import { resetPassword, sendOtp } from "../services/user";
 import { useMutationHook } from "../hooks/useMutationHook";
@@ -7,13 +6,18 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/header.jsx";
 
-
 const ResetPassword = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [contact, setContact] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+  });
+  const [role, setRole] = useState("");
 
   const sendOtpMutation = useMutationHook((data) => sendOtp(data));
   const resetPasswordMutation = useMutationHook((data) => resetPassword(data));

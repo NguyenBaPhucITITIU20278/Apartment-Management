@@ -12,7 +12,7 @@ import { message } from "antd";
 
 const AdminPage = () => {
   const [name, setName] = useState("");
-  const [foundUser, setFoundUser] = useState("");
+  const [foundUser, setFoundUser] = useState(null);
   const navigate = useNavigate();
 
   const mutation = useMutationHook((data) => findUser(name));
@@ -23,13 +23,14 @@ const AdminPage = () => {
       setFoundUser(mutation.data);
       setTimeout(() => {
         message.success("User found successfully");
-      }, 500); 
+      }, 500);
     } else {
       setTimeout(() => {
         message.error("User not found");
-      }, 500); 
+      }, 500);
     }
   };
+
   useEffect(() => {
     if (mutation.isSuccess) {
       setFoundUser(mutation.data);
@@ -39,7 +40,7 @@ const AdminPage = () => {
   const handleDeleteUser = () => {
     deleteUserService(foundUser.userName);
     if (mutation.isSuccess) {
-      setFoundUser("");
+      setFoundUser(null);
       setName("");
       message.success("User deleted successfully");
       navigate(0);
@@ -49,7 +50,7 @@ const AdminPage = () => {
   const handleUpdateUser = () => {
     updateUser(foundUser);
     if (mutation.isSuccess) {
-      setFoundUser("");
+      setFoundUser(null);
       setName("");
       message.success("User updated successfully");
     } else {
@@ -85,9 +86,9 @@ const AdminPage = () => {
               <div className="w-2/3 pl-4">
                 <h2 className="text-xl font-bold mb-2">User Details</h2>
                 <p className="mb-1">
-                  <strong>ID:</strong> {foundUser.id}
+                  <strong>ID:</strong> {foundUser.contact.id}
                 </p>
-                <input 
+                <input
                   placeholder="User Name"
                   type="text"
                   value={foundUser.userName}
@@ -99,18 +100,30 @@ const AdminPage = () => {
                 <input
                   placeholder="First Name"
                   type="text"
-                  value={foundUser.firstName}
+                  value={foundUser.contact.firstName}
                   onChange={(e) =>
-                    setFoundUser({ ...foundUser, firstName: e.target.value })
+                    setFoundUser({
+                      ...foundUser,
+                      contact: {
+                        ...foundUser.contact,
+                        firstName: e.target.value,
+                      },
+                    })
                   }
                   className="border p-2 w-full mb-1"
                 />
                 <input
                   placeholder="Last Name"
                   type="text"
-                  value={foundUser.lastName}
+                  value={foundUser.contact.lastName}
                   onChange={(e) =>
-                    setFoundUser({ ...foundUser, lastName: e.target.value })
+                    setFoundUser({
+                      ...foundUser,
+                      contact: {
+                        ...foundUser.contact,
+                        lastName: e.target.value,
+                      },
+                    })
                   }
                   className="border p-2 w-full mb-1"
                 />
@@ -124,38 +137,46 @@ const AdminPage = () => {
                   className="border p-2 w-full mb-1"
                 />
                 <input
+                  placeholder="Phone"
                   type="text"
-                  value={foundUser.phone}
+                  value={foundUser.contact.phone}
                   onChange={(e) =>
-                    setFoundUser({ ...foundUser, phone: e.target.value })
+                    setFoundUser({
+                      ...foundUser,
+                      contact: { ...foundUser.contact, phone: e.target.value },
+                    })
                   }
                   className="border p-2 w-full mb-1"
                 />
                 <input
+                  placeholder="Role"
                   type="text"
-                  value={foundUser.role}
+                  value={foundUser.role.roleName}
                   onChange={(e) =>
-                    setFoundUser({ ...foundUser, role: e.target.value })
+                    setFoundUser({
+                      ...foundUser,
+                      role: { ...foundUser.role, roleName: e.target.value },
+                    })
                   }
                   className="border p-2 w-full mb-1"
                 />
               </div>
             </div>
-            <div className="flex mt-4 justify-center space-x-4  ">
+            <div className="flex mt-4 justify-center space-x-4">
               <button
                 className="cursor-pointer transition-all bg-blue-500 text-white px-8 py-4 rounded-lg
-  border-blue-600
-  border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px]
-  active:border-b-[2px] active:brightness-90 active:translate-y-[2px]"
+                  border-blue-600
+                  border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px]
+                  active:border-b-[2px] active:brightness-90 active:translate-y-[2px]"
                 onClick={handleDeleteUser}
               >
                 Delete User
               </button>
               <button
                 className="cursor-pointer transition-all bg-blue-500 text-white px-8 py-4 rounded-lg
-  border-blue-600
-                border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px]
-                active:border-b-[2px] active:brightness-90 active:translate-y-[2px]"
+                  border-blue-600
+                  border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px]
+                  active:border-b-[2px] active:brightness-90 active:translate-y-[2px]"
                 onClick={handleUpdateUser}
               >
                 Update User

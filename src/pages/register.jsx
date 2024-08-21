@@ -16,6 +16,7 @@ const Register = () => {
     phone: "",
     firstName: "",
     lastName: "",
+    role: "",
   });
 
   const handleChange = useCallback((e) => {
@@ -33,7 +34,19 @@ const Register = () => {
         message.error("Passwords do not match. Please try again.");
         return;
       }
-      mutation.mutate(formData);
+      mutation.mutate({
+        userName: formData.userName,
+        email: formData.email,
+        password: formData.password,
+        contact: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+        },
+        role: {
+          roleName: "user",
+        },
+      });
     },
     [formData, mutation]
   );

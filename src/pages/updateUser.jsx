@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { message } from "antd";
-import { updateUser, checkUser, } from "../services/user";
+import { updateUser, checkUser } from "../services/user";
 
 const UpdateProfile = () => {
   const [profileImage, setProfileImage] = useState(null);
   const userName = localStorage.getItem("userName");
   const [foundUser, setFoundUser] = useState({
-    id: "",
-    firstName: "",
-    lastName: "",
+    userName: "",
     email: "",
-    phone: "",
     password: "",
-    role: "",
+    contact: {
+      id: "",
+      firstName: "",
+      lastName: "",
+      phone: "",
+    },
+    role: {
+      id: "",
+      roleName: "",
+    },
   });
   const [mutation, setMutation] = useState({ isSuccess: false });
 
@@ -22,42 +28,64 @@ const UpdateProfile = () => {
         const user = await checkUser(userName);
         console.log(user);
         setFoundUser({
-          ...user,
+          userName: user.userName,
+          email: user.email,
           password: user.password,
-          role: user.role,
+          contact: {
+            id: user.contact.id,
+            firstName: user.contact.firstName,
+            lastName: user.contact.lastName,
+            phone: user.contact.phone,
+          },
+          role: {
+            id: user.role.id,
+            roleName: user.role.roleName,
+          },
         });
       } catch (error) {
         message.error("User not found");
       }
-      
     };
     fetchUser();
-  }, []);
+  }, [userName]);
 
   const handleImageChange = (e) => {
     setProfileImage(e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission logic here
-  };
-
   const handleUpdateUser = () => {
     updateUser({
-      ...foundUser,
+      userName: foundUser.userName,
+      email: foundUser.email,
       password: foundUser.password,
-      role: foundUser.role,
+      contact: {
+        id: foundUser.contact.id,
+        firstName: foundUser.contact.firstName,
+        lastName: foundUser.contact.lastName,
+        phone: foundUser.contact.phone,
+      },
+      role: {
+        id: foundUser.role.id,
+        roleName: foundUser.role.roleName,
+      },
     })
       .then((response) => {
         setMutation({ isSuccess: true });
         setFoundUser({
           ...foundUser,
-          id: foundUser.id,
-          firstName: foundUser.firstName,
-          lastName: foundUser.lastName,
+          userName: foundUser.userName,
           email: foundUser.email,
-          phone: foundUser.phone,
+          password: foundUser.password,
+          contact: {
+            id: foundUser.contact.id,
+            firstName: foundUser.contact.firstName,
+            lastName: foundUser.contact.lastName,
+            phone: foundUser.contact.phone,
+          },
+          role: {
+            id: foundUser.role.id,
+            roleName: foundUser.role.roleName,
+          },
         });
         message.success("User updated successfully");
       })
@@ -83,23 +111,32 @@ const UpdateProfile = () => {
             <div className="w-2/3 pl-4">
               <h2 className="text-xl font-bold mb-2">User Details</h2>
               <p className="mb-1">
-                <strong>ID:</strong> {foundUser.id}
+                <strong>Contact ID:</strong> {foundUser.contact.id}
               </p>
               <input
                 placeholder="First Name"
                 type="text"
-                value={foundUser.firstName}
+                value={foundUser.contact.firstName}
                 onChange={(e) =>
-                  setFoundUser({ ...foundUser, firstName: e.target.value })
+                  setFoundUser({
+                    ...foundUser,
+                    contact: {
+                      ...foundUser.contact,
+                      firstName: e.target.value,
+                    },
+                  })
                 }
                 className="border p-2 w-full mb-1"
               />
               <input
                 placeholder="Last Name"
                 type="text"
-                value={foundUser.lastName}
+                value={foundUser.contact.lastName}
                 onChange={(e) =>
-                  setFoundUser({ ...foundUser, lastName: e.target.value })
+                  setFoundUser({
+                    ...foundUser,
+                    contact: { ...foundUser.contact, lastName: e.target.value },
+                  })
                 }
                 className="border p-2 w-full mb-1"
               />
@@ -115,9 +152,12 @@ const UpdateProfile = () => {
               <input
                 placeholder="Phone"
                 type="text"
-                value={foundUser.phone}
+                value={foundUser.contact.phone}
                 onChange={(e) =>
-                  setFoundUser({ ...foundUser, phone: e.target.value })
+                  setFoundUser({
+                    ...foundUser,
+                    contact: { ...foundUser.contact, phone: e.target.value },
+                  })
                 }
                 className="border p-2 w-full mb-1"
               />
