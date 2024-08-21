@@ -19,6 +19,7 @@ const Login = () => {
 
   const mutation = useMutationHook((data) => loginUser(data));
   const { data, isError, isSuccess } = mutation;
+  
   const handleUserNameChange = (e) => {
     setUserName(e.target.value);
   };
@@ -40,7 +41,7 @@ const Login = () => {
     );
   };
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && data) {
       navigate("/");
       message.success("Login successful");
       // Kiểm tra dữ liệu trước khi sử dụng
@@ -59,11 +60,12 @@ const Login = () => {
           console.log(decode.userName);
           localStorage.setItem("userName", decode.userName);
         }
-      } else {
+      }
+      else{
         message.error("Invalid response from server");
       }
     }
-    if (isError) {
+    if (!isSuccess) {
       message.error("Login failed.Please check your username and password or change to admin");
     }
   }, [data, isSuccess, isError]);
