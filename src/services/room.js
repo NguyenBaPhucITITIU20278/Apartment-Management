@@ -113,3 +113,8 @@ export const getRoomById = async (id) => {
     throw error;
   }
 };
+
+export const searchRooms = async (query) => {
+  const response = await axios.get(`${API_URL}/search`, { params: { query } });
+  return response.data;
+};

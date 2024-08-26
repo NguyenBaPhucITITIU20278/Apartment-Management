@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { message } from "antd";
 import { updateUser, checkUser } from "../services/user";
+import { image } from "@nextui-org/react";
+import userProfile from "../assets/user1.jpg"
 
 const UpdateProfile = () => {
   const [profileImage, setProfileImage] = useState(null);
@@ -101,14 +103,17 @@ const UpdateProfile = () => {
 
   return (
     <div>
-      <h1>Update User</h1>
       {foundUser && (
         <div className="mt-6 p-4 border rounded-lg shadow-lg">
           <div className="flex">
             <div className="w-1/3 bg-gray-200 rounded-lg p-4">
-              {/* Placeholder for user image */}
+              <img
+                src={userProfile}
+                alt="Search illustration"
+                className="w-full h-auto"
+              />
             </div>
-            <div className="w-2/3 pl-4">
+            <div className="flex-1 pl-4 ">
               <h2 className="text-xl font-bold mb-2">User Details</h2>
               <p className="mb-1">
                 <strong>Contact ID:</strong> {foundUser.contact.id}

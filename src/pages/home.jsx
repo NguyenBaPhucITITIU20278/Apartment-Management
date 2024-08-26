@@ -4,6 +4,8 @@ import { getAllRooms, getRoomByAddress, addRoom } from "../services/room";
 import { useMutationHook } from "../hooks/useMutationHook";
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
+import debounce from "lodash.debounce";
+import { searchRooms } from "../services/room";
 
 const Home = () => {
   const [rooms, setRooms] = useState([]);
@@ -37,7 +39,7 @@ const Home = () => {
     fetchRooms();
   }, [address]);
 
-  const searchMutation = useMutationHook((data) => getRoomByAddress(data));
+  const searchMutation = useMutationHook((data) => searchRooms(data));
   const addRoomMutation = useMutationHook(addRoom);
   const {
     data: searchData,
@@ -73,6 +75,21 @@ const Home = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  // Thêm debounce để giảm số lần gọi API khi người dùng nhập
+  const debouncedSearch = debounce((value) => {
+    setAddress(value);
+  }, 300);
+
+  const handleInputChange = (e) => {
+    debouncedSearch(e.target.value);
+  };
+
+  useEffect(() => {
+    if (address.length > 0) {
+      searchMutation.mutate({ address });
+    }
+  }, [address]);
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">
@@ -87,8 +104,7 @@ const Home = () => {
           placeholder="Where would you like to stay?"
           className="p-2 border border-gray-300 rounded-md flex-1 w-4/6"
           name="address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
+          onChange={handleInputChange}
         />
         <button
           type="button"
