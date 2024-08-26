@@ -13,6 +13,7 @@ import Header from "./components/header";
 import Home from "./pages/home";
 import News from "./pages/News"; // Import trang News
 import NewsDetail from "./pages/NewsDetail"; // Import trang NewsDetail
+import RoomDetail from "./pages/roomDetail"; // Import trang RoomDetail
 import { useSelector } from "react-redux";
 import { Fragment, useEffect, useState } from "react";
 
@@ -74,6 +75,7 @@ export default function App() {
                 })}
                 <Route path="/news" element={<News />} />
                 <Route path="/news/:id" element={<NewsDetail />} />
+                <Route path="/room-detail/:roomId" element={<RoomDetail />} />
               </Routes>
             </div>
           </Router>

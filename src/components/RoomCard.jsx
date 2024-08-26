@@ -1,11 +1,16 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const RoomCard = ({ room }) => {
-  // Đảm bảo imagePath chỉ chứa tên tệp hình ảnh
-  const imagePath = `/images/room/${room.imagePath}`;
+  const navigate = useNavigate();
+
+  const handleRoomClick = () => {
+    navigate(`/room-detail/${room.id}`); // Navigate to room-detail with room.id
+  };
 
   return (
     <div
+      onClick={handleRoomClick}
       style={{
         border: "1px solid #ddd",
         borderRadius: "8px",
@@ -13,11 +18,12 @@ const RoomCard = ({ room }) => {
         margin: "16px 0",
         display: "flex",
         alignItems: "center",
+        cursor: "pointer",
       }}
     >
       {room.imagePath && (
         <img
-          src={`http://localhost:8080${imagePath}`}
+          src={`http://localhost:8080/images/room/${room.imagePath}`}
           alt="Room"
           style={{ width: "100px", height: "100px", marginRight: "16px" }}
         />
@@ -32,9 +38,9 @@ const RoomCard = ({ room }) => {
         <p className="bedrooms font-bold">
           Bedrooms: <span className="font-normal">{room.numberOfBedrooms}</span>
         </p>
-        <p className="description font-bold">
+        {/* <p className="description font-bold">
           Description: <span className="font-normal">{room.description}</span>
-        </p>
+        </p> */}
         <p className="address font-bold">
           Address: <span className="font-normal">{room.address}</span>
         </p>

@@ -3,6 +3,7 @@ import RoomCard from "../components/RoomCard";
 import { getAllRooms, getRoomByAddress, addRoom } from "../services/room";
 import { useMutationHook } from "../hooks/useMutationHook";
 import { message } from "antd";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [rooms, setRooms] = useState([]);
@@ -12,6 +13,7 @@ const Home = () => {
   const [id, setId] = useState("");
   const [currentPage, setCurrentPage] = useState(1); // Thêm state cho trang hiện tại
   const roomsPerPage = 6; // Số lượng RoomCard trên mỗi trang
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -60,6 +62,10 @@ const Home = () => {
     addRoomMutation.mutate({ id, address, bedroom: parsedBedroom });
   };
 
+  const handleRoomClick = (roomId) => {
+    navigate(`/room-detail/${roomId}`);
+  };
+
   // Tính toán các RoomCard cần hiển thị dựa trên trang hiện tại
   const indexOfLastRoom = currentPage * roomsPerPage;
   const indexOfFirstRoom = indexOfLastRoom - roomsPerPage;
@@ -95,7 +101,9 @@ const Home = () => {
       {error ? (
         <p className="text-red-500">Error: {error}</p>
       ) : Array.isArray(currentRooms) && currentRooms.length > 0 ? (
-        currentRooms.map((room) => <RoomCard key={room.id} room={room} />)
+        currentRooms.map((room) => (
+          <RoomCard key={room.id} room={room} onClick={handleRoomClick} />
+        ))
       ) : (
         <p>No rooms available</p>
       )}

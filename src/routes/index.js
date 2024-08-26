@@ -8,6 +8,7 @@ import addRoom from "../pages/addRoom";
 import News from "../pages/News";
 import NewsDetail from "../pages/NewsDetail";
 import updateUser from "../pages/updateUser";
+import RoomDetail from "../pages/roomDetail";
 
 export const routes = [
   {
@@ -97,6 +98,15 @@ export const routes = [
     page: updateUser,
     title: "Update User Page",
     description: "Update User page",
+    header: true,
+    background: true,
+    role: "user",
+  },
+  {
+    path: "/room-id/:id",
+    page: RoomDetail,
+    title: "Room Detail Page",
+    description: "Room Detail page",
     header: true,
     background: true,
     role: "user",

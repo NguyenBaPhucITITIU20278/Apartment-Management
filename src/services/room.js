@@ -101,3 +101,15 @@ export const addRoom = async ({ data, file }) => {
     throw error;
   }
 };
+export const getRoomById = async (id) => {
+  console.log(id);
+  try {
+    const response = await axios.get(`${API_URL}/room-by-id/${id}`);
+    console.log(id);
+    return response.data;
+  } catch (error) {
+    
+    console.error("Error getting room by id:", error);
+    throw error;
+  }
+};
