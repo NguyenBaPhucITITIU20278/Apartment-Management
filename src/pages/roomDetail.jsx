@@ -4,7 +4,7 @@ import axios from "axios";
 import { getRoomById } from "../services/room.js";
 import { useMutationHook } from "../hooks/useMutationHook.jsx";
 import Header from "../components/header.jsx";
-
+import userProfile from "../assets/user1.jpg";
 
 const RoomDetail = () => {
   const { roomId } = useParams();
@@ -53,8 +53,7 @@ const RoomDetail = () => {
         }}
       >
         <div style={{ flex: 3, marginRight: "16px" }}>
-          <div
-          >
+          <div>
             <img
               src={`http://localhost:8080/images/room/${room.imagePath}`}
               alt="Room"
@@ -75,11 +74,10 @@ const RoomDetail = () => {
             <span style={{ fontWeight: "bold" }}>Address:</span> {room.address}
           </p>
           <p>
-            <span style={{ fontWeight: "bold" }}>Area:</span> {room.area}{" "}
-            m²
+            <span style={{ fontWeight: "bold" }}>Area:</span> {room.area} m²
           </p>
           <p>
-            <span style={{ fontWeight: "bold" }}>Posted Time:</span>{room.postedTime}  {" "}
+            <span style={{ fontWeight: "bold" }}>Posted Time:</span>{room.postedTime}{" "}
           </p>
           <p>
             <span style={{ fontWeight: "bold" }}>Id:</span> {room.id}
@@ -95,33 +93,24 @@ const RoomDetail = () => {
             backgroundColor: "white",
             padding: "16px",
             borderRadius: "8px",
+            textAlign: "center",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
           }}
         >
-          {/* <div style={{ textAlign: "center" }}>
-            <img
-              src={`http://localhost:8080/images/room/${room.imagePath}`}
-              alt="room"
-              style={{
-                width: "100px",
-                height: "100px",
-                borderRadius: "50%",
-                marginBottom: "16px",
-              }}
-            />
-            <h3>{room.ownerName}</h3>
-            <p style={{ color: "green" }}>Active</p>
-            <button
-              style={{
-                backgroundColor: "#4CAF50",
-                color: "white",
-                padding: "10px 20px",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-            >
-              {room.ownerPhone}
-            </button>
+          <img
+            src={userProfile}
+            alt="room"
+            style={{
+              width: "100px",
+              height: "100px",
+              borderRadius: "50%",
+              margin: "0 auto 16px",
+              display: "block",
+            }}
+          />
+          <h3 style={{ marginBottom: "8px" }}>{room.name}</h3>
+          <p style={{ marginBottom: "16px", fontWeight: "bold" }}>{room.phoneNumber}</p>
+          <a href={`tel:${room.phoneNumber}`}>
             <button
               style={{
                 backgroundColor: "#0084ff",
@@ -131,24 +120,13 @@ const RoomDetail = () => {
                 borderRadius: "5px",
                 cursor: "pointer",
                 marginTop: "10px",
+                marginBottom: "10px",
+                width: "100%",
               }}
             >
-              Chat
+              Phone
             </button>
-            <button
-              style={{
-                backgroundColor: "#f44336",
-                color: "white",
-                padding: "10px 20px",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-                marginTop: "10px",
-              }}
-            >
-              Like
-            </button>
-          </div> */}
+          </a>
         </div>
       </div>
     </div>

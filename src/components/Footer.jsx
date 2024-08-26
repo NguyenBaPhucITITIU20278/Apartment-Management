@@ -23,7 +23,7 @@ const Footer = () => {
         </div>
         &nbsp;|&nbsp;
         <div className="flex ml-2">
-          <a href="tel:+1234567890">
+          <a href="tel:+84 0938359708">
             <FaPhone className="mr-1" /> Phone: +84 0938359708
           </a>
         </div>
