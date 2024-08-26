@@ -14,7 +14,7 @@ const Footer = () => {
         <div className="flex">Contact us:</div>&nbsp;
         <div className="flex ml-2">
           <a
-            href="https://www.facebook.com/yourpage"
+            href="https://www.facebook.com/profile.php?id=100012729762312"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -24,13 +24,13 @@ const Footer = () => {
         &nbsp;|&nbsp;
         <div className="flex ml-2">
           <a href="tel:+1234567890">
-            <FaPhone className="mr-1" /> Phone: +1234567890
+            <FaPhone className="mr-1" /> Phone: +84 0938359708
           </a>
         </div>
         &nbsp;|&nbsp;
         <div className="flex ml-2">
-          <a href="mailto:contact@apartment.com">
-            <FaEnvelope className="mr-1" /> Gmail: contact@apartment.com
+          <a href="mailto:phucnguyenba217@gmail.com">
+            <FaEnvelope className="mr-1" /> Gmail: phucnguyenba217@gmail.com
           </a>
         </div>
       </div>
