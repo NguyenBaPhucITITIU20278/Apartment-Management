@@ -67,7 +67,6 @@ export default function App() {
                             )}
                             <Page />
                           </div>
-                          <Footer className="w-full bg-gray-200 text-center py-4 mt-auto" />
                         </AuthWrapper>
                       }
                     />
@@ -77,6 +76,7 @@ export default function App() {
                 <Route path="/news/:id" element={<NewsDetail />} />
                 <Route path="/room-detail/:roomId" element={<RoomDetail />} />
               </Routes>
+              <Footer />
             </div>
           </Router>
         </HelmetProvider>

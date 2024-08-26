@@ -9,6 +9,7 @@ import News from "../pages/News";
 import NewsDetail from "../pages/NewsDetail";
 import updateUser from "../pages/updateUser";
 import RoomDetail from "../pages/roomDetail";
+import Footer from "../components/Footer";
 
 export const routes = [
   {
