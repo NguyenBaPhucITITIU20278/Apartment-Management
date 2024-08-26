@@ -4,7 +4,7 @@ import axios from "axios";
 import { getRoomById } from "../services/room.js";
 import { useMutationHook } from "../hooks/useMutationHook.jsx";
 import Header from "../components/header.jsx";
-import RoomCard from "../components/RoomCard.jsx"; // Import RoomCard
+
 
 const RoomDetail = () => {
   const { roomId } = useParams();
@@ -69,36 +69,35 @@ const RoomDetail = () => {
             {room.title}
           </h2>
           <p style={{ color: "green", fontWeight: "bold" }}>
-            {room.price} triệu/tháng
+            {room.price} million VND/month
           </p>
           <p>
-            <span style={{ fontWeight: "bold" }}>Địa chỉ:</span> {room.address}
+            <span style={{ fontWeight: "bold" }}>Address:</span> {room.address}
           </p>
           <p>
-            <span style={{ fontWeight: "bold" }}>Diện tích:</span> {room.area}{" "}
+            <span style={{ fontWeight: "bold" }}>Area:</span> {room.area}{" "}
             m²
           </p>
           <p>
-            <span style={{ fontWeight: "bold" }}>Thời gian đăng:</span>{" "}
-            {room.postedTime}
+            <span style={{ fontWeight: "bold" }}>Posted Time:</span>{room.postedTime}  {" "}
           </p>
           <p>
             <span style={{ fontWeight: "bold" }}>Id:</span> {room.id}
           </p>
           <div>
-            <h3>Mô tả</h3>
+            <h3 style={{ fontWeight: "bold" }}>Description</h3>
             <p>{room.description}</p>
           </div>
         </div>
         <div
           style={{
             flex: 1,
-            backgroundColor: "#ffeb3b",
+            backgroundColor: "white",
             padding: "16px",
             borderRadius: "8px",
           }}
         >
-          <div style={{ textAlign: "center" }}>
+          {/* <div style={{ textAlign: "center" }}>
             <img
               src={`http://localhost:8080/images/room/${room.imagePath}`}
               alt="room"
@@ -149,11 +148,11 @@ const RoomDetail = () => {
             >
               Like
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
-  );
+  );    
 };
 
 export default RoomDetail;

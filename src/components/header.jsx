@@ -70,9 +70,9 @@ const Header = ({ title }) => {
               
               <button className="text-white" onClick={goToAddRoom}>Add Room</button>
 
-              <button className="text-white">Rent Land</button>
+              {/* <button className="text-white">Rent Land</button> */}
               <button className="text-white" onClick={goToNews}>News</button>
-              <button className="text-white">Price</button>
+              {/* <button className="text-white">Price</button> */}
             </>
           ) : (
             <button className="text-white" onClick={goToControlUser}>Control User</button>
