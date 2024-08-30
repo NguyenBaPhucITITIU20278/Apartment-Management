@@ -82,3 +82,8 @@ export const updateUser = async (userName) => {
     throw error;
   }
 };
+
+export const getAllUsers = async () => {
+  const response = await axiosJWT.get(`${API_URL}/all`);
+  return response.data;
+};

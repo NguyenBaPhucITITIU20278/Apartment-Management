@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
+import { getAllUsers } from "../services/user";
 import {
   findUser,
   deleteUser as deleteUserService,
   updateUser,
 } from "../services/admin";
-
 import { useMutationHook } from "../hooks/useMutationHook";
 import { message } from "antd";
+import * as XLSX from "xlsx";
 
 const AdminPage = () => {
   const [name, setName] = useState("");
   const [foundUser, setFoundUser] = useState(null);
+  const [allUsers, setAllUsers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5;
+
   const navigate = useNavigate();
 
   const mutation = useMutationHook((data) => findUser(name));
+  const mutationGetAllUsers = useMutationHook(() => getAllUsers());
 
   const handleSearch = () => {
     mutation.mutate({ name: name });
@@ -31,11 +37,26 @@ const AdminPage = () => {
     }
   };
 
+  const handleGetAllUsers = () => {
+    mutationGetAllUsers.mutate();
+    if (mutationGetAllUsers.isSuccess) {
+      setAllUsers(mutationGetAllUsers.data);
+    }
+  };
+
   useEffect(() => {
     if (mutation.isSuccess) {
       setFoundUser(mutation.data);
     }
-  }, [mutation.data, mutation.isSuccess]);
+    if (mutationGetAllUsers.isSuccess) {
+      setAllUsers(mutationGetAllUsers.data);
+    }
+  }, [
+    mutation.data,
+    mutation.isSuccess,
+    mutationGetAllUsers.data,
+    mutationGetAllUsers.isSuccess,
+  ]);
 
   const handleDeleteUser = () => {
     deleteUserService(foundUser.userName);
@@ -58,6 +79,33 @@ const AdminPage = () => {
     }
   };
 
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = allUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  //Xử lí dữ liệu để export ra file excel
+  const flattenUserData = (users) => {
+    return users.map((user) => ({
+      userName: user.userName,
+      email: user.email,
+      phone: user.contact.phone,
+      role: user.role.roleName,
+      contactId: user.contact.id,
+      firstName: user.contact.firstName,
+      lastName: user.contact.lastName,
+    }));
+  };
+
+  const handleExportToExcel = () => {
+    const flatData = flattenUserData(allUsers);
+    const worksheet = XLSX.utils.json_to_sheet(flatData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+    XLSX.writeFile(workbook, "users.xlsx");
+  };
+
   return (
     <div>
       <div className="container mx-auto p-4">
@@ -77,6 +125,42 @@ const AdminPage = () => {
         >
           Find User
         </button>
+        <button
+          onClick={handleGetAllUsers}
+          className="bg-green-500 text-white px-4 py-2 rounded ml-2"
+        >
+          Get All Users
+        </button>
+        <div className="mt-6">
+          {currentUsers.map((user) => (
+            <div
+              key={user.email}
+              className="p-4 mb-4 border rounded-lg shadow-lg"
+            >
+              <p className="font-bold">{user.userName}</p>
+              <p>{user.email}</p>
+              <p>{user.contact.phone}</p>
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-center mt-4">
+          {Array.from(
+            { length: Math.ceil(allUsers.length / usersPerPage) },
+            (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => paginate(i + 1)}
+                className={`px-4 py-2 mx-1 border rounded ${
+                  currentPage === i + 1
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-blue-500"
+                }`}
+              >
+                {i + 1}
+              </button>
+            )
+          )}
+        </div>
         {foundUser && (
           <div className="mt-6 p-4 border rounded-lg shadow-lg">
             <div className="flex">
@@ -184,6 +268,14 @@ const AdminPage = () => {
             </div>
           </div>
         )}
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={handleExportToExcel}
+            className="bg-yellow-500 text-white px-4 py-2 rounded"
+          >
+            Export to Excel
+          </button>
+        </div>
       </div>
     </div>
   );

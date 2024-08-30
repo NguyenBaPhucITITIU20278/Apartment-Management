@@ -9,7 +9,7 @@ import News from "../pages/News";
 import NewsDetail from "../pages/NewsDetail";
 import updateUser from "../pages/updateUser";
 import RoomDetail from "../pages/roomDetail";
-import Footer from "../components/Footer";
+import controlRoom from "../pages/controlRoom";
 
 export const routes = [
   {
@@ -111,5 +111,14 @@ export const routes = [
     header: true,
     background: true,
     role: "user",
+  },
+  {
+    path: "/controlRoom",
+    page: controlRoom,
+    title: "Control Room Page",
+    description: "Control Room page",
+    header: true,
+    background: true,
+    role: "admin",
   },
 ];
