@@ -16,6 +16,7 @@ import NewsDetail from "./pages/NewsDetail"; // Import trang NewsDetail
 import RoomDetail from "./pages/roomDetail"; // Import trang RoomDetail
 import { useSelector } from "react-redux";
 import { Fragment, useEffect, useState } from "react";
+import Projecticon from "./assets/Projecticon.ico";
 
 export default function App() {
   const queryClient = new QueryClient();
@@ -47,6 +48,8 @@ export default function App() {
             <Helmet>
               <title>Apartment Control</title>
               <meta name="description" content="Apartment Control" />
+              <link rel="icon" href={Projecticon} />{" "}
+              {/* Thay đổi đường dẫn này */}
             </Helmet>
             <div className="flex flex-col min-h-screen">
               <Routes>
@@ -60,6 +63,11 @@ export default function App() {
                         <AuthWrapper title={route.title}>
                           <Helmet>
                             <title>{route.title}</title>
+                            <link
+                              rel="icon"
+                              href={Projecticon}
+                            />{" "}
+                            {/* Thay đổi đường dẫn này */}
                           </Helmet>
                           <div className="flex flex-col flex-grow">
                             {route.header && (
