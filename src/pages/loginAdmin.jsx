@@ -12,6 +12,7 @@ import { getUser } from "../services/user.js";
 import { jwtDecode } from "jwt-decode";
 import Header from "../components/header.jsx";
 import { loginAdmin } from "../services/admin.js";
+import { fetchWithAuth } from "../services/auth.js";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -68,6 +69,21 @@ const Login = () => {
       message.error("Login failed.Please check your username and password");
     }
   }, [data, isSuccess, isError]);
+
+  // Sử dụng fetchWithAuth trong các yêu cầu HTTP
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetchWithAuth('/api/rooms'); 
+      if (response.ok) {
+        const result = await response.json();
+        console.log(result);
+      } else {
+        console.error('Failed to fetch data');
+      }
+    };
+
+    fetchData();
+  }, []);
   return (
     <div>
       <Header />

@@ -10,12 +10,14 @@ import {
 import { useMutationHook } from "../hooks/useMutationHook";
 import { message } from "antd";
 import * as XLSX from "xlsx";
+import { fetchWithAuth } from "../services/auth";
 
 const AdminPage = () => {
   const [name, setName] = useState("");
   const [foundUser, setFoundUser] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [action, setAction] = useState(""); // New state to track current action
   const usersPerPage = 5;
 
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ const AdminPage = () => {
   const mutationGetAllUsers = useMutationHook(() => getAllUsers());
 
   const handleSearch = () => {
+    setAction("findUser");
     mutation.mutate({ name: name });
     if (mutation.isSuccess) {
       setFoundUser(mutation.data);
@@ -38,6 +41,7 @@ const AdminPage = () => {
   };
 
   const handleGetAllUsers = () => {
+    setAction("getAllUsers");
     mutationGetAllUsers.mutate();
     if (mutationGetAllUsers.isSuccess) {
       setAllUsers(mutationGetAllUsers.data);
@@ -45,13 +49,15 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    if (mutation.isSuccess) {
+    if (action === "findUser" && mutation.isSuccess && mutation.data) {
       setFoundUser(mutation.data);
-    }
-    if (mutationGetAllUsers.isSuccess) {
+      setAllUsers([]); // Clear all users if a specific user is found
+    } else if (action === "getAllUsers" && mutationGetAllUsers.isSuccess && mutationGetAllUsers.data) {
       setAllUsers(mutationGetAllUsers.data);
+      setFoundUser(null); // Clear found user if all users are fetched
     }
   }, [
+    action,
     mutation.data,
     mutation.isSuccess,
     mutationGetAllUsers.data,
@@ -105,6 +111,20 @@ const AdminPage = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
     XLSX.writeFile(workbook, "users.xlsx");
   };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const method = 'POST';
+  //     const response = await fetchWithAuth('http://localhost:8080/api/admin/find-user', {method});
+  //     if (response.ok) {
+  //       const result = await response.json();
+  //       console.log(result);
+  //     } else {
+  //       console.error('Failed to fetch data');
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
 
   return (
     <div>

@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import debounce from "lodash.debounce";
 import { searchRooms } from "../services/room";
 import FeaturedAreas from "../components/featureAreas";
+import { fetchWithAuth } from "../services/auth";
 
 const Home = () => {
   const [rooms, setRooms] = useState([]);
@@ -95,6 +96,19 @@ const Home = () => {
     }
   }, [address]);
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const response = await fetchWithAuth('/api/some-endpoint');
+  //     if (response.ok) {
+  //       const result = await response.json();
+  //       console.log(result);
+  //     } else {
+  //       console.error('Failed to fetch data');
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">
