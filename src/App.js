@@ -17,6 +17,7 @@ import RoomDetail from "./pages/roomDetail"; // Import trang RoomDetail
 import { useSelector } from "react-redux";
 import { Fragment, useEffect, useState } from "react";
 import Projecticon from "./assets/Projecticon.ico";
+import WhyUs from "./components/WhyUs"; // Import the WhyUs component
 
 export default function App() {
   const queryClient = new QueryClient();
@@ -63,10 +64,7 @@ export default function App() {
                         <AuthWrapper title={route.title}>
                           <Helmet>
                             <title>{route.title}</title>
-                            <link
-                              rel="icon"
-                              href={Projecticon}
-                            />{" "}
+                            <link rel="icon" href={Projecticon} />{" "}
                             {/* Thay đổi đường dẫn này */}
                           </Helmet>
                           <div className="flex flex-col flex-grow">
@@ -84,6 +82,7 @@ export default function App() {
                 <Route path="/news/:id" element={<NewsDetail />} />
                 <Route path="/room-detail/:roomId" element={<RoomDetail />} />
               </Routes>
+              <WhyUs /> {/* Add the WhyUs component here */}
               <Footer />
             </div>
           </Router>
