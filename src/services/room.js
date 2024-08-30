@@ -114,7 +114,14 @@ export const getRoomById = async (id) => {
   }
 };
 
-export const searchRooms = async (query) => {
-  const response = await axios.get(`${API_URL}/search`, { params: { query } });
-  return response.data;
+export const searchRooms = async ({ address }) => {
+  try {
+    const response = await axios.post(`${API_URL}/rooms-by-address`, {
+      address
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error searching rooms:", error);
+    throw error;
+  }
 };

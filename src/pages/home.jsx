@@ -6,6 +6,7 @@ import { message } from "antd";
 import { useNavigate } from "react-router-dom";
 import debounce from "lodash.debounce";
 import { searchRooms } from "../services/room";
+import FeaturedAreas from "../components/featureAreas";
 
 const Home = () => {
   const [rooms, setRooms] = useState([]);
@@ -48,10 +49,14 @@ const Home = () => {
   } = searchMutation;
   const { isError: isAddError, isSuccess: isAddSuccess } = addRoomMutation;
 
-  const handleSearch = (event) => {
-    event.preventDefault();
+  const handleSearch = (address) => {
     console.log({ address });
     searchMutation.mutate({ address });
+  };
+  const handleAreaClick = (address) => {
+    setAddress(address);
+    setId(id);
+    handleSearch(address);
   };
 
   const handleAddRoom = () => {
@@ -98,6 +103,10 @@ const Home = () => {
       <p className="text-gray-500 mb-4">
         Search for your dream home and book it now!
       </p>
+      <FeaturedAreas onAreaClick={handleAreaClick} />
+      {error ? (
+        <p className="text-red-500">Error: {error}</p>
+      ) : null}
       <div className="p-2 text-base border border-yellow-300 rounded-md flex-1 w-3/12">
         <input
           type="text"
@@ -116,7 +125,7 @@ const Home = () => {
       </div>
       {error ? (
         <p className="text-red-500">Error: {error}</p>
-      ) : Array.isArray(currentRooms) && currentRooms.length > 0 ? (
+      ) : currentRooms.length > 0 ? (
         currentRooms.map((room) => (
           <RoomCard key={room.id} room={room} onClick={handleRoomClick} />
         ))

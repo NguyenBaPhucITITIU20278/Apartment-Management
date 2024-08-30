@@ -68,7 +68,7 @@ const RoomDetail = () => {
             {room.title}
           </h2>
           <p style={{ color: "green", fontWeight: "bold" }}>
-            {room.price} million VND/month
+            {room.price}  VND/month
           </p>
           <p>
             <span style={{ fontWeight: "bold" }}>Address:</span> {room.address}
