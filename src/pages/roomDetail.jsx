@@ -5,30 +5,31 @@ import { getRoomById } from "../services/room.js";
 import { useMutationHook } from "../hooks/useMutationHook.jsx";
 import Header from "../components/header.jsx";
 import userProfile from "../assets/user1.jpg";
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
+import ImageCarousel from "./ImageCarousel";
 
 const RoomDetail = () => {
   const { roomId } = useParams();
-  const parsedRoomId = parseInt(roomId, 10); // Parse roomId as an integer
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const mutation = useMutationHook((data) => getRoomById(data));
-  const { data, isError, isSuccess } = mutation;
-
   useEffect(() => {
-    mutation.mutate(parsedRoomId); // Use parsedRoomId
-  }, [parsedRoomId]);
+    const fetchRoom = async () => {
+      try {
+        const data = await getRoomById(roomId);
+        console.log("Room data:", data);
+        setRoom(data);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch room details");
+        setLoading(false);
+      }
+    };
 
-  useEffect(() => {
-    if (isSuccess) {
-      setRoom(data);
-      setLoading(false);
-    } else if (isError) {
-      setError("Failed to fetch room details");
-      setLoading(false);
-    }
-  }, [isSuccess, isError, data]);
+    fetchRoom();
+  }, [roomId]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -42,88 +43,50 @@ const RoomDetail = () => {
     return <div>No room details available</div>;
   }
 
+  const images = room.imagePaths || [];
+  const address = room.address;
+  console.log("Room Address:", address);
   return (
     <div>
       <Header />
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          margin: "16px 0",
-        }}
-      >
-        <div style={{ flex: 3, marginRight: "16px" }}>
+      <div className="flex justify-between my-4">
+        <div className="flex-3 mr-4">
           <div>
-            <img
-              src={`http://localhost:8080/images/room/${room.imagePath}`}
-              alt="Room"
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
+            <ImageCarousel images={images} address={address} />
           </div>
-          <h2 style={{ color: "red", fontWeight: "bold", marginTop: "16px" }}>
+          <h2 className="text-red-500 font-bold mt-4">
             {room.title}
           </h2>
-          <p style={{ color: "green", fontWeight: "bold" }}>
-            {room.price}  VND/month
+          <p className="text-green-500 font-bold">
+            {room.price} VND/month
           </p>
           <p>
-            <span style={{ fontWeight: "bold" }}>Address:</span> {room.address}
+            <span className="font-bold">Address:</span> {room.address}
           </p>
           <p>
-            <span style={{ fontWeight: "bold" }}>Area:</span> {room.area} m²
+            <span className="font-bold">Area:</span> {room.area} m²
           </p>
           <p>
-            <span style={{ fontWeight: "bold" }}>Posted Time:</span>{room.postedTime}{" "}
+            <span className="font-bold">Posted Time:</span> {room.postedTime}
           </p>
           <p>
-            <span style={{ fontWeight: "bold" }}>Id:</span> {room.id}
+            <span className="font-bold">Id:</span> {room.id}
           </p>
           <div>
-            <h3 style={{ fontWeight: "bold" }}>Description</h3>
+            <h3 className="font-bold">Description</h3>
             <p>{room.description}</p>
           </div>
         </div>
-        <div
-          style={{
-            flex: 1,
-            backgroundColor: "white",
-            padding: "16px",
-            borderRadius: "8px",
-            textAlign: "center",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-          }}
-        >
+        <div className="flex-1 bg-white p-4 rounded-lg text-center shadow-md">
           <img
             src={userProfile}
             alt="room"
-            style={{
-              width: "100px",
-              height: "100px",
-              borderRadius: "50%",
-              margin: "0 auto 16px",
-              display: "block",
-            }}
+            className="w-24 h-24 rounded-full mx-auto mb-4"
           />
-          <h3 style={{ marginBottom: "8px" }}>{room.name}</h3>
-          <p style={{ marginBottom: "16px", fontWeight: "bold" }}>{room.phoneNumber}</p>
+          <h3 className="mb-2">{room.name}</h3>
+          <p className="mb-4 font-bold">{room.phoneNumber}</p>
           <a href={`tel:${room.phoneNumber}`}>
-            <button
-              style={{
-                backgroundColor: "#0084ff",
-                color: "white",
-                padding: "10px 20px",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-                marginTop: "10px",
-                marginBottom: "10px",
-                width: "100%",
-              }}
-            >
+            <button className="bg-blue-500 text-white py-2 px-4 rounded cursor-pointer mt-2 mb-2 w-full">
               Phone
             </button>
           </a>

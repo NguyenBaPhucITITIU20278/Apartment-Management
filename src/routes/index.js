@@ -10,6 +10,7 @@ import NewsDetail from "../pages/NewsDetail";
 import updateUser from "../pages/updateUser";
 import RoomDetail from "../pages/roomDetail";
 import controlRoom from "../pages/controlRoom";
+import ImageCarousel from "../pages/ImageCarousel";
 
 export const routes = [
   {
@@ -120,5 +121,14 @@ export const routes = [
     header: true,
     background: true,
     role: "admin",
+  },
+  {
+    path: "/imageCarousel",
+    page: ImageCarousel,
+    title: "Image Carousel Page",
+    description: "Image Carousel page",
+    header: true,
+    background: true,
+    role: "user",
   },
 ];
