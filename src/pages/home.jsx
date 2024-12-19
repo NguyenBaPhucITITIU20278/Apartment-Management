@@ -14,6 +14,7 @@ const Home = () => {
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
   const [bedroom, setBedroom] = useState(0);
+  const [image, setImage] = useState([])
   const [id, setId] = useState("");
   const [currentPage, setCurrentPage] = useState(1); // Thêm state cho trang hiện tại
   const roomsPerPage = 6; // Số lượng RoomCard trên mỗi trang
@@ -141,7 +142,7 @@ const Home = () => {
         <p className="text-red-500">Error: {error}</p>
       ) : currentRooms.length > 0 ? (
         currentRooms.map((room) => (
-          <RoomCard key={room.id} room={room} onClick={handleRoomClick} />
+          <RoomCard key={room.id} room={room} onClick={handleRoomClick} address={room.address} image={room.image_paths}/>
         ))
       ) : (
         <p>No rooms available</p>

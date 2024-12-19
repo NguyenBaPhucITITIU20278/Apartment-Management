@@ -1,12 +1,18 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const RoomCard = ({ room }) => {
+const RoomCard = ({ room, address }) => {
   const navigate = useNavigate();
 
   const handleRoomClick = () => {
-    navigate(`/room-detail/${room.id}`); // Navigate to room-detail with room.id
+    navigate(`/room-detail/${room.id}`);
   };
+
+  const formattedAddress = address ? address.replace(/\s+/g, "_") : "default_address";
+  const imagePathArray = room.image_paths ? room.imagePath.split(',') : [];
+  const firstImage = imagePathArray.length > 0 ? imagePathArray[0] : null;
+
+  console.log(`Image URL: http://localhost:8080/images/${formattedAddress}/${firstImage}`);
 
   return (
     <div
@@ -21,9 +27,9 @@ const RoomCard = ({ room }) => {
         cursor: "pointer",
       }}
     >
-      {room.imagePath && (
+      {firstImage && (
         <img
-          src={`http://localhost:8080/images/room/${room.imagePath}`}
+          src={`http://localhost:8080/images/${formattedAddress}/${firstImage}`}
           alt="Room"
           style={{ width: "100px", height: "100px", marginRight: "16px" }}
         />
@@ -38,9 +44,9 @@ const RoomCard = ({ room }) => {
         <p className="bedrooms font-bold">
           Bedrooms: <span className="font-normal">{room.numberOfBedrooms}</span>
         </p>
-        {/* <p className="description font-bold">
+        <p className="description font-bold">
           Description: <span className="font-normal">{room.description}</span>
-        </p> */}
+        </p>
         <p className="address font-bold">
           Address: <span className="font-normal">{room.address}</span>
         </p>
