@@ -8,18 +8,20 @@ import userProfile from "../assets/user1.jpg";
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 import ImageCarousel from "./ImageCarousel";
+import ThreeDViewer from "../components/ThreeDViewer";
 
 const RoomDetail = () => {
   const { roomId } = useParams();
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [show3DViewer, setShow3DViewer] = useState(false);
 
   useEffect(() => {
     const fetchRoom = async () => {
       try {
         const data = await getRoomById(roomId);
-        console.log("Room data:", data);
+        console.log("Fetched room data:", data);
         setRoom(data);
         setLoading(false);
       } catch (err) {
@@ -30,6 +32,10 @@ const RoomDetail = () => {
 
     fetchRoom();
   }, [roomId]);
+
+  const handleView3D = () => {
+    setShow3DViewer(true);
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -43,9 +49,14 @@ const RoomDetail = () => {
     return <div>No room details available</div>;
   }
 
+  const formattedAddress = room.address.replace(/\s+/g, "_");
+  const modelPath = room.modelPath;
+  const modelName = modelPath.split('/').pop().split('.')[0];
+  const fullModelPath = `http://localhost:8080/images/${formattedAddress}/${modelName}.glb`;
+
   const images = room.imagePaths || [];
   const address = room.address;
-  console.log("Room Address:", address);
+  console.log("Path:", modelPath);
   return (
     <div>
       <Header />
@@ -76,6 +87,13 @@ const RoomDetail = () => {
             <h3 className="font-bold">Description</h3>
             <p>{room.description}</p>
           </div>
+          <button
+            className="bg-blue-500 text-white py-2 px-4 rounded cursor-pointer mt-2 mb-2"
+            onClick={handleView3D}
+          >
+            View in 3D
+          </button>
+          {show3DViewer && <ThreeDViewer modelPath={fullModelPath} />}
         </div>
         <div className="flex-1 bg-white p-4 rounded-lg text-center shadow-md">
           <img

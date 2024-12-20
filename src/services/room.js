@@ -108,7 +108,7 @@ export const getRoomById = async (id) => {
     console.log(id);
     return response.data;
   } catch (error) {
-    
+
     console.error("Error getting room by id:", error);
     throw error;
   }
@@ -125,3 +125,33 @@ export const searchRooms = async ({ address }) => {
     throw error;
   }
 };
+
+export const addRoomWithModel = async ({ data, files, model }) => {
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(data));
+  
+  if (files.length === 0) {
+    console.error("No files selected"); // Log if no files are selected
+  }
+
+  files.forEach((file, index) => {
+    formData.append("files", file); // Ensure 'files' is used as the key
+  });
+
+  formData.append("model", model);
+
+  try {
+    const response = await axios.post(`${API_URL}/add-room-with-model`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error adding room with model:", error);
+    console.error("Error details:", error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
+
+

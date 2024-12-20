@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { addRoom } from "../services/room";
+import { addRoomWithModel } from "../services/room";
 import { useMutationHook } from "../hooks/useMutationHook";
 import { message } from "antd";
+
 
 const AddRoom = () => {
   const [error, setError] = useState("");
@@ -12,13 +13,21 @@ const AddRoom = () => {
   const [status, setStatus] = useState("");
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
-  const [imagePath, setImage] = useState(null); // Change to null to handle file
+  const [images, setImages] = useState([]);
+  const [model, setModel] = useState(null);
+  const [area, setArea] = useState("");
 
-  const mutation = useMutationHook((data) => addRoom(data));
+  const mutation = useMutationHook((data) => addRoomWithModel(data));
   const { isError: isAddError, isSuccess: isAddSuccess } = mutation;
 
   const handleAddRoom = async (e) => {
     e.preventDefault();
+    
+    if (images.length === 0) {
+      message.error("Please select at least one image.");
+      return;
+    }
+
     const roomData = {
       name,
       address,
@@ -27,8 +36,21 @@ const AddRoom = () => {
       price,
       status,
       description,
+      area,
     };
-    mutation.mutate({ data: roomData, file: imagePath });
+
+    try {
+      await addRoomWithModel({ data: roomData, files: images, model });
+      message.success("Room added successfully with images and 3D model");
+    } catch (error) {
+      message.error("Error adding room: " + error.message);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    console.log("Selected files:", selectedFiles);
+    setImages(selectedFiles);
   };
 
   useEffect(() => {
@@ -91,6 +113,12 @@ const AddRoom = () => {
                 type="text"
                 onChange={(e) => setStatus(e.target.value)}
               />
+              <input
+                placeholder="Area (in sqm)"
+                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                type="text"
+                onChange={(e) => setArea(e.target.value)}
+              />
               <textarea
                 placeholder="Description"
                 className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
@@ -98,10 +126,17 @@ const AddRoom = () => {
                 onChange={(e) => setDescription(e.target.value)}
               ></textarea>
               <input
-                placeholder="Image"
+                placeholder="Images"
                 className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
                 type="file"
-                onChange={(e) => setImage(e.target.files[0])} // Change to handle file
+                multiple
+                onChange={handleImageChange}
+              />
+              <input
+                placeholder="3D Model"
+                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                type="file"
+                onChange={(e) => setModel(e.target.files[0])}
               />
               <button
                 className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150"
