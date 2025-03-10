@@ -101,15 +101,24 @@ export const addRoom = async ({ data, file }) => {
     throw error;
   }
 };
+
 export const getRoomById = async (id) => {
-  console.log(id);
   try {
-    const response = await axios.get(`${API_URL}/room-by-id/${id}`);
-    console.log(id);
+    const headers = getHeaders(); // Đảm bảo headers được bao gồm
+    const response = await axios.get(`${API_URL}/room-by-id/${id}`, { headers });
+    console.log("Response received:", response); // Log phản hồi
     return response.data;
   } catch (error) {
-
     console.error("Error getting room by id:", error);
+    console.error(
+      "Error details:",
+      error.response ? error.response.data : error.message
+    );
+    if (error.response && error.response.status === 403) {
+      console.error(
+        "Access denied. Please check your access token and permissions."
+      );
+    }
     throw error;
   }
 };
@@ -126,7 +135,7 @@ export const searchRooms = async ({ address }) => {
   }
 };
 
-export const addRoomWithModel = async ({ data, files, model }) => {
+export const addRoomWithModel = async ({ data, files, model, web360 }) => {
   const formData = new FormData();
   formData.append("data", JSON.stringify(data));
   
@@ -139,6 +148,7 @@ export const addRoomWithModel = async ({ data, files, model }) => {
   });
 
   formData.append("model", model);
+  formData.append("web360", web360);
 
   try {
     const response = await axios.post(`${API_URL}/add-room-with-model`, formData, {

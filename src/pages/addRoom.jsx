@@ -15,6 +15,7 @@ const AddRoom = () => {
   const [name, setName] = useState("");
   const [images, setImages] = useState([]);
   const [model, setModel] = useState(null);
+  const [web360, setweb360] = useState([]);
   const [area, setArea] = useState("");
 
   const mutation = useMutationHook((data) => addRoomWithModel(data));
@@ -40,8 +41,8 @@ const AddRoom = () => {
     };
 
     try {
-      await addRoomWithModel({ data: roomData, files: images, model });
-      message.success("Room added successfully with images and 3D model");
+      await addRoomWithModel({ data: roomData, files: images, model, web360});
+      message.success("Room added successfully");
     } catch (error) {
       message.error("Error adding room: " + error.message);
     }
@@ -137,6 +138,12 @@ const AddRoom = () => {
                 className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
                 type="file"
                 onChange={(e) => setModel(e.target.files[0])}
+              />
+              <input
+                placeholder="360Image"
+                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                type="file"
+                onChange={(e) => setweb360(e.target.files[0])}
               />
               <button
                 className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150"

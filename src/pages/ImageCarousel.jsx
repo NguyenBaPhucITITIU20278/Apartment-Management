@@ -14,7 +14,7 @@ const ImageCarousel = ({ images = [], address = "" }) => {
     slidesToScroll: 1
   };
 
-  const formattedAddress = address ? address.replace(/\s+/g, "_") : "default_address";
+  const formattedAddress = address.replace(/\s+/g, "_");
   console.log("Formatted Address:", formattedAddress);
 
   return (
@@ -23,7 +23,7 @@ const ImageCarousel = ({ images = [], address = "" }) => {
         {images.map((image, index) => (
           <div key={index} style={{ height: '400px' }}>
             <img
-              src={`http://localhost:8080/images/${formattedAddress}/${image}`}
+              src={`http://localhost:8080/images/${formattedAddress}/images/${image.split('/').pop()}`}
               alt={`Room ${index}`}
               style={{
                 width: '100%',

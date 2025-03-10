@@ -12,7 +12,7 @@ const RoomCard = ({ room, address }) => {
   const imagePathArray = room.image_paths ? room.imagePath.split(',') : [];
   const firstImage = imagePathArray.length > 0 ? imagePathArray[0] : null;
 
-  console.log(`Image URL: http://localhost:8080/images/${formattedAddress}/${firstImage}`);
+  console.log(`Image URL: http://localhost:8080/images/${formattedAddress}/images/${firstImage}`);
 
   return (
     <div
@@ -29,7 +29,7 @@ const RoomCard = ({ room, address }) => {
     >
       {firstImage && (
         <img
-          src={`http://localhost:8080/images/${formattedAddress}/${firstImage}`}
+          src={`http://localhost:8080/images/${formattedAddress}/images/${firstImage}`}
           alt="Room"
           style={{ width: "100px", height: "100px", marginRight: "16px" }}
         />
