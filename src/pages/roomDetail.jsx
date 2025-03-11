@@ -13,6 +13,7 @@ import ThreeSixtyImageViewer from "../components/ThreeSixtyImageViewer";
 import Draggable from 'react-draggable';
 import button360Image from '../assets/360button.png';
 import button3DImage from '../assets/3Dbutton.png';
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 
 const RoomDetail = () => {
   const { roomId } = useParams();
@@ -21,6 +22,7 @@ const RoomDetail = () => {
   const [error, setError] = useState(null);
   const [show3DViewer, setShow3DViewer] = useState(false);
   const [show360Viewer, setShow360Viewer] = useState(false);
+  const [center, setCenter] = useState({ lat: 0, lng: 0 });
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -29,8 +31,17 @@ const RoomDetail = () => {
         console.log("Fetched room data:", data);
         setRoom(data);
         setLoading(false);
+
+        // Geocode the address to get latitude and longitude
+        const geocodeResponse = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(data.address)}&key=YOUR_GOOGLE_MAPS_API_KEY`);
+        const geocodeData = await geocodeResponse.json();
+
+        if (geocodeData.results.length > 0) {
+          const location = geocodeData.results[0].geometry.location;
+          setCenter({ lat: location.lat, lng: location.lng });
+        }
       } catch (err) {
-        setError("Failed to fetch room details");
+        setError("Login to see the detail of the apartment");
         setLoading(false);
       }
     };
@@ -67,6 +78,10 @@ const RoomDetail = () => {
   const fullModelPath = modelName ? `http://localhost:8080/images/${formattedAddress}/models/${modelName}.glb` : null;
   const full360ImagePath = image360Name ? `http://localhost:8080/images/${formattedAddress}/web360/${image360Name}.jpg` : null;
 
+  const mapContainerStyle = {
+    width: '100%',
+    height: '400px',
+  };
 
   console.log("Image URL", images);
   console.log("Path:", modelPath);
@@ -74,6 +89,8 @@ const RoomDetail = () => {
   return (
     <div>
       <Header />
+      {error && <div>Error: {error}</div>}
+      {!room && <div>No room details available</div>}
       <div className="flex my-2">
         <div className="flex flex-row justify-center md:flex-col gap-5 active" style={{ position: 'fixed', left: '20px', top: '100px' }}>
           <button
@@ -114,8 +131,21 @@ const RoomDetail = () => {
             <p>{room.description}</p>
           </div>
         </div>
+        <div className="flex-1" style={{ marginLeft: '70px' }}>
+          <div className="map-container">
+            <LoadScript googleMapsApiKey="AIzaSyCWEvmo5M3vR4JGCiMfpyb2ZeWkV7a15F0">
+              <GoogleMap
+                mapContainerStyle={mapContainerStyle}
+                center={center}
+                zoom={15}
+              >
+                <Marker position={center} />
+              </GoogleMap>
+            </LoadScript>
+          </div>
+        </div>
         <Draggable>
-          <div className="flex-1 bg-white p-2 rounded-lg text-center shadow-md" style={{ width: '180px', position: 'fixed', right: '20px', top: '100px' }}>
+          <div className="flex-1 bg-white p-2 rounded-lg text-center shadow-md" style={{ width: '220px', position: 'fixed', right: '20px', top: '100px' }}>
             <img
               src={userProfile}
               alt="room"
