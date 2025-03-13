@@ -11,12 +11,25 @@ const ThreeDViewer = ({ modelPath }) => {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0xffffff, 1);
     mountRef.current.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
 
-    const loader = new GLTFLoader();
-    loader.load(
+    // Tạo SkyBox
+    const loader = new THREE.CubeTextureLoader();
+    const texture = loader.load([
+      'path/to/px.jpg', // Right
+      'path/to/nx.jpg', // Left
+      'path/to/py.jpg', // Top
+      'path/to/ny.jpg', // Bottom
+      'path/to/pz.jpg', // Front
+      'path/to/nz.jpg'  // Back
+    ]);
+    scene.background = texture;
+
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.load(
       modelPath,
       (gltf) => {
         scene.add(gltf.scene);

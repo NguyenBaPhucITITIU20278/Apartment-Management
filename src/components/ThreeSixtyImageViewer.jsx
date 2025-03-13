@@ -1,6 +1,14 @@
 // src/components/ThreeSixtyImageViewer.jsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import PropTypes from 'prop-types';
+
+const extractRoomName = (path) => {
+  const parts = path.split('/');
+  const fileName = parts[parts.length - 1];
+  const roomName = fileName.split('.')[0]; // Assuming the file name is the room name
+  return roomName.charAt(0).toUpperCase() + roomName.slice(1);
+};
 
 const PanoramaViewer = ({ image360Path }) => {
   const mountRef = useRef(null);
@@ -8,6 +16,16 @@ const PanoramaViewer = ({ image360Path }) => {
   const sphereRef = useRef(null);
   const isDragging = useRef(false);
   const previousMousePosition = useRef({ x: 0, y: 0 });
+
+  console.log("360 Image Paths:", image360Path);
+
+  const images = image360Path.map((path) => ({
+    path,
+    name: extractRoomName(path),
+  }));
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const currentImage = images[currentIndex];
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -19,7 +37,7 @@ const PanoramaViewer = ({ image360Path }) => {
 
     // Tạo hình cầu để hiển thị hình ảnh 360 độ
     const geometry = new THREE.SphereGeometry(500, 60, 40);
-    const texture = new THREE.TextureLoader().load(image360Path);
+    const texture = new THREE.TextureLoader().load(currentImage.path);
     const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
     const sphere = new THREE.Mesh(geometry, material);
     sphereRef.current = sphere; // Lưu sphere vào ref
@@ -40,7 +58,7 @@ const PanoramaViewer = ({ image360Path }) => {
         mountRef.current.removeChild(renderer.domElement);
       }
     };
-  }, [image360Path]);
+  }, [currentImage.path]);
 
   // Xử lý sự kiện chuột để xoay hình cầu
   const handleMouseDown = (event) => {
@@ -96,11 +114,28 @@ const PanoramaViewer = ({ image360Path }) => {
     };
   }, []);
 
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
+
+  const handlePrevious = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+  };
+
   return (
     <div className="relative w-full h-[calc(100vh-100px)] overflow-hidden"> {/* Giả sử footer cao 100px */}
       <div ref={mountRef} className="w-full h-full" />
+      <div className="absolute top-0 left-0 p-4 text-white bg-black bg-opacity-50">{currentImage.name}</div>
+      <div className="absolute bottom-0 left-0 right-0 flex justify-between p-4">
+        <button onClick={handlePrevious} className="text-white bg-black bg-opacity-50 p-2">Previous</button>
+        <button onClick={handleNext} className="text-white bg-black bg-opacity-50 p-2">Next</button>
+      </div>
     </div>
   );
+};
+
+PanoramaViewer.propTypes = {
+  image360Path: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default PanoramaViewer;

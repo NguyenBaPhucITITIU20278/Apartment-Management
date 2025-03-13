@@ -73,10 +73,9 @@ const RoomDetail = () => {
   const formattedAddress = room.address.replace(/\s+/g, "_");
   const modelPath = room.modelPath;
   const modelName = modelPath ? modelPath.split('/').pop().split('.')[0] : null;
-  const image360Path = room.web360Path;
-  const image360Name = image360Path ? image360Path.split('/').pop().split('.')[0] : null;
+  const image360Paths = room.web360Paths || [];
+  const formatted360Paths = image360Paths.map(path => `http://localhost:8080/images/${formattedAddress}/web360/${path.split('/').pop()}`);
   const fullModelPath = modelName ? `http://localhost:8080/images/${formattedAddress}/models/${modelName}.glb` : null;
-  const full360ImagePath = image360Name ? `http://localhost:8080/images/${formattedAddress}/web360/${image360Name}.jpg` : null;
 
   const mapContainerStyle = {
     width: '100%',
@@ -85,7 +84,7 @@ const RoomDetail = () => {
 
   console.log("Image URL", images);
   console.log("Path:", modelPath);
-  console.log("Image360 URL:", full360ImagePath);
+  console.log("Web360 Paths:", image360Paths);
   return (
     <div>
       <Header />
@@ -166,9 +165,9 @@ const RoomDetail = () => {
           <ThreeDViewer modelPath={fullModelPath} />
         </div>
       )}
-      {show360Viewer && (
+      {show360Viewer && formatted360Paths.length > 0 && (
         <div style={{ marginTop: '20px' }}>
-          <ThreeSixtyImageViewer image360Path={full360ImagePath} />
+          <ThreeSixtyImageViewer image360Path={formatted360Paths} />
         </div>
       )}
     </div>
