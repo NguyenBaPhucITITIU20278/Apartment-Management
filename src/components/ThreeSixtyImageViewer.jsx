@@ -10,7 +10,7 @@ const extractRoomName = (path) => {
   return roomName.charAt(0).toUpperCase() + roomName.slice(1);
 };
 
-const PanoramaViewer = ({ image360Path }) => {
+const PanoramaViewer = ({ image360Path, onDelete }) => {
   const mountRef = useRef(null);
   const rendererRef = useRef(null);
   const sphereRef = useRef(null);
@@ -125,7 +125,17 @@ const PanoramaViewer = ({ image360Path }) => {
   return (
     <div className="relative w-full h-[calc(100vh-100px)] overflow-hidden"> {/* Giả sử footer cao 100px */}
       <div ref={mountRef} className="w-full h-full" />
-      <div className="absolute top-0 left-0 p-4 text-white bg-black bg-opacity-50">{currentImage.name}</div>
+      <div className="absolute top-0 left-0 p-4 text-white bg-black bg-opacity-50 flex justify-between w-full">
+        <span>{currentImage.name}</span>
+        {onDelete && (
+          <button 
+            onClick={() => onDelete(currentImage.path.split('/').pop())}
+            className="bg-red-500 text-white px-2 py-1 rounded"
+          >
+            Delete
+          </button>
+        )}
+      </div>
       <div className="absolute bottom-0 left-0 right-0 flex justify-between p-4">
         <button onClick={handlePrevious} className="text-white bg-black bg-opacity-50 p-2">Previous</button>
         <button onClick={handleNext} className="text-white bg-black bg-opacity-50 p-2">Next</button>
@@ -136,6 +146,7 @@ const PanoramaViewer = ({ image360Path }) => {
 
 PanoramaViewer.propTypes = {
   image360Path: PropTypes.arrayOf(PropTypes.string).isRequired,
+  onDelete: PropTypes.func
 };
 
 export default PanoramaViewer;

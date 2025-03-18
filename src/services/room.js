@@ -164,4 +164,44 @@ export const addRoomWithModel = async ({ data, files, model, web360 }) => {
   }
 };
 
+export const deleteRoomImage = async (roomId, imageName) => {
+  try {
+    const response = await axios.delete(`${API_URL}/delete-room-image/${roomId}/${imageName}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting room image:", error);
+    throw error;
+  }
+};
+
+export const deleteRoomModel = async (roomId) => {
+  try {
+    const response = await axios.delete(`${API_URL}/delete-room-model/${roomId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting room model:", error);
+    throw error;
+  }
+};
+
+export const deleteRoomWeb360 = async (roomId, web360Name) => {
+  try {
+    const response = await axios.delete(`${API_URL}/delete-room-web360/${roomId}/${web360Name}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting room web360:", error);
+    throw error;
+  }
+};
+
+export const deleteEntireRoom = async (roomId) => {
+  try {
+    const response = await axios.delete(`${API_URL}/delete-room/${roomId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting entire room:", error);
+    throw error;
+  }
+};
+
 
