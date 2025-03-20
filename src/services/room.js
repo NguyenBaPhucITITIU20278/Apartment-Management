@@ -135,21 +135,7 @@ export const searchRooms = async ({ address }) => {
   }
 };
 
-export const addRoomWithModel = async ({ data, files, model, web360 }) => {
-  const formData = new FormData();
-  formData.append("data", JSON.stringify(data));
-  
-  if (files.length === 0) {
-    console.error("No files selected"); // Log if no files are selected
-  }
-
-  files.forEach((file, index) => {
-    formData.append("files", file); // Ensure 'files' is used as the key
-  });
-
-  formData.append("model", model);
-  formData.append("web360", web360);
-
+export const addRoomWithModel = async (formData) => {
   try {
     const response = await axios.post(`${API_URL}/add-room-with-model`, formData, {
       headers: {

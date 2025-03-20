@@ -15,7 +15,7 @@ const AddRoom = () => {
   const [name, setName] = useState("");
   const [images, setImages] = useState([]);
   const [model, setModel] = useState(null);
-  const [web360, setweb360] = useState([]);
+  const [web360, setWeb360] = useState([]);
   const [area, setArea] = useState("");
 
   const mutation = useMutationHook((data) => addRoomWithModel(data));
@@ -40,10 +40,29 @@ const AddRoom = () => {
       area,
     };
 
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(roomData));
+
+    console.log("Images:", images);
+    images.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    if (model) {
+      console.log("Model:", model);
+      formData.append("model", model);
+    }
+
+    console.log("Web360:", web360);
+    web360.forEach((file) => {
+      formData.append("web360", file);
+    });
+
     try {
-      await addRoomWithModel({ data: roomData, files: images, model, web360});
+      await addRoomWithModel(formData);
       message.success("Room added successfully");
     } catch (error) {
+      console.error("Error adding room:", error);
       message.error("Error adding room: " + error.message);
     }
   };
@@ -52,6 +71,12 @@ const AddRoom = () => {
     const selectedFiles = Array.from(e.target.files);
     console.log("Selected files:", selectedFiles);
     setImages(selectedFiles);
+  };
+
+  const handleWeb360Change = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    console.log("Selected 360 images:", selectedFiles);
+    setWeb360(selectedFiles);
   };
 
   useEffect(() => {
@@ -143,7 +168,8 @@ const AddRoom = () => {
                 placeholder="360Image"
                 className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
                 type="file"
-                onChange={(e) => setweb360(e.target.files[0])}
+                multiple
+                onChange={handleWeb360Change}
               />
               <button
                 className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150"
