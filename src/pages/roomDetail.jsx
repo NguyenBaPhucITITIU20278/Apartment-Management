@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { getRoomById } from "../services/room.js";
+import { getRoomById, updateRoomDetails } from "../services/room.js";
 import { useMutationHook } from "../hooks/useMutationHook.jsx";
 import Header from "../components/header.jsx";
 import userProfile from "../assets/user1.jpg";
@@ -18,7 +18,10 @@ import {
   deleteRoomImage, 
   deleteRoomModel, 
   deleteRoomWeb360, 
-  deleteEntireRoom 
+  deleteEntireRoom, 
+  updateRoomImages, 
+  updateRoomModel, 
+  updateRoomWeb360 
 } from "../services/room.js";
 
 const RoomDetail = () => {
@@ -31,6 +34,9 @@ const RoomDetail = () => {
   const [show360Viewer, setShow360Viewer] = useState(false);
   const [center, setCenter] = useState({ lat: 0, lng: 0 });
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedModel, setSelectedModel] = useState(null);
+  const [selectedWeb360Files, setSelectedWeb360Files] = useState([]);
 
   const fetchRoomData = async () => {
     try {
@@ -109,6 +115,47 @@ const RoomDetail = () => {
     }
   };
 
+  const handleUpdateImages = async (newImages) => {
+    try {
+      await updateRoomImages(roomId, newImages);
+      fetchRoomData();
+    } catch (error) {
+      console.error("Error updating images:", error);
+    }
+  };
+
+  const handleUpdateModel = async (newModel) => {
+    try {
+      await updateRoomModel(roomId, newModel);
+      fetchRoomData();
+    } catch (error) {
+      console.error("Error updating model:", error);
+    }
+  };
+
+  const handleUpdateWeb360 = async (newWeb360Files) => {
+    try {
+      await updateRoomWeb360(roomId, newWeb360Files);
+      fetchRoomData();
+    } catch (error) {
+      console.error("Error updating web360:", error);
+    }
+  };
+
+  const handleUpdateRoomDetails = async (updatedRoomData) => {
+    console.log("Attempting to update room details with data:", updatedRoomData);
+    try {
+      const response = await updateRoomDetails(roomId, {
+        ...updatedRoomData,
+        web360Paths: updatedRoomData.web360Paths.map(path => path.toString())
+      });
+      console.log("Update successful, response:", response);
+      // window.location.reload(); // Reload the page to fetch updated data
+    } catch (error) {
+      console.error("Error updating room details:", error);
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -169,16 +216,63 @@ const RoomDetail = () => {
               onDeleteImage={isEditing ? handleDeleteImage : undefined}
             />
           </div>
-          <h2 className="text-red-500 font-bold mt-4">{room.title}</h2>
-          <p className="text-green-500 font-bold">{room.price} VND/month</p>
-          <p><span className="font-bold">Address:</span> {room.address}</p>
-          <p><span className="font-bold">Area:</span> {room.area} m²</p>
-          <p><span className="font-bold">Posted Time:</span> {room.postedTime}</p>
-          <p><span className="font-bold">Id:</span> {room.id}</p>
-          <div>
-            <h3 className="font-bold">Description</h3>
-            <p>{room.description}</p>
-          </div>
+          {isEditing ? (
+            <>
+              <div className="flex items-center mb-2">
+                <label className="font-bold mr-2">Address:</label>
+                <input
+                  type="text"
+                  className="text-500"
+                  style={{ border: 'none', background: 'transparent', width: '100%' }}
+                  value={room.address}
+                  onChange={(e) => setRoom({ ...room, address: e.target.value })}
+                />
+              </div>
+              
+              <div className="flex items-center mb-2">
+                <label className="font-bold mr-2">Price:</label>
+                <input
+                  type="number"
+                  className="text-500 font-bold"
+                  style={{ border: 'none', background: 'transparent', width: '100%' }}
+                  value={room.price}
+                  onChange={(e) => setRoom({ ...room, price: e.target.value })}
+                />
+              </div>
+              
+              <div className="flex items-center mb-2">
+                <label className="font-bold mr-2">Area:</label>
+                <input
+                  type="number"
+                  style={{ border: 'none', background: 'transparent', width: '100%' }}
+                  value={room.area}
+                  onChange={(e) => setRoom({ ...room, area: e.target.value })}
+                />
+              </div>
+              
+              <div className="flex items-center mb-2">
+                <label className="font-bold mr-2">Description:</label>
+                <textarea
+                  style={{ border: 'none', background: 'transparent', width: '100%' }}
+                  value={room.description}
+                  onChange={(e) => setRoom({ ...room, description: e.target.value })}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="text-red-500 font-bold mt-4">{room.title}</h2>
+              <p className="text-green-500 font-bold">{room.price} VND/month</p>
+              <p><span className="font-bold">Address:</span> {room.address}</p>
+              <p><span className="font-bold">Area:</span> {room.area} m²</p>
+              <p><span className="font-bold">Posted Time:</span> {room.postedTime}</p>
+              <p><span className="font-bold">Id:</span> {room.id}</p>
+              <div>
+                <h3 className="font-bold">Description</h3>
+                <p>{room.description}</p>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="flex-1" style={{ marginLeft: '70px' }}>
@@ -238,17 +332,14 @@ const RoomDetail = () => {
       </div>
 
       {/* Edit mode toggle button */}
-      {isEditing && (
-        <button
-          className="fixed bottom-4 right-4 bg-red-500 text-white py-2 px-4 rounded"
-          onClick={handleDeleteRoom}
-        >
-          Delete Room
-        </button>
-      )}
       <button
         className="fixed bottom-4 left-4 bg-blue-500 text-white py-2 px-4 rounded"
-        onClick={() => setIsEditing(!isEditing)}
+        onClick={() => {
+          if (isEditing) {
+            handleUpdateRoomDetails(room); // Update room details when done editing
+          }
+          setIsEditing(!isEditing);
+        }}
       >
         {isEditing ? 'Done Editing' : 'Edit Room'}
       </button>
