@@ -37,6 +37,12 @@ const RoomDetail = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [selectedModel, setSelectedModel] = useState(null);
   const [selectedWeb360Files, setSelectedWeb360Files] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("Authorization");
+    setIsLoggedIn(!!token); // Set to true if token exists
+  }, []);
 
   const fetchRoomData = async () => {
     try {
@@ -53,8 +59,10 @@ const RoomDetail = () => {
         setCenter({ lat: location.lat, lng: location.lng });
       }
     } catch (err) {
-      setError("Login to see the detail of the apartment");
+      setError(null); // Clear any previous error
       setLoading(false);
+      alert("Please log in to see the details of the apartment."); // Display an alert message
+      navigate("/");
     }
   };
 
@@ -75,7 +83,9 @@ const RoomDetail = () => {
       await deleteRoomImage(roomId, imageName);
       fetchRoomData();
     } catch (error) {
+      alert("Please log in correct account to delete the details of the apartment."); 
       console.error("Error deleting image:", error);
+      window.location.reload();
     }
   };
 
@@ -86,7 +96,9 @@ const RoomDetail = () => {
       fetchRoomData();
       setShow3DViewer(false);
     } catch (error) {
+      alert("Please log in correct account to delete the details of the apartment."); 
       setError("Error deleting 3D model");
+      window.location.reload();
     }
   };
 
@@ -99,7 +111,9 @@ const RoomDetail = () => {
         setShow360Viewer(false);
       }
     } catch (error) {
+      alert("Please log in correct account to delete the details of the apartment."); 
       setError("Error deleting 360 image");
+      window.location.reload();
     }
   };
 
@@ -135,7 +149,7 @@ const RoomDetail = () => {
 
   const handleUpdateWeb360 = async (newWeb360Files) => {
     try {
-      await updateRoomWeb360(roomId, newWeb360Files);
+      await updateRoomWeb360(roomId, newWeb360Files); 
       fetchRoomData();
     } catch (error) {
       console.error("Error updating web360:", error);
@@ -152,7 +166,9 @@ const RoomDetail = () => {
       console.log("Update successful, response:", response);
       // window.location.reload(); // Reload the page to fetch updated data
     } catch (error) {
+      alert("Please log in correct account to update the details of the apartment."); 
       console.error("Error updating room details:", error);
+      window.location.reload();
     }
   };
 
@@ -190,6 +206,13 @@ const RoomDetail = () => {
       {error && <div>Error: {error}</div>}
       {!room && <div>No room details available</div>}
       
+      {/* Display message if user is not logged in */}
+      {!isLoggedIn && (
+        <div className="alert alert-warning" style={{ color: 'red', margin: '20px' }}>
+          Please log in to edit or delete this room.
+        </div>
+      )}
+
       {/* Main content section */}
       <div className="flex my-2">
         <div className="flex flex-row justify-center md:flex-col gap-5 active" style={{ position: 'fixed', left: '20px', top: '100px' }}>
@@ -340,6 +363,7 @@ const RoomDetail = () => {
           }
           setIsEditing(!isEditing);
         }}
+        disabled={!isLoggedIn} // Disable button if not logged in
       >
         {isEditing ? 'Done Editing' : 'Edit Room'}
       </button>
