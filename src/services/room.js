@@ -268,4 +268,15 @@ export const updateRoomDetails = async (roomId, roomData) => {
   }
 };
 
+export const getMyRooms = async () => {
+  try {
+    const headers = getHeaders(); // Ensure headers include Authorization
+    const response = await axios.get(`${API_URL}/my-rooms`, { headers });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching my rooms:", error);
+    throw error;
+  }
+};
+
 

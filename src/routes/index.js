@@ -11,6 +11,8 @@ import updateUser from "../pages/updateUser";
 import RoomDetail from "../pages/roomDetail";
 import controlRoom from "../pages/controlRoom";
 import ImageCarousel from "../pages/ImageCarousel";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import MyRooms from "../pages/MyRooms";
 
 export const routes = [
   {
@@ -127,6 +129,15 @@ export const routes = [
     page: ImageCarousel,
     title: "Image Carousel Page",
     description: "Image Carousel page",
+    header: true,
+    background: true,
+    role: "user",
+  },
+  {
+    path: "/my-rooms",
+    page: MyRooms,
+    title: "My Rooms",
+    description: "My Rooms",
     header: true,
     background: true,
     role: "user",

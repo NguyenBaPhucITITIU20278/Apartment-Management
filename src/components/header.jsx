@@ -35,7 +35,7 @@ const Header = ({ title }) => {
   };
 
   const goToLogin = () => {
-    navigate("/login"); 
+    navigate("/login");
   };
 
   const goToRegister = () => {
@@ -67,12 +67,15 @@ const Header = ({ title }) => {
 
           {role === "user" || role === "" ? (
             <>
-              
+
               <button className="text-white" onClick={goToAddRoom}>Add Room</button>
 
               {/* <button className="text-white">Rent Land</button> */}
-              <button className="text-white" onClick={goToNews}>News</button>
+              <button className="text-white" onClick={goToNews}>Blogs</button>
               {/* <button className="text-white">Price</button> */}
+
+              <button className="text-white" onClick={() => navigate('/my-rooms')}>List My Apartments</button>
+
             </>
           ) : (
             <button className="text-white" onClick={goToControlUser}>Control User</button>
