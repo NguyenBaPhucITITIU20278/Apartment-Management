@@ -187,6 +187,8 @@ const RoomDetail = () => {
     }
   };
 
+  const isRoomOwner = room && room.username === localStorage.getItem("userName");
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -384,26 +386,30 @@ const RoomDetail = () => {
       </div>
 
       {/* Edit mode toggle button */}
-      <button
-        className="fixed bottom-4 left-4 bg-blue-500 text-white py-2 px-4 rounded"
-        onClick={() => {
-          if (isEditing) {
-            handleUpdateRoomDetails(room); // Update room details when done editing
-          }
-          setIsEditing(!isEditing);
-        }}
-        disabled={!isLoggedIn} // Disable button if not logged in
-      >
-        {isEditing ? 'Done Editing' : 'Edit Room'}
-      </button>
+      {isRoomOwner && (
+        <button
+          className="fixed bottom-4 left-4 bg-blue-500 text-white py-2 px-4 rounded"
+          onClick={() => {
+            if (isEditing) {
+              handleUpdateRoomDetails(room); // Update room details when done editing
+            }
+            setIsEditing(!isEditing);
+          }}
+          disabled={!isLoggedIn} // Disable button if not logged in
+        >
+          {isEditing ? 'Done Editing' : 'Edit Room'}
+        </button>
+      )}
 
-      <button
-        className="fixed bottom-4 right-10 bg-red-500 text-white py-2 px-4 rounded"
-        onClick={handleDeleteRoom}
-        disabled={!isLoggedIn} // Disable button if not logged in
-      >
-        Delete Room
-      </button>
+      {isRoomOwner && (
+        <button
+          className="fixed bottom-4 right-10 bg-red-500 text-white py-2 px-4 rounded"
+          onClick={handleDeleteRoom}
+          disabled={!isLoggedIn} // Disable button if not logged in
+        >
+          Delete Room
+        </button>
+      )}
     </div>
   );
 };
