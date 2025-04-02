@@ -14,14 +14,14 @@ import Draggable from 'react-draggable';
 import button360Image from '../assets/360button.png';
 import button3DImage from '../assets/3Dbutton.png';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import { 
-  deleteRoomImage, 
-  deleteRoomModel, 
-  deleteRoomWeb360, 
-  deleteEntireRoom, 
-  updateRoomImages, 
-  updateRoomModel, 
-  updateRoomWeb360 
+import {
+  deleteRoomImage,
+  deleteRoomModel,
+  deleteRoomWeb360,
+  deleteEntireRoom,
+  updateRoomImages,
+  updateRoomModel,
+  updateRoomWeb360
 } from "../services/room.js";
 
 const RoomDetail = () => {
@@ -83,7 +83,7 @@ const RoomDetail = () => {
       await deleteRoomImage(roomId, imageName);
       fetchRoomData();
     } catch (error) {
-      alert("Please log in correct account to delete the details of the apartment."); 
+      alert("Please log in correct account to delete the details of the apartment.");
       console.error("Error deleting image:", error);
       window.location.reload();
     }
@@ -96,7 +96,7 @@ const RoomDetail = () => {
       fetchRoomData();
       setShow3DViewer(false);
     } catch (error) {
-      alert("Please log in correct account to delete the details of the apartment."); 
+      alert("Please log in correct account to delete the details of the apartment.");
       setError("Error deleting 3D model");
       window.location.reload();
     }
@@ -111,7 +111,7 @@ const RoomDetail = () => {
         setShow360Viewer(false);
       }
     } catch (error) {
-      alert("Please log in correct account to delete the details of the apartment."); 
+      alert("Please log in correct account to delete the details of the apartment.");
       setError("Error deleting 360 image");
       window.location.reload();
     }
@@ -124,17 +124,32 @@ const RoomDetail = () => {
         // Điều hướng về trang chủ sau khi xóa thành công
         navigate('/');
       } catch (error) {
-        setError("Error deleting room");
+        alert("Please log in with the correct account to update the images of the apartment.");
+        console.error("Error updating images:", error.response ? error.response.data : error.message);
+        window.location.reload(); 
       }
     }
   };
 
   const handleUpdateImages = async (newImages) => {
+    console.log("Images to update:", newImages); 
+    const formData = new FormData();
+
+    newImages.forEach((image) => {
+      console.log("Appending image:", image); 
+      formData.append('files', image); 
+    });
+
+    console.log("FormData entries before sending:", Array.from(formData.entries())); // Log các mục trong FormData
+
     try {
-      await updateRoomImages(roomId, newImages);
-      fetchRoomData();
+      await updateRoomImages(roomId, formData); // Gửi formData
+      fetchRoomData(); // Refresh room data
+      console.log("Successfully updated images");
     } catch (error) {
-      console.error("Error updating images:", error);
+      alert("Please log in with the correct account to update the images of the apartment.");
+      console.error("Error updating images:", error.response ? error.response.data : error.message);
+      window.location.reload(); // Reload the page after showing the alert
     }
   };
 
@@ -149,7 +164,7 @@ const RoomDetail = () => {
 
   const handleUpdateWeb360 = async (newWeb360Files) => {
     try {
-      await updateRoomWeb360(roomId, newWeb360Files); 
+      await updateRoomWeb360(roomId, newWeb360Files);
       fetchRoomData();
     } catch (error) {
       console.error("Error updating web360:", error);
@@ -166,7 +181,7 @@ const RoomDetail = () => {
       console.log("Update successful, response:", response);
       // window.location.reload(); // Reload the page to fetch updated data
     } catch (error) {
-      alert("Please log in correct account to update the details of the apartment."); 
+      alert("Please log in correct account to update the details of the apartment.");
       console.error("Error updating room details:", error);
       window.location.reload();
     }
@@ -205,7 +220,7 @@ const RoomDetail = () => {
       <Header />
       {error && <div>Error: {error}</div>}
       {!room && <div>No room details available</div>}
-      
+
       {/* Display message if user is not logged in */}
       {!isLoggedIn && (
         <div className="alert alert-warning" style={{ color: 'red', margin: '20px' }}>
@@ -233,8 +248,8 @@ const RoomDetail = () => {
         {/* Room details and map section - Tăng kích thước hình ảnh */}
         <div className="flex-3 mr-4" style={{ marginLeft: '150px' }}>
           <div className="image-carousel-container" style={{ height: '500px', marginBottom: '30px' }}>
-            <ImageCarousel 
-              images={images} 
+            <ImageCarousel
+              images={images}
               address={room.address}
               onDeleteImage={isEditing ? handleDeleteImage : undefined}
             />
@@ -251,7 +266,7 @@ const RoomDetail = () => {
                   onChange={(e) => setRoom({ ...room, address: e.target.value })}
                 />
               </div>
-              
+
               <div className="flex items-center mb-2">
                 <label className="font-bold mr-2">Price:</label>
                 <input
@@ -262,7 +277,7 @@ const RoomDetail = () => {
                   onChange={(e) => setRoom({ ...room, price: e.target.value })}
                 />
               </div>
-              
+
               <div className="flex items-center mb-2">
                 <label className="font-bold mr-2">Area:</label>
                 <input
@@ -272,13 +287,27 @@ const RoomDetail = () => {
                   onChange={(e) => setRoom({ ...room, area: e.target.value })}
                 />
               </div>
-              
+
               <div className="flex items-center mb-2">
                 <label className="font-bold mr-2">Description:</label>
                 <textarea
                   style={{ border: 'none', background: 'transparent', width: '100%' }}
                   value={room.description}
                   onChange={(e) => setRoom({ ...room, description: e.target.value })}
+                />
+              </div>
+
+              {/* New section for updating images */}
+              <div className="flex items-center mb-2">
+                <label className="font-bold mr-2">Update Images:</label>
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files);
+                    console.log("Selected files:", files); // Log selected files
+                    handleUpdateImages(files); // Call the function to update images
+                  }}
                 />
               </div>
             </>
@@ -313,8 +342,8 @@ const RoomDetail = () => {
         </div>
 
         <Draggable>
-          <div className="flex-1 bg-white p-2 rounded-lg text-center shadow-md" 
-               style={{ width: '220px', position: 'fixed', right: '20px', top: '100px' }}>
+          <div className="flex-1 bg-white p-2 rounded-lg text-center shadow-md"
+            style={{ width: '220px', position: 'fixed', right: '20px', top: '100px' }}>
             <img
               src={userProfile}
               alt="room"
@@ -336,8 +365,8 @@ const RoomDetail = () => {
         {show3DViewer && fullModelPath && (
           <div className="mb-8 w-full" style={{ height: '800px' }}>
             <h3 className="text-xl font-bold mb-4">3D Model View</h3>
-            <ThreeDViewer 
-              modelPath={fullModelPath} 
+            <ThreeDViewer
+              modelPath={fullModelPath}
               onDelete={isEditing ? handleDeleteModel : null}
             />
           </div>
@@ -346,7 +375,7 @@ const RoomDetail = () => {
         {show360Viewer && formatted360Paths.length > 0 && (
           <div className="w-full" style={{ height: '800px' }}>
             <h3 className="text-xl font-bold mb-4">360° View</h3>
-            <ThreeSixtyImageViewer 
+            <ThreeSixtyImageViewer
               image360Path={formatted360Paths}
               onDelete={isEditing ? handleDeleteWeb360 : null}
             />
@@ -366,6 +395,14 @@ const RoomDetail = () => {
         disabled={!isLoggedIn} // Disable button if not logged in
       >
         {isEditing ? 'Done Editing' : 'Edit Room'}
+      </button>
+
+      <button
+        className="fixed bottom-4 right-10 bg-red-500 text-white py-2 px-4 rounded"
+        onClick={handleDeleteRoom}
+        disabled={!isLoggedIn} // Disable button if not logged in
+      >
+        Delete Room
       </button>
     </div>
   );

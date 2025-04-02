@@ -200,11 +200,19 @@ export const updateRoomImages = async (roomId, images) => {
   try {
     const headers = getHeaders(); // Ensure headers include Authorization
     const formData = new FormData();
-    images.forEach((image, index) => {
-      formData.append(`files[${index}]`, image);
+    
+    // Append each file to the FormData with the correct key
+    images.forEach((image) => {
+      formData.append('files', image); // Use 'files' as the key
     });
+
     console.log("Updating room images with:", formData);
-    const response = await axios.post(`${API_URL}/update-room-images/${roomId}`, formData, { headers });
+    const response = await axios.post(`${API_URL}/update-room-images/${roomId}`, formData, {
+      headers: {
+        ...headers,
+        "Content-Type": "multipart/form-data",
+      },
+    });
     console.log("Response received for updating images:", response);
     return response.data;
   } catch (error) {
