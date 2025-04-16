@@ -247,8 +247,8 @@ const RoomDetail = () => {
           </button>
         </div>
 
-        {/* Room details and map section - Tăng kích thước hình ảnh */}
-        <div className="flex-3 mr-4" style={{ marginLeft: '150px' }}>
+        {/* Room details section */}
+        <div className="flex-3" style={{ marginLeft: '150px' }}>
           <div className="image-carousel-container" style={{ height: '500px', marginBottom: '30px' }}>
             <ImageCarousel
               images={images}
@@ -256,6 +256,7 @@ const RoomDetail = () => {
               onDeleteImage={isEditing ? handleDeleteImage : undefined}
             />
           </div>
+
           {isEditing ? (
             <>
               <div className="flex items-center mb-2">
@@ -293,7 +294,7 @@ const RoomDetail = () => {
               <div className="flex items-center mb-2">
                 <label className="font-bold mr-2">Description:</label>
                 <textarea
-                  style={{ border: 'none', background: 'transparent', width: '100%' }}
+                  className="w-1/4 min-h-[100px] p-2 border border-gray-200 rounded-md bg-gray-50 resize-vertical"
                   value={room.description}
                   onChange={(e) => setRoom({ ...room, description: e.target.value })}
                 />
@@ -315,32 +316,47 @@ const RoomDetail = () => {
             </>
           ) : (
             <>
-              <h2 className="text-red-500 font-bold mt-4">{room.title}</h2>
-              <p className="text-green-500 font-bold">{room.price} VND/month</p>
-              <p><span className="font-bold">Address:</span> {room.address}</p>
-              <p><span className="font-bold">Area:</span> {room.area} m²</p>
-              <p><span className="font-bold">Posted Time:</span> {room.postedTime}</p>
-              <p><span className="font-bold">Id:</span> {room.id}</p>
-              <div>
-                <h3 className="font-bold">Description</h3>
-                <p>{room.description}</p>
+              <div className="space-y-4 mt-6">
+                <h2 className="text-2xl font-bold text-gray-800">{room.title}</h2>
+                <p className="text-xl font-bold text-green-600">{room.price} VND/month</p>
+                
+                <div className="space-y-2">
+                  <h3 className="text-lg font-bold mb-2">Description Information</h3>
+                  <p className="text-gray-700 w-1/4"><span className="font-medium">Address:</span> {room.address}</p>
+                  <p className="text-gray-700 w-1/4"><span className="font-medium">Area:</span> {room.area} m²</p>
+                  <p className="text-gray-700 w-1/4"><span className="font-medium">Posted Date:</span> {room.postedTime}</p>
+                  <p className="text-gray-700 w-1/4"><span className="font-medium">Room ID:</span> {room.id}</p>
+                </div>
+
+                <div className="mt-6">
+                  <h3 className="text-lg font-bold mb-2">Details</h3>
+                  <div className="whitespace-pre-line text-gray-700 w-1/2 bg-gray-50 p-4 rounded-md border border-gray-200">
+                    {room.description}
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <h3 className="text-lg font-bold mb-2">Location</h3>
+                  <div className="w-3/4">
+                    <LoadScript googleMapsApiKey="AIzaSyCWEvmo5M3vR4JGCiMfpyb2ZeWkV7a15F0">
+                      <GoogleMap
+                        mapContainerStyle={{
+                          width: '100%',
+                          height: '400px',
+                          borderRadius: '8px',
+                          border: '1px solid #e2e8f0'
+                        }}
+                        center={center}
+                        zoom={15}
+                      >
+                        <Marker position={center} />
+                      </GoogleMap>
+                    </LoadScript>
+                  </div>
+                </div>
               </div>
             </>
           )}
-        </div>
-
-        <div className="flex-1" style={{ marginLeft: '70px' }}>
-          <div className="map-container">
-            <LoadScript googleMapsApiKey="AIzaSyCWEvmo5M3vR4JGCiMfpyb2ZeWkV7a15F0">
-              <GoogleMap
-                mapContainerStyle={mapContainerStyle}
-                center={center}
-                zoom={15}
-              >
-                <Marker position={center} />
-              </GoogleMap>
-            </LoadScript>
-          </div>
         </div>
 
         <Draggable>

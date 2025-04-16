@@ -24,17 +24,26 @@ const Home = () => {
     const fetchRooms = async () => {
       try {
         let data;
-        if (address) {
-          data = await getRoomByAddress({ address });
+        if (address && typeof address === 'string' && address.trim()) {
+          console.log("Fetching rooms for address:", address.trim());
+          data = await getRoomByAddress({ address: address.trim() });
+          console.log("Received data:", data);
         } else {
           data = await getAllRooms();
         }
         if (Array.isArray(data)) {
           setRooms(data);
+          if (data.length === 0) {
+            console.log("No rooms found for this address");
+          } else {
+            console.log("Rooms found for this address");
+          }
         } else {
           console.error("Expected an array but got:", data);
+          setError("Invalid data received from server");
         }
       } catch (error) {
+        console.error("Error fetching rooms:", error);
         setError(error.message);
       }
     };
@@ -51,14 +60,21 @@ const Home = () => {
   } = searchMutation;
   const { isError: isAddError, isSuccess: isAddSuccess } = addRoomMutation;
 
-  const handleSearch = (address) => {
-    console.log({ address });
-    searchMutation.mutate({ address });
+  const handleSearch = () => {
+    console.log("Current address state:", address);
+    if (address && typeof address === 'string') {
+      const searchTerm = address.trim();
+      console.log("Search term after trim:", searchTerm);
+      searchMutation.mutate({ address: searchTerm });
+    }
   };
-  const handleAreaClick = (address) => {
-    setAddress(address);
-    setId(id);
-    handleSearch(address);
+
+  const handleAreaClick = (areaAddress) => {
+    console.log("Area clicked:", areaAddress);
+    setAddress(areaAddress);
+    if (areaAddress && typeof areaAddress === 'string') {
+      searchMutation.mutate({ address: areaAddress.trim() });
+    }
   };
 
   const handleAddRoom = () => {
@@ -84,11 +100,19 @@ const Home = () => {
 
   // Thêm debounce để giảm số lần gọi API khi người dùng nhập
   const debouncedSearch = debounce((value) => {
-    setAddress(value);
+    console.log("Debounced search value:", value);
+    if (value && typeof value === 'string') {
+      setAddress(value.trim());
+    } else {
+      setAddress("");
+      setError("");
+    }
   }, 300);
 
   const handleInputChange = (e) => {
-    debouncedSearch(e.target.value);
+    const value = e.target.value;
+    console.log("Input value:", value);
+    debouncedSearch(value);
   };
 
   useEffect(() => {
@@ -129,6 +153,7 @@ const Home = () => {
           className="p-2 border border-gray-300 rounded-md flex-1 w-4/6"
           name="address"
           onChange={handleInputChange}
+          value={address || ''}
         />
         <button
           type="button"
