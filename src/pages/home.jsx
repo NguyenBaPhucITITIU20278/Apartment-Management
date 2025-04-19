@@ -107,7 +107,7 @@ const Home = () => {
       setAddress("");
       setError("");
     }
-  }, 300);
+  },50);
 
   const handleInputChange = (e) => {
     const value = e.target.value;

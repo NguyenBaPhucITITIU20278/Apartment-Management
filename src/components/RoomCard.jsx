@@ -1,66 +1,88 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const RoomCard = ({ room, address }) => {
+const RoomCard = ({ room, onClick }) => {
   const navigate = useNavigate();
 
   const handleRoomClick = () => {
     navigate(`/room-detail/${room.id}`);
   };
 
-  const formattedAddress = address ? address.replace(/\s+/g, "_") : "default_address";
-  const imagePathArray = room.image_paths ? room.imagePath.split(',') : [];
-  const firstImage = imagePathArray.length > 0 ? imagePathArray[0] : null;
+  // Format address for image URL
+  const formattedAddress = room.address ? room.address.replace(/\s+/g, "_") : "default_address";
+  
+  // Handle image paths correctly
+  const getFirstImage = () => {
+    if (!room.imagePaths || !Array.isArray(room.imagePaths) || room.imagePaths.length === 0) {
+      console.log("No image paths found for room:", room.id);
+      return null;
+    }
+    
+    const firstImage = room.imagePaths[0];
+    console.log("First image path:", firstImage);
+    return firstImage;
+  };
 
-  console.log(`Image URL: http://localhost:8080/images/${formattedAddress}/images/${firstImage}`);
+  const firstImage = getFirstImage();
+  const imageUrl = firstImage 
+    ? `http://localhost:8080/images/${formattedAddress}/images/${firstImage}`
+    : null;
+
+  console.log("Room data:", {
+    id: room.id,
+    address: room.address,
+    formattedAddress,
+    imagePaths: room.imagePaths,
+    firstImage,
+    imageUrl
+  });
 
   return (
     <div
       onClick={handleRoomClick}
-      style={{
-        border: "1px solid #ddd",
-        borderRadius: "8px",
-        padding: "16px",
-        margin: "16px 0",
-        display: "flex",
-        alignItems: "center",
-        cursor: "pointer",
-      }}
+      className="flex items-center border border-gray-200 rounded-lg p-4 mb-4 hover:shadow-lg transition-shadow cursor-pointer"
     >
-      {firstImage && (
-        <img
-          src={`http://localhost:8080/images/${formattedAddress}/images/${firstImage}`}
-          alt="Room"
-          style={{ width: "100px", height: "100px", marginRight: "16px" }}
-        />
-      )}
-      <div>
-        <h2 className="Name font-bold">
-          Name: <span className="font-normal">{room.name}</span>
+      <div className="w-32 h-32 mr-6 flex-shrink-0">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={`${room.name || 'Room'}`}
+            className="w-full h-full object-cover rounded-lg"
+            onError={(e) => {
+              console.error("Image failed to load:", imageUrl);
+              e.target.src = "https://via.placeholder.com/128?text=No+Image";
+            }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+            <span className="text-gray-400">No Image</span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex-grow">
+        <h2 className="text-xl font-bold mb-2">
+          {room.name || "Unnamed Room"}
         </h2>
-        <p className="price font-bold">
-          Price: <span className="font-normal">{room.price}</span>
-        </p>
-        <p className="bedrooms font-bold">
-          Bedrooms: <span className="font-normal">{room.numberOfBedrooms}</span>
-        </p>
-        <p className="description font-bold">
-          Description: <span className="font-normal">{room.description}</span>
-        </p>
-        <p className="address font-bold">
-          Address: <span className="font-normal">{room.address}</span>
-        </p>
-        <button
-          style={{
-            backgroundColor: "#FFD700",
-            border: "none",
-            padding: "10px",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          Call: {room.phoneNumber}
-        </button>
+        <div className="grid grid-cols-2 gap-4">
+          <p className="text-gray-700">
+            <span className="font-semibold">Price:</span> ${room.price || 'N/A'}
+          </p>
+          <p className="text-gray-700">
+            <span className="font-semibold">Bedrooms:</span> {room.numberOfBedrooms || 'N/A'}
+          </p>
+          <p className="text-gray-700">
+            <span className="font-semibold">Address:</span> {room.address || 'N/A'}
+          </p>
+          <p className="text-gray-700">
+            <span className="font-semibold">Phone:</span> {room.phoneNumber || 'N/A'}
+          </p>
+        </div>
+        {room.description && (
+          <p className="text-gray-600 mt-2">
+            <span className="font-semibold">Description:</span> {room.description}
+          </p>
+        )}
       </div>
     </div>
   );

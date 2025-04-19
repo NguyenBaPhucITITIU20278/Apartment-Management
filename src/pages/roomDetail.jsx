@@ -13,7 +13,9 @@ import ThreeSixtyImageViewer from "../components/ThreeSixtyImageViewer";
 import Draggable from 'react-draggable';
 import button360Image from '../assets/360button.png';
 import button3DImage from '../assets/3Dbutton.png';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import {
   deleteRoomImage,
   deleteRoomModel,
@@ -23,6 +25,21 @@ import {
   updateRoomModel,
   updateRoomWeb360
 } from "../services/room.js";
+
+// Add this after your imports to fix Leaflet icon issues
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
+
+// Thêm component để cập nhật view của map
+const ChangeView = ({ center, zoom }) => {
+  const map = useMap();
+  map.setView(center, zoom);
+  return null;
+};
 
 const RoomDetail = () => {
   const { roomId } = useParams();
@@ -50,18 +67,35 @@ const RoomDetail = () => {
       setRoom(fetchedRoom);
       setLoading(false);
 
-      // Geocode the address to get latitude and longitude
-      const geocodeResponse = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fetchedRoom.address)}&key=YOUR_GOOGLE_MAPS_API_KEY`);
+      // Thêm "Vietnam" vào địa chỉ để tăng độ chính xác
+      const searchAddress = `${fetchedRoom.address}, Vietnam`;
+      const geocodeResponse = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1&countrycodes=vn`,
+        {
+          headers: {
+            'User-Agent': 'ApartmentManagement/1.0'
+          }
+        }
+      );
       const geocodeData = await geocodeResponse.json();
 
-      if (geocodeData.results.length > 0) {
-        const location = geocodeData.results[0].geometry.location;
-        setCenter({ lat: location.lat, lng: location.lng });
+      if (geocodeData.length > 0) {
+        const newCenter = {
+          lat: parseFloat(geocodeData[0].lat),
+          lng: parseFloat(geocodeData[0].lon)
+        };
+        setCenter(newCenter);
+        console.log("Location found:", newCenter);
+      } else {
+        console.log("Could not find coordinates for address:", searchAddress);
+        // Set default center to Vietnam if coordinates not found
+        setCenter({ lat: 10.762622, lng: 106.660172 });
       }
     } catch (err) {
-      setError(null); // Clear any previous error
+      console.error("Error fetching room data:", err);
+      setError(null);
       setLoading(false);
-      alert("Please log in to see the details of the apartment."); // Display an alert message
+      alert("Please log in to see the details of the apartment.");
       navigate("/");
     }
   };
@@ -337,21 +371,37 @@ const RoomDetail = () => {
 
                 <div className="mt-6">
                   <h3 className="text-lg font-bold mb-2">Location</h3>
-                  <div className="w-3/4">
-                    <LoadScript googleMapsApiKey="AIzaSyCWEvmo5M3vR4JGCiMfpyb2ZeWkV7a15F0">
-                      <GoogleMap
-                        mapContainerStyle={{
-                          width: '100%',
-                          height: '400px',
-                          borderRadius: '8px',
-                          border: '1px solid #e2e8f0'
-                        }}
-                        center={center}
-                        zoom={15}
-                      >
-                        <Marker position={center} />
-                      </GoogleMap>
-                    </LoadScript>
+                  <p className="text-gray-700 mb-2">
+                    <span className="font-medium">Current Address:</span> {address}
+                  </p>
+                  <div className="w-full">
+                    <MapContainer 
+                      center={center} 
+                      zoom={15} 
+                      style={{
+                        width: '100%',
+                        height: '400px',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0'
+                      }}
+                      scrollWheelZoom={true}
+                    >
+                      <ChangeView center={center} zoom={15} />
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      />
+                      {center.lat !== 0 && center.lng !== 0 && (
+                        <Marker position={center}>
+                          <Popup>
+                            <div>
+                              <strong>Address:</strong><br />
+                              {address}
+                            </div>
+                          </Popup>
+                        </Marker>
+                      )}
+                    </MapContainer>
                   </div>
                 </div>
               </div>
