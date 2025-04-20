@@ -63,8 +63,8 @@ const Home = () => {
   const handleSearch = () => {
     console.log("Current address state:", address);
     if (address && typeof address === 'string') {
-      const searchTerm = address.trim();
-      console.log("Search term after trim:", searchTerm);
+      const searchTerm = address;
+      console.log("Search term:", searchTerm);
       searchMutation.mutate({ address: searchTerm });
     }
   };
@@ -73,7 +73,7 @@ const Home = () => {
     console.log("Area clicked:", areaAddress);
     setAddress(areaAddress);
     if (areaAddress && typeof areaAddress === 'string') {
-      searchMutation.mutate({ address: areaAddress.trim() });
+      searchMutation.mutate({ address: areaAddress });
     }
   };
 
@@ -102,12 +102,12 @@ const Home = () => {
   const debouncedSearch = debounce((value) => {
     console.log("Debounced search value:", value);
     if (value && typeof value === 'string') {
-      setAddress(value.trim());
+      setAddress(value);
     } else {
       setAddress("");
       setError("");
     }
-  },50);
+  }, 200);
 
   const handleInputChange = (e) => {
     const value = e.target.value;

@@ -236,7 +236,7 @@ const RoomDetail = () => {
   }
   const address = room.address;
   const images = room.imagePaths || [];
-  const formattedAddress = room.address.replace(/\s+/g, "_");
+  const formattedAddress = room.address.replace(/,/g, '').replace(/\s+/g, "_");
   const modelPath = room.modelPath;
   const modelName = modelPath ? modelPath.split('/').pop().split('.')[0] : null;
   const image360Paths = room.web360Paths || [];
@@ -356,7 +356,7 @@ const RoomDetail = () => {
                 
                 <div className="space-y-2">
                   <h3 className="text-lg font-bold mb-2">Description Information</h3>
-                  <p className="text-gray-700 w-1/4"><span className="font-medium">Address:</span> {room.address}</p>
+                  <p className="text-gray-700 w-3/4"><span className="font-medium">Address:</span> {room.address}</p>
                   <p className="text-gray-700 w-1/4"><span className="font-medium">Area:</span> {room.area} m²</p>
                   <p className="text-gray-700 w-1/4"><span className="font-medium">Posted Date:</span> {room.postedTime}</p>
                   <p className="text-gray-700 w-1/4"><span className="font-medium">Room ID:</span> {room.id}</p>

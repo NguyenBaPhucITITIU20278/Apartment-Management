@@ -15,7 +15,7 @@ const ImageCarousel = ({ images = [], address = "", onDeleteImage }) => {
     slidesToScroll: 1
   };
 
-  const formattedAddress = address.replace(/\s+/g, "_");
+  const formattedAddress = address.replace(/,/g, '').replace(/\s+/g, "_");
   console.log("Formatted Address:", formattedAddress);
 
   return (

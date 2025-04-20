@@ -9,7 +9,7 @@ const RoomCard = ({ room, onClick }) => {
   };
 
   // Format address for image URL
-  const formattedAddress = room.address ? room.address.replace(/\s+/g, "_") : "default_address";
+  const formattedAddress = room.address ? room.address.replace(/,/g, '').replace(/\s+/g, "_") : "default_address";
   
   // Handle image paths correctly
   const getFirstImage = () => {

@@ -7,7 +7,7 @@ const featuredAreas = [
   {
     name: "Hồ Chí Minh",
     imageUrl: HCM,
-    address: "HCM",
+    address: "Ho Chi Minh",
   },
   {
     name: "Hà Nội",
