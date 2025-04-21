@@ -13,6 +13,7 @@ import ThreeSixtyImageViewer from "../components/ThreeSixtyImageViewer";
 import Draggable from 'react-draggable';
 import button360Image from '../assets/360button.png';
 import button3DImage from '../assets/3Dbutton.png';
+import FeaturedListings from '../components/FeaturedListings';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -282,7 +283,7 @@ const RoomDetail = () => {
         </div>
 
         {/* Room details section */}
-        <div className="flex-3" style={{ marginLeft: '150px' }}>
+        <div className="flex-3" style={{ marginLeft: '150px', marginRight: '350px' }}>
           <div className="image-carousel-container" style={{ height: '500px', marginBottom: '30px' }}>
             <ImageCarousel
               images={images}
@@ -408,6 +409,9 @@ const RoomDetail = () => {
             </>
           )}
         </div>
+
+        {/* Add FeaturedListings component */}
+        <FeaturedListings currentAddress={room.address} currentRoomId={room.id} />
 
         <Draggable>
           <div className="flex-1 bg-white p-2 rounded-lg text-center shadow-md"
