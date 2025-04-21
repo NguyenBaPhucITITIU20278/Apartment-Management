@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllRooms } from '../services/room.js';
+import { formatAddress } from '../utils/addressFormatter';
 
 const FeaturedListings = ({ currentAddress, currentRoomId }) => {
   const [featuredRooms, setFeaturedRooms] = useState([]);
@@ -138,7 +139,7 @@ const FeaturedListings = ({ currentAddress, currentRoomId }) => {
                 <div className="w-20 h-20 flex-shrink-0">
                   {room.imagePaths && room.imagePaths.length > 0 ? (
                     <img
-                      src={`http://localhost:8080/images/${room.address.replace(/,/g, '').replace(/\s+/g, "_")}/images/${room.imagePaths[0].split('/').pop()}`}
+                      src={`http://localhost:8080/images/${formatAddress(room.address)}/images/${room.imagePaths[0].split('/').pop()}`}
                       alt={room.name || 'Room'}
                       className="w-full h-full object-cover rounded-lg"
                       onError={(e) => {

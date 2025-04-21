@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { formatAddress } from '../utils/addressFormatter';
 
 const RoomCard = ({ room, onClick }) => {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ const RoomCard = ({ room, onClick }) => {
   };
 
   // Format address for image URL
-  const formattedAddress = room.address ? room.address.replace(/,/g, '').replace(/\s+/g, "_") : "default_address";
+  const formattedAddress = room.address ? formatAddress(room.address) : "default_address";
   
   // Handle image paths correctly
   const getFirstImage = () => {

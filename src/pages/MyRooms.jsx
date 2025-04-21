@@ -5,25 +5,38 @@ import { useNavigate } from "react-router-dom";
 
 const MyRooms = () => {
   const [rooms, setRooms] = useState([]);
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMyRooms = async () => {
       try {
+        // Check if token exists
+        const token = localStorage.getItem('Authorization');
+        if (!token) {
+          alert("Please log in to view your apartments");
+          navigate('/');
+          return;
+        }
+
         const data = await getMyRooms();
         if (Array.isArray(data)) {
           setRooms(data);
         } else {
-          console.error("Expected an array but got:", data);
+          alert("Error loading apartments. Please try again.");
+          navigate('/');
         }
       } catch (error) {
-        setError(error.message);
+        if (error.response && error.response.status === 401) {
+          alert("Please log in to view your apartments");
+        } else {
+          alert("Error loading apartments. Please try again.");
+        }
+        navigate('/');
       }
     };
 
     fetchMyRooms();
-  }, []);
+  }, [navigate]);
 
   const handleRoomClick = (roomId) => {
     navigate(`/room-detail/${roomId}`);
@@ -32,14 +45,12 @@ const MyRooms = () => {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">My Apartments</h1>
-      {error ? (
-        <p className="text-red-500">Error: {error}</p>
-      ) : rooms.length > 0 ? (
+      {rooms.length > 0 ? (
         rooms.map((room) => (
           <RoomCard key={room.id} room={room} onClick={handleRoomClick} />
         ))
       ) : (
-        <p>No rooms available</p>
+        <p>No apartments available</p>
       )}
     </div>
   );

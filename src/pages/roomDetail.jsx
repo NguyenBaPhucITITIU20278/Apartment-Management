@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { getRoomById, updateRoomDetails } from "../services/room.js";
-import { useMutationHook } from "../hooks/useMutationHook.jsx";
+import { updateRoomDetails } from "../services/room.js";
 import Header from "../components/header.jsx";
 import userProfile from "../assets/user1.jpg";
 import "slick-carousel/slick/slick.css";
@@ -23,9 +22,11 @@ import {
   deleteRoomWeb360,
   deleteEntireRoom,
   updateRoomImages,
-  updateRoomModel,
-  updateRoomWeb360
+  updateRoomVideo,
+  deleteRoomVideo
 } from "../services/room.js";
+import { formatAddress } from '../utils/addressFormatter';
+// import { toast } from 'react-hot-toast';
 
 // Add this after your imports to fix Leaflet icon issues
 delete L.Icon.Default.prototype._getIconUrl;
@@ -52,24 +53,24 @@ const RoomDetail = () => {
   const [show360Viewer, setShow360Viewer] = useState(false);
   const [center, setCenter] = useState({ lat: 0, lng: 0 });
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedImages, setSelectedImages] = useState([]);
-  const [selectedModel, setSelectedModel] = useState(null);
-  const [selectedWeb360Files, setSelectedWeb360Files] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [videoPath, setVideoPath] = useState(null);
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem("Authorization");
-    setIsLoggedIn(!!token); // Set to true if token exists
+    setIsLoggedIn(!!token);
   }, []);
 
-  const fetchRoomData = async () => {
+  const fetchRoomData = useCallback(async () => {
     try {
-      const fetchedRoom = await getRoomById(roomId);
-      setRoom(fetchedRoom);
+      const response = await axios.get(`http://localhost:8080/api/rooms/room-by-id/${roomId}`);
+      setRoom(response.data);
+      setImages(response.data.imagePaths || []);
+      setVideoPath(response.data.videoPath);
       setLoading(false);
 
-      // Thêm "Vietnam" vào địa chỉ để tăng độ chính xác
-      const searchAddress = `${fetchedRoom.address}, Vietnam`;
+      const searchAddress = `${response.data.address}, Vietnam`;
       const geocodeResponse = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1&countrycodes=vn`,
         {
@@ -86,24 +87,18 @@ const RoomDetail = () => {
           lng: parseFloat(geocodeData[0].lon)
         };
         setCenter(newCenter);
-        console.log("Location found:", newCenter);
       } else {
-        console.log("Could not find coordinates for address:", searchAddress);
-        // Set default center to Vietnam if coordinates not found
         setCenter({ lat: 10.762622, lng: 106.660172 });
       }
     } catch (err) {
-      console.error("Error fetching room data:", err);
-      setError(null);
-      setLoading(false);
       alert("Please log in to see the details of the apartment.");
-      navigate("/");
+      window.location.reload();
     }
-  };
+  }, [roomId]);
 
   useEffect(() => {
     fetchRoomData();
-  }, [roomId]);
+  }, [roomId, fetchRoomData]);
 
   const handleView3D = () => {
     setShow3DViewer(true);
@@ -175,34 +170,16 @@ const RoomDetail = () => {
       formData.append('files', image); 
     });
 
-    console.log("FormData entries before sending:", Array.from(formData.entries())); // Log các mục trong FormData
+    console.log("FormData entries before sending:", Array.from(formData.entries())); 
 
     try {
-      await updateRoomImages(roomId, formData); // Gửi formData
-      fetchRoomData(); // Refresh room data
+      await updateRoomImages(roomId, formData);
+      fetchRoomData();
       console.log("Successfully updated images");
     } catch (error) {
       alert("Please log in with the correct account to update the images of the apartment.");
       console.error("Error updating images:", error.response ? error.response.data : error.message);
-      window.location.reload(); // Reload the page after showing the alert
-    }
-  };
-
-  const handleUpdateModel = async (newModel) => {
-    try {
-      await updateRoomModel(roomId, newModel);
-      fetchRoomData();
-    } catch (error) {
-      console.error("Error updating model:", error);
-    }
-  };
-
-  const handleUpdateWeb360 = async (newWeb360Files) => {
-    try {
-      await updateRoomWeb360(roomId, newWeb360Files);
-      fetchRoomData();
-    } catch (error) {
-      console.error("Error updating web360:", error);
+      window.location.reload();
     }
   };
 
@@ -222,32 +199,52 @@ const RoomDetail = () => {
     }
   };
 
+  const handleDeleteVideo = async () => {
+    try {
+      await deleteRoomVideo(room.id);
+      setVideoPath(null);
+      alert('Video deleted successfully');
+    } catch (error) {
+      console.error('Error deleting video:', error);
+      alert('Failed to delete video');
+    }
+  };
+
+  const handleUpdateVideo = async (videoFile) => {
+    try {
+      await updateRoomVideo(room.id, videoFile);
+      // Refresh room data to get updated video path
+      fetchRoomData();
+      alert('Video updated successfully');
+    } catch (error) {
+      console.error('Error updating video:', error);
+      alert('Failed to update video');
+    }
+  };
+
   const isRoomOwner = room && room.username === localStorage.getItem("userName");
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
   if (!room) {
-    return <div>No room details available</div>;
+    alert("No room details available. Please try again.");
+    window.location.reload();
+    return null;
   }
   const address = room.address;
-  const images = room.imagePaths || [];
-  const formattedAddress = room.address.replace(/,/g, '').replace(/\s+/g, "_");
+  const formattedAddress = formatAddress(room.address);
   const modelPath = room.modelPath;
   const modelName = modelPath ? modelPath.split('/').pop().split('.')[0] : null;
   const image360Paths = room.web360Paths || [];
   const formatted360Paths = image360Paths.map(path => `http://localhost:8080/images/${formattedAddress}/web360/${path.split('/').pop()}`);
   const fullModelPath = modelName ? `http://localhost:8080/images/${formattedAddress}/models/${modelName}.glb` : null;
 
-  const mapContainerStyle = {
-    width: '100%',
-    height: '400px',
-  };
+  // const mapContainerStyle = {
+  //   width: '100%',
+  //   height: '400px',
+  // };
 
   console.log("Image URL", images);
   console.log("Path:", modelPath);
@@ -255,15 +252,6 @@ const RoomDetail = () => {
   return (
     <div>
       <Header />
-      {error && <div>Error: {error}</div>}
-      {!room && <div>No room details available</div>}
-
-      {/* Display message if user is not logged in */}
-      {!isLoggedIn && (
-        <div className="alert alert-warning" style={{ color: 'red', margin: '20px' }}>
-          Please log in to edit or delete this room.
-        </div>
-      )}
 
       {/* Main content section */}
       <div className="flex my-2">
@@ -288,7 +276,9 @@ const RoomDetail = () => {
             <ImageCarousel
               images={images}
               address={room.address}
+              videoPath={videoPath}
               onDeleteImage={isEditing ? handleDeleteImage : undefined}
+              onDeleteVideo={isEditing ? handleDeleteVideo : undefined}
             />
           </div>
 
@@ -345,6 +335,21 @@ const RoomDetail = () => {
                     const files = Array.from(e.target.files);
                     console.log("Selected files:", files); // Log selected files
                     handleUpdateImages(files); // Call the function to update images
+                  }}
+                />
+              </div>
+
+              {/* New section for updating video */}
+              <div className="flex items-center mb-2">
+                <label className="font-bold mr-2">Update Video:</label>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      handleUpdateVideo(file);
+                    }
                   }}
                 />
               </div>
@@ -432,7 +437,7 @@ const RoomDetail = () => {
         </Draggable>
       </div>
 
-      {/* 3D and 360 viewers section - Tăng kích thước */}
+      {/* 3D and 360 viewers section */}
       <div className="mt-8">
         {show3DViewer && fullModelPath && (
           <div className="mb-8 w-full" style={{ height: '800px' }}>
@@ -460,12 +465,16 @@ const RoomDetail = () => {
         <button
           className="fixed bottom-4 left-4 bg-blue-500 text-white py-2 px-4 rounded"
           onClick={() => {
+            if (!isLoggedIn) {
+              alert("Please log in to edit this room.");
+              window.location.reload();
+              return;
+            }
             if (isEditing) {
-              handleUpdateRoomDetails(room); // Update room details when done editing
+              handleUpdateRoomDetails(room);
             }
             setIsEditing(!isEditing);
           }}
-          disabled={!isLoggedIn} // Disable button if not logged in
         >
           {isEditing ? 'Done Editing' : 'Edit Room'}
         </button>
@@ -474,8 +483,14 @@ const RoomDetail = () => {
       {isRoomOwner && (
         <button
           className="fixed bottom-4 right-10 bg-red-500 text-white py-2 px-4 rounded"
-          onClick={handleDeleteRoom}
-          disabled={!isLoggedIn} // Disable button if not logged in
+          onClick={() => {
+            if (!isLoggedIn) {
+              alert("Please log in to delete this room.");
+              window.location.reload();
+              return;
+            }
+            handleDeleteRoom();
+          }}
         >
           Delete Room
         </button>

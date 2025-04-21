@@ -16,10 +16,9 @@ const getHeaders = () => {
 
 export const getAllRooms = async () => {
   try {
-    // const headers = getHeaders();
     const response = await axios.get(`${API_URL}/all-rooms`);
 
-    console.log("Response received:", response); // Log the response
+    console.log("Response received:", response);
 
     return response.data;
   } catch (error) {
@@ -38,20 +37,18 @@ export const getAllRooms = async () => {
 };
 
 export const getRoomByAddress = async (data) => {
-  console.log("Payload being sent:", data); // Log the payload
+  console.log("Payload being sent:", data);
 
   try {
-    // Check if data is correctly formed
     if (!data) {
       throw new Error("Data is missing or undefined");
     }
-    console.log("Data being sent:", data); // Log the data
+    console.log("Data being sent:", data);
 
-    // const headers = getHeaders(); // Get headers including Authorization
+    const headers = getHeaders();
+    const response = await axios.post(`${API_URL}/rooms-by-address`, data, { headers });
 
-    const response = await axios.post(`${API_URL}/rooms-by-address`, data);
-
-    console.log("Response received:", response); // Log the response
+    console.log("Response received:", response);
 
     return response.data;
   } catch (error) {
@@ -125,9 +122,10 @@ export const getRoomById = async (id) => {
 
 export const searchRooms = async ({ address }) => {
   try {
+    const headers = getHeaders();
     const response = await axios.post(`${API_URL}/rooms-by-address`, {
       address
-    });
+    }, { headers });
     return response.data;
   } catch (error) {
     console.error("Error searching rooms:", error);
@@ -275,6 +273,36 @@ export const getMyRooms = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching my rooms:", error);
+    throw error;
+  }
+};
+
+export const updateRoomVideo = async (roomId, videoFile) => {
+  try {
+    const headers = getHeaders();
+    const formData = new FormData();
+    formData.append('video', videoFile);
+
+    const response = await axios.post(`${API_URL}/${roomId}/video`, formData, {
+      headers: {
+        ...headers,
+        'Content-Type': 'multipart/form-data',
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating room video:', error);
+    throw error;
+  }
+};
+
+export const deleteRoomVideo = async (roomId) => {
+  try {
+    const headers = getHeaders();
+    const response = await axios.delete(`${API_URL}/${roomId}/video`, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting room video:', error);
     throw error;
   }
 };
