@@ -9,9 +9,6 @@ const RoomCard = ({ room, onClick }) => {
     navigate(`/room-detail/${room.id}`);
   };
 
-  // Format address for image URL
-  const formattedAddress = room.address ? formatAddress(room.address) : "default_address";
-  
   // Handle image paths correctly
   const getFirstImage = () => {
     if (!room.imagePaths || !Array.isArray(room.imagePaths) || room.imagePaths.length === 0) {
@@ -19,12 +16,14 @@ const RoomCard = ({ room, onClick }) => {
       return null;
     }
     
-    const firstImage = room.imagePaths[0];
-    console.log("First image path:", firstImage);
+    // Extract just the filename from the path
+    const firstImage = room.imagePaths[0].split('/').pop();
+    console.log("First image filename:", firstImage);
     return firstImage;
   };
 
   const firstImage = getFirstImage();
+  const formattedAddress = room.address ? formatAddress(room.address) : "default_address";
   const imageUrl = firstImage 
     ? `http://localhost:8080/images/${formattedAddress}/images/${firstImage}`
     : null;
