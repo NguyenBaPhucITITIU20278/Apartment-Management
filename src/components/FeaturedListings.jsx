@@ -123,7 +123,7 @@ const FeaturedListings = ({ currentAddress, currentRoomId }) => {
         maxHeight: '600px',
         overflowY: 'auto',
         position: 'fixed',
-        right: '270px',
+        right: '170px',
         top: '100px'
       }}>
       <h3 className="text-lg font-bold mb-4 text-center text-blue-600">Featured Listings</h3>

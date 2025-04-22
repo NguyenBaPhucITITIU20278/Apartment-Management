@@ -420,7 +420,7 @@ const RoomDetail = () => {
 
         <Draggable>
           <div className="flex-1 bg-white p-2 rounded-lg text-center shadow-md"
-            style={{ width: '220px', position: 'fixed', right: '20px', top: '100px' }}>
+            style={{ width: '180px', position: 'fixed', right: '1px', top: '100px' }}>
             <img
               src={userProfile}
               alt="room"
