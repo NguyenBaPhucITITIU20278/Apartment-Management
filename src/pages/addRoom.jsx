@@ -1,82 +1,100 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { addRoomWithModel } from "../services/room";
 import { useMutationHook } from "../hooks/useMutationHook";
 import { message } from "antd";
 
-
 const AddRoom = () => {
+  const navigate = useNavigate();
+
   const [error, setError] = useState("");
-  const [address, setAddress] = useState("");
-  const [numberOfBedrooms, setBedroom] = useState(0);
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [status, setStatus] = useState("");
+  const [numberOfBedrooms, setNumberOfBedrooms] = useState(0);
   const [description, setDescription] = useState("");
-  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [address, setAddress] = useState("");
+  const [area, setArea] = useState("");
   const [images, setImages] = useState([]);
   const [model, setModel] = useState(null);
   const [web360, setWeb360] = useState([]);
-  const [area, setArea] = useState("");
+  const [video, setVideo] = useState(null);
+  const [username, setUsername] = useState("");
 
   const mutation = useMutationHook((data) => addRoomWithModel(data));
   const { isError: isAddError, isSuccess: isAddSuccess } = mutation;
+
+  useEffect(() => {
+    const token = localStorage.getItem("Authorization");
+    if (!token) {
+      message.error("Please log in to add a room.");
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const handleAddRoom = async (e) => {
     e.preventDefault();
     
     if (images.length === 0) {
-      message.error("Please select at least one image.");
+      message.error("Please select at least one image for the image section.");
       return;
     }
 
     const roomData = {
       name,
-      address,
-      numberOfBedrooms,
-      phoneNumber,
-      price,
+      price: parseFloat(price),
       status,
+      numberOfBedrooms: parseInt(numberOfBedrooms),
       description,
-      area,
+      phoneNumber,
+      address,
+      area: parseFloat(area),
+      username: localStorage.getItem("username") || ""
     };
 
     const formData = new FormData();
     formData.append("data", JSON.stringify(roomData));
 
-    console.log("Images:", images);
     images.forEach((file) => {
       formData.append("files", file);
     });
 
     if (model) {
-      console.log("Model:", model);
       formData.append("model", model);
     }
 
-    console.log("Web360:", web360);
     web360.forEach((file) => {
       formData.append("web360", file);
     });
 
+    if (video) {
+      formData.append("video", video);
+    }
+
     try {
       await addRoomWithModel(formData);
       message.success("Room added successfully");
+      navigate("/");
     } catch (error) {
       console.error("Error adding room:", error);
-      message.error("Error adding room: " + error.message);
+      message.error("Error adding room: " + (error?.response?.data?.message || error.message));
     }
   };
 
   const handleImageChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    console.log("Selected files:", selectedFiles);
     setImages(selectedFiles);
   };
 
   const handleWeb360Change = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    console.log("Selected 360 images:", selectedFiles);
     setWeb360(selectedFiles);
+  };
+
+  const handleVideoChange = (e) => {
+    const selectedFile = e.target.files[0];
+    setVideo(selectedFile);
   };
 
   useEffect(() => {
@@ -89,96 +107,175 @@ const AddRoom = () => {
   }, [isAddSuccess, isAddError]);
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">
-        Find your perfect home with us
-      </h1>
-      <p className="text-gray-500 ">
-        Search for your dream home and book it now!
-      </p>
-      <form onSubmit={handleAddRoom}>
-        <div className="flex flex-col items-center justify-center h-screen dark">
-          <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold text-gray-200 mb-4 flex justify-center">
-              Detail Room{" "}
-            </h2>
-            <div className="flex flex-col">
+    <div className="container mx-auto p-4 lg:p-8 bg-gray-50">
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">Post Rental Listing</h1>
+
+      <form onSubmit={handleAddRoom} className="space-y-8">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold mb-4 text-gray-700">Basic Information</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Room Name <span className="text-red-500">(*)</span>
+              </label>
               <input
-                placeholder="Name"
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
                 type="text"
+                value={name}
                 onChange={(e) => setName(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Rental Price <span className="text-red-500">(*)</span>
+              </label>
               <input
-                placeholder="Address"
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
-                type="text"
-                onChange={(e) => setAddress(e.target.value)}
-              />
-              <input
-                placeholder="Number of Bedroom"
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
                 type="number"
-                onChange={(e) => setBedroom(e.target.value)}
-              />
-              <input
-                placeholder="Phone Number"
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
-                type="text"
-                onChange={(e) => setPhoneNumber(e.target.value)}
-              />
-              <input
-                placeholder="Price"
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
-                type="text"
+                value={price}
                 onChange={(e) => setPrice(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
               />
-              <input
-                placeholder="Status"
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
-                type="text"
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Status <span className="text-red-500">(*)</span>
+              </label>
+              <select
+                value={status}
                 onChange={(e) => setStatus(e.target.value)}
-              />
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
+              >
+                <option value="">Select Status</option>
+                <option value="AVAILABLE">Available</option>
+                <option value="RENTED">Rented</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Number of Bedrooms <span className="text-red-500">(*)</span>
+              </label>
               <input
-                placeholder="Area (in sqm)"
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
-                type="text"
+                type="number"
+                value={numberOfBedrooms}
+                onChange={(e) => setNumberOfBedrooms(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Area (m²) <span className="text-red-500">(*)</span>
+              </label>
+              <input
+                type="number"
+                value={area}
                 onChange={(e) => setArea(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
               />
-              <textarea
-                placeholder="Description"
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
-                name="cover_letter"
-                onChange={(e) => setDescription(e.target.value)}
-              ></textarea>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Phone Number <span className="text-red-500">(*)</span>
+              </label>
               <input
-                placeholder="Images"
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+          </div>
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Address <span className="text-red-500">(*)</span>
+            </label>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              required
+            />
+          </div>
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Description <span className="text-red-500">(*)</span>
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              rows="4"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold mb-4 text-gray-700">Images and Media</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Images <span className="text-red-500">(*)</span>
+              </label>
+              <input
                 type="file"
                 multiple
                 onChange={handleImageChange}
+                accept="image/*"
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                3D Model
+              </label>
               <input
-                placeholder="3D Model"
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
                 type="file"
                 onChange={(e) => setModel(e.target.files[0])}
+                accept=".glb,.gltf"
+                className="w-full p-2 border border-gray-300 rounded-md"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                360° Images
+              </label>
               <input
-                placeholder="360Image"
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
                 type="file"
                 multiple
                 onChange={handleWeb360Change}
+                accept="image/*"
+                className="w-full p-2 border border-gray-300 rounded-md"
               />
-              <button
-                className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150"
-                type="submit"
-              >
-                Submit
-              </button>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Video
+              </label>
+              <input
+                type="file"
+                onChange={handleVideoChange}
+                accept="video/*"
+                className="w-full p-2 border border-gray-300 rounded-md"
+              />
             </div>
           </div>
+        </div>
+
+        <div className="flex justify-end pt-4">
+          <button
+            className="bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold py-2 px-6 rounded-md hover:from-red-600 hover:to-orange-600 transition ease-in-out duration-150"
+            type="submit"
+          >
+            Post Listing
+          </button>
         </div>
       </form>
     </div>
