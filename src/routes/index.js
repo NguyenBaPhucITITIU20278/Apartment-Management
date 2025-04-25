@@ -13,6 +13,7 @@ import controlRoom from "../pages/controlRoom";
 import ImageCarousel from "../pages/ImageCarousel";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import MyRooms from "../pages/MyRooms";
+import PriceServices from "../pages/PriceServices";
 
 export const routes = [
   {
@@ -87,7 +88,15 @@ export const routes = [
     background: true,
     role: "user",
   },
-
+  {
+    path: "/price-services",
+    page: PriceServices,
+    title: "Price of Services",
+    description: "Pricing information for all services",
+    header: true,
+    background: true,
+    role: "user",
+  },
   {
     path: "/addRoom",
     page: addRoom,

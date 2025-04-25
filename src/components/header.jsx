@@ -72,7 +72,7 @@ const Header = ({ title }) => {
 
               {/* <button className="text-white">Rent Land</button> */}
               <button className="text-white" onClick={goToNews}>Blogs</button>
-              {/* <button className="text-white">Price</button> */}
+              <button className="text-white" onClick={() => navigate('/price-services')}>Pricing</button>
 
               <button className="text-white" onClick={() => navigate('/my-rooms')}>List My Apartments</button>
 
