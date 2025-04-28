@@ -1,0 +1,11 @@
+services:
+  - type: static
+    name: apartment-frontend
+    env: node
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: REACT_APP_API_URL
+        value: https://apartment-backend-phuc-2025.onrender.com 
