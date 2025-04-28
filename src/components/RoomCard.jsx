@@ -15,18 +15,13 @@ const RoomCard = ({ room, onClick }) => {
       console.log("No image paths found for room:", room.id);
       return null;
     }
-    
-    // Extract just the filename from the path
-    const firstImage = room.imagePaths[0].split('/').pop();
-    console.log("First image filename:", firstImage);
-    return firstImage;
+    // Nếu imagePaths đã là link S3, trả về luôn
+    return room.imagePaths[0];
   };
 
   const firstImage = getFirstImage();
   const formattedAddress = room.address ? formatAddress(room.address) : "default_address";
-  const imageUrl = firstImage 
-    ? `http://localhost:8080/images/${formattedAddress}/images/${firstImage}`
-    : null;
+  const imageUrl = firstImage ? firstImage : null;
 
   console.log("Room data:", {
     id: room.id,

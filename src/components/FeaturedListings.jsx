@@ -139,7 +139,7 @@ const FeaturedListings = ({ currentAddress, currentRoomId }) => {
                 <div className="w-20 h-20 flex-shrink-0">
                   {room.imagePaths && room.imagePaths.length > 0 ? (
                     <img
-                      src={`http://localhost:8080/images/${formatAddress(room.address)}/images/${room.imagePaths[0].split('/').pop()}`}
+                      src={room.imagePaths[0]}
                       alt={room.name || 'Room'}
                       className="w-full h-full object-cover rounded-lg"
                       onError={(e) => {

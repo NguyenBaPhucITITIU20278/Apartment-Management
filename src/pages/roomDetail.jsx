@@ -239,8 +239,8 @@ const RoomDetail = () => {
   const modelPath = room.modelPath;
   const modelName = modelPath ? modelPath.split('/').pop().split('.')[0] : null;
   const image360Paths = room.web360Paths || [];
-  const formatted360Paths = image360Paths.map(path => `${API_URLS.IMAGES}/${formattedAddress}/web360/${path.split('/').pop()}`);
-  const fullModelPath = modelName ? `${API_URLS.IMAGES}/${formattedAddress}/models/${modelName}.glb` : null;
+  const formatted360Paths = image360Paths;
+  const fullModelPath = modelPath;
 
   // const mapContainerStyle = {
   //   width: '100%',
