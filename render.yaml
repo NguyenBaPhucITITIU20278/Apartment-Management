@@ -2,6 +2,7 @@ services:
   - type: static
     name: apartment-frontend
     env: node
+    rootDir: Apartment-Management
     buildCommand: npm install && npm run build
     staticPublishPath: build
     envVars:
