@@ -1,7 +1,8 @@
 import axios from "axios";
+import API_URLS from "../config/api";
 
 export const axiosJWT = axios.create();
-const API_URL = "http://localhost:8080/api/admin";
+const API_URL = API_URLS.ADMIN;
 
 export const findUser = async (name) => {
   try {

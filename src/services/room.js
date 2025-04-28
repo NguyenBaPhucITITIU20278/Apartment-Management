@@ -1,5 +1,7 @@
 import axios from "axios";
-const API_URL = "http://localhost:8080/api/rooms";
+import API_URLS from "../config/api";
+
+const API_URL = API_URLS.ROOMS;
 
 const getHeaders = () => {
   const accessToken = localStorage.getItem("Authorization");

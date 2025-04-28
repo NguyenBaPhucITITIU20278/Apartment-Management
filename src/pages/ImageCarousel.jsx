@@ -3,6 +3,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 import { formatAddress } from '../utils/addressFormatter';
+import API_URLS from "../config/api";
 
 const ImageCarousel = ({ images = [], address = "", videoPath = null, onDeleteImage, onDeleteVideo }) => {
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
@@ -85,14 +86,14 @@ const ImageCarousel = ({ images = [], address = "", videoPath = null, onDeleteIm
               <div className="w-full pb-[56.25%] relative"> {/* 16:9 aspect ratio container */}
                 {slide.type === 'video' ? (
                   <video
-                    src={`http://localhost:8080/images/${formattedAddress}/video/${slide.path}`}
+                    src={`${API_URLS.IMAGES}/${formattedAddress}/video/${slide.path}`}
                     controls
                     className="absolute inset-0 w-full h-full object-contain"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-white">
                     <img
-                      src={`http://localhost:8080/images/${formattedAddress}/images/${slide.path.split('/').pop()}`}
+                      src={`${API_URLS.IMAGES}/${formattedAddress}/images/${slide.path.split('/').pop()}`}
                       alt={`Room ${index}`}
                       className="max-w-full max-h-full w-auto h-auto object-contain"
                       onLoad={(e) => handleImageLoad(index, e)}

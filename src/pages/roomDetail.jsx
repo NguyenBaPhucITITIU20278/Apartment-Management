@@ -26,6 +26,7 @@ import {
   deleteRoomVideo
 } from "../services/room.js";
 import { formatAddress } from '../utils/addressFormatter';
+import API_URLS from "../config/api";
 // import { toast } from 'react-hot-toast';
 
 // Add this after your imports to fix Leaflet icon issues
@@ -64,7 +65,7 @@ const RoomDetail = () => {
 
   const fetchRoomData = useCallback(async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/rooms/room-by-id/${roomId}`);
+      const response = await axios.get(`${API_URLS.ROOMS}/room-by-id/${roomId}`);
       setRoom(response.data);
       setImages(response.data.imagePaths || []);
       setVideoPath(response.data.videoPath);
@@ -238,8 +239,8 @@ const RoomDetail = () => {
   const modelPath = room.modelPath;
   const modelName = modelPath ? modelPath.split('/').pop().split('.')[0] : null;
   const image360Paths = room.web360Paths || [];
-  const formatted360Paths = image360Paths.map(path => `http://localhost:8080/images/${formattedAddress}/web360/${path.split('/').pop()}`);
-  const fullModelPath = modelName ? `http://localhost:8080/images/${formattedAddress}/models/${modelName}.glb` : null;
+  const formatted360Paths = image360Paths.map(path => `${API_URLS.IMAGES}/${formattedAddress}/web360/${path.split('/').pop()}`);
+  const fullModelPath = modelName ? `${API_URLS.IMAGES}/${formattedAddress}/models/${modelName}.glb` : null;
 
   // const mapContainerStyle = {
   //   width: '100%',
