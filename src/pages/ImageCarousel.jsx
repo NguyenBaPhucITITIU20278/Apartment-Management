@@ -5,7 +5,7 @@ import "slick-carousel/slick/slick-theme.css";
 import { formatAddress } from '../utils/addressFormatter';
 import API_URLS from "../config/api";
 
-const ImageCarousel = ({ images = [], address = "", videoPath = null, onDeleteImage, onDeleteVideo }) => {
+const ImageCarousel = ({ images = [], address = "", videoPaths = [], onDeleteImage, onDeleteVideo }) => {
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const [imageLoaded, setImageLoaded] = useState({});
 
@@ -55,11 +55,11 @@ const ImageCarousel = ({ images = [], address = "", videoPath = null, onDeleteIm
 
   // Combine images and video into slides
   const slides = [
-    // Add video slide if videoPath exists
-    ...(videoPath ? [{
+    // Add all video slides if videoPaths exist
+    ...(Array.isArray(videoPaths) ? videoPaths.map(path => ({
       type: 'video',
-      path: videoPath
-    }] : []),
+      path
+    })) : []),
     // Add image slides
     ...images.map(image => ({
       type: 'image',
