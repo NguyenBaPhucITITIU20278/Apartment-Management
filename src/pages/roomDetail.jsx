@@ -55,7 +55,7 @@ const RoomDetail = () => {
   const [center, setCenter] = useState({ lat: 0, lng: 0 });
   const [isEditing, setIsEditing] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [videoPath, setVideoPath] = useState(null);
+  const [videoPaths, setVideoPaths] = useState([]);
   const [images, setImages] = useState([]);
 
   useEffect(() => {
@@ -68,7 +68,7 @@ const RoomDetail = () => {
       const response = await axios.get(`${API_URLS.ROOMS}/room-by-id/${roomId}`);
       setRoom(response.data);
       setImages(response.data.imagePaths || []);
-      setVideoPath(response.data.videoPath);
+      setVideoPaths(response.data.videoPaths || []);
       setLoading(false);
 
       const searchAddress = `${response.data.address}, Vietnam`;
@@ -203,7 +203,7 @@ const RoomDetail = () => {
   const handleDeleteVideo = async () => {
     try {
       await deleteRoomVideo(room.id);
-      setVideoPath(null);
+      setVideoPaths([]);
       alert('Video deleted successfully');
     } catch (error) {
       console.error('Error deleting video:', error);
@@ -277,7 +277,7 @@ const RoomDetail = () => {
             <ImageCarousel
               images={images}
               address={room.address}
-              videoPath={videoPath}
+              videoPaths={videoPaths}
               onDeleteImage={isEditing ? handleDeleteImage : undefined}
               onDeleteVideo={isEditing ? handleDeleteVideo : undefined}
             />
