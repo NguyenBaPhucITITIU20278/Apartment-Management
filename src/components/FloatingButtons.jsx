@@ -1,7 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
+import ChatButton from './ChatButton';
 
 const FloatingButtons = () => {
   const [showSupportModal, setShowSupportModal] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  useEffect(() => {
+    // Check authentication from cookies
+    const checkAuth = () => {
+      const authToken = Cookies.get('Authorization');
+      const userRole = Cookies.get('role');
+      
+      console.log('FloatingButtons - Cookie State:', {
+        Authorization: authToken,
+        role: userRole
+      });
+
+      setIsAuthenticated(Boolean(authToken && userRole));
+    };
+
+    // Initial check
+    checkAuth();
+
+    // Set up an interval to check periodically
+    const interval = setInterval(checkAuth, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -9,6 +35,9 @@ const FloatingButtons = () => {
       behavior: 'smooth'
     });
   };
+
+  // Show ChatButton if authenticated via cookies
+  const shouldShowChat = isAuthenticated;
 
   return (
     <div className="fixed bottom-8 right-8 flex flex-col gap-4">
@@ -63,6 +92,9 @@ const FloatingButtons = () => {
           </div>
         </div>
       )}
+
+      {/* Chat Button - Only show for logged-in users */}
+      {shouldShowChat && <ChatButton />}
 
       {/* Support Button */}
       <button

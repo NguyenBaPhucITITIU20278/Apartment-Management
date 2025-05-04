@@ -15,9 +15,25 @@ import RoomDetail from "./pages/roomDetail";
 import Projecticon from "./assets/Projecticon.ico";
 import WhyUs from "./components/WhyUs";
 import FloatingButtons from "./components/FloatingButtons";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { login } from "./redux/slice/Authslice";
 
 export default function App() {
   const queryClient = new QueryClient();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Check if user is logged in from localStorage
+    const token = localStorage.getItem('Authorization');
+    const role = localStorage.getItem('role');
+    console.log('App initialization - localStorage:', { token, role });
+    
+    if (token && role) {
+      console.log('Dispatching login with role:', role);
+      dispatch(login({ role }));
+    }
+  }, [dispatch]);
 
   return (
     <NextUIProvider>

@@ -11,6 +11,7 @@ import { login } from "../redux/slice/Authslice.jsx";
 import { getUser } from "../services/user.js";
 import { jwtDecode } from "jwt-decode";
 import Header from "../components/header.jsx";
+import Cookies from 'js-cookie';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -42,14 +43,19 @@ const Login = () => {
   };
   useEffect(() => {
     if (isSuccess && data) {
-      navigate("/");
-      message.success("Login successful");
       // Kiểm tra dữ liệu trước khi sử dụng
       if (data && data.accessToken) {
-        localStorage.setItem("Authorization", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-        localStorage.setItem("userName", userName);
-        localStorage.setItem("role", "user");
+        console.log('Login successful, setting auth state...', data);
+        
+        // Set cookies instead of localStorage
+        Cookies.set('Authorization', data.accessToken, { expires: 7 }); // Expires in 7 days
+        Cookies.set('refresh_token', data.refreshToken, { expires: 7 });
+        Cookies.set('userName', userName, { expires: 7 });
+        Cookies.set('role', 'user', { expires: 7 });
+
+        // Dispatch login action first
+        dispatch(login({ role: "user" }));
+
         const decode = jwtDecode(data.accessToken);
         if (decode && decode.userName) {
           handleGetDetailUser(
@@ -57,18 +63,22 @@ const Login = () => {
             data.accessToken,
             data.refreshToken
           );
-          console.log(decode.userName);
-          localStorage.setItem("userName", decode.userName);
+          console.log('User details:', decode.userName);
+          Cookies.set('userName', decode.userName, { expires: 7 });
         }
-      }
-      else{
+
+        // Navigate and show success message after everything is set
+        message.success("Login successful");
+        navigate("/");
+      } else {
         message.error("Invalid response from server");
       }
     }
     if (!isSuccess) {
-      message.error("Login failed.Please check your username and password or change to admin");
+      message.error("Login failed. Please check your username and password or change to admin");
     }
   }, [data, isSuccess, isError]);
+
   return (
     <div >
       <Header />

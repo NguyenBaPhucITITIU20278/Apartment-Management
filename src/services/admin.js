@@ -6,11 +6,11 @@ const API_URL = API_URLS.ADMIN;
 
 export const findUser = async (name) => {
   try {
-    const accessToken = localStorage.getItem("Authorization");
+    const accessToken = localStorage.getItem("admin_token");
     if (!accessToken) {
-      throw new Error("Missing access token");
+      throw new Error("Missing admin access token");
     }
-    const userName = localStorage.getItem("userName");
+    const userName = localStorage.getItem("admin_username");
     const userData = {
       userName: name,
       accessToken: accessToken,
@@ -18,7 +18,6 @@ export const findUser = async (name) => {
     const response = await axiosJWT.post(`${API_URL}/find-user`, userData, {
       headers: {
         "Content-Type": "application/json",
-
         Authorization: `Bearer ${accessToken}`,
         username: `${userName}`,
       },
@@ -55,45 +54,39 @@ export const loginAdmin = async (data) => {
     throw error;
   }
 };
+
 export const deleteUser = async (userName) => {
   try {
-    const accessToken = localStorage.getItem("Authorization");
-
+    const accessToken = localStorage.getItem("admin_token");
     if (!accessToken) {
-      throw new Error("Missing access token");
+      throw new Error("Missing admin access token");
     }
-
-    const currentUserName = localStorage.getItem("userName");
-
-    const userData = {
-      userName: userName,
-      accessToken: accessToken,
-    };
-    const response = await axiosJWT.delete(`${API_URL}/deleteUser`, {
+    const response = await axiosJWT.delete(`${API_URL}/delete-user/${userName}`, {
       headers: {
-        "Content-Type": "application/json",
-
         Authorization: `Bearer ${accessToken}`,
-        username: `${currentUserName}`,
       },
-
-      data: userData,
     });
-
     return response.data;
   } catch (error) {
-    if (error.response) {
-      console.error("Error response:", error.response.data);
-    } else if (error.request) {
-      console.error("Error request:", error.request);
-    } else {
-      console.error("Error message:", error.message);
-    }
-
+    console.error("Error deleting user:", error);
     throw error;
   }
 };
+
 export const updateUser = async (user) => {
-  const response = await axiosJWT.post(`${API_URL}/updateUser`, user);
-  return response.data;
+  try {
+    const accessToken = localStorage.getItem("admin_token");
+    if (!accessToken) {
+      throw new Error("Missing admin access token");
+    }
+    const response = await axiosJWT.post(`${API_URL}/updateUser`, user, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
+  }
 };

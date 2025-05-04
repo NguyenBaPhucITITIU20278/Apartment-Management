@@ -13,6 +13,7 @@ import { jwtDecode } from "jwt-decode";
 import Header from "../components/header.jsx";
 import { loginAdmin } from "../services/admin.js";
 import { fetchWithAuth } from "../services/auth.js";
+import Cookies from 'js-cookie';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -47,10 +48,12 @@ const Login = () => {
       message.success("Login successful");
       // Kiểm tra dữ liệu trước khi sử dụng
       if (data && data.accessToken) {
-        localStorage.setItem("Authorization", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-        localStorage.setItem("userName", userName);
-        localStorage.setItem("role", "admin");
+        // Set cookies instead of localStorage
+        Cookies.set('Authorization', data.accessToken, { expires: 7 }); // Expires in 7 days
+        Cookies.set('refresh_token', data.refreshToken, { expires: 7 });
+        Cookies.set('userName', userName, { expires: 7 });
+        Cookies.set('role', 'admin', { expires: 7 });
+        
         const decode = jwtDecode(data.accessToken);
         if (decode && decode.userName) {
           handleGetDetailUser(
@@ -59,14 +62,16 @@ const Login = () => {
             data.refreshToken
           );
           console.log(decode.userName);
-          localStorage.setItem("userName", decode.userName);
+          Cookies.set('userName', decode.userName, { expires: 7 });
+          // Dispatch login action to update auth state
+          dispatch(login({ role: "admin" }));
         }
       } else {
         message.error("Invalid response from server");
       }
     }
     if (isError) {
-      message.error("Login failed.Please check your username and password");
+      message.error("Login failed. Please check your username and password");
     }
   }, [data, isSuccess, isError]);
 

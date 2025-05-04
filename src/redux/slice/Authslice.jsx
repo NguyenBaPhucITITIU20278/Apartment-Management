@@ -1,8 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
+import Cookies from 'js-cookie';
 
 const initialState = {
-    isAuthenticated: false,
-    role: null, 
+    isAuthenticated: Boolean(Cookies.get('Authorization')),
+    role: Cookies.get('role') || null, 
 };
 
 const authSlice = createSlice({
@@ -10,12 +11,20 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         login: (state, action) => {
+            console.log('Login action received:', action.payload);
             state.isAuthenticated = true;
-            state.role = action.payload.role; 
+            state.role = action.payload.role;
         },
         logout: (state) => {
+            console.log('Logout action received');
+            // Clear all auth cookies
+            Cookies.remove('Authorization');
+            Cookies.remove('refresh_token');
+            Cookies.remove('userName');
+            Cookies.remove('role');
+            
             state.isAuthenticated = false;
-            state.role = null; 
+            state.role = null;
         },
     },
 });

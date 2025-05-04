@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../redux/slice/Authslice";
 import homelogo from "../assets/homelogo.jpg";
-
-
+import Cookies from 'js-cookie';
+import { isAuthenticated } from "../services/auth";
 
 const Header = ({ title }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [userName, setUserName] = useState("");
   const [role, setRole] = useState("");
   const user = useSelector((state) => state.user);
@@ -14,8 +16,8 @@ const Header = ({ title }) => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const storedUserName = localStorage.getItem('userName');
-      const storedRole = localStorage.getItem('role');
+      const storedUserName = Cookies.get('userName');
+      const storedRole = Cookies.get('role');
       if (storedUserName) {
         setUserName(storedUserName);
       }
@@ -28,8 +30,13 @@ const Header = ({ title }) => {
   }, [user, admin]);
 
   const signOut = () => {
-    localStorage.clear();
-    window.location.reload();
+    // Remove all cookies
+    Cookies.remove('Authorization');
+    Cookies.remove('refresh_token');
+    Cookies.remove('userName');
+    Cookies.remove('role');
+    
+    dispatch(logout());
     navigate("/");
     window.location.reload();
   };

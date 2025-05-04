@@ -1,6 +1,7 @@
+import Cookies from 'js-cookie';
 
 export const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
+    const refreshToken = Cookies.get('refresh_token');
     const response = await fetch('/api/auth/refresh-token', {
         method: 'POST',
         body: JSON.stringify({ refreshToken }),
@@ -11,15 +12,20 @@ export const refreshAccessToken = async () => {
 
     if (response.ok) {
         const { accessToken } = await response.json();
-        localStorage.setItem('accessToken', accessToken);
+        Cookies.set('Authorization', accessToken, { expires: 7 });
     } else {
         // Xử lý lỗi, có thể yêu cầu người dùng đăng nhập lại
         console.error('Failed to refresh access token');
+        // Clear all auth cookies
+        Cookies.remove('Authorization');
+        Cookies.remove('refresh_token');
+        Cookies.remove('userName');
+        Cookies.remove('role');
     }
 };
 
 export const fetchWithAuth = async (url, options = {}) => {
-    let accessToken = localStorage.getItem('accessToken');
+    let accessToken = Cookies.get('Authorization');
 
     let response = await fetch(url, {
         ...options,
@@ -31,7 +37,12 @@ export const fetchWithAuth = async (url, options = {}) => {
 
     if (response.status === 401) { // Unauthorized, token có thể đã hết hạn
         await refreshAccessToken();
-        accessToken = localStorage.getItem('accessToken');
+        accessToken = Cookies.get('Authorization');
+        
+        if (!accessToken) {
+            throw new Error('Authentication failed');
+        }
+        
         response = await fetch(url, {
             ...options,
             headers: {
@@ -42,4 +53,17 @@ export const fetchWithAuth = async (url, options = {}) => {
     }
 
     return response;
+};
+
+export const isAuthenticated = () => {
+    const token = Cookies.get('Authorization');
+    const role = Cookies.get('role');
+    return Boolean(token && role);
+};
+
+export const logout = () => {
+    Cookies.remove('Authorization');
+    Cookies.remove('refresh_token');
+    Cookies.remove('userName');
+    Cookies.remove('role');
 };
