@@ -2,8 +2,10 @@ import axios from "axios";
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import Cookies from 'js-cookie';
+import API_URLS from "../config/api";
 
-const BASE_URL = 'http://localhost:8080/api/chat';
+const BASE_URL = API_URLS.CHAT;
+const WS_URL = 'https://apartment-backend-30kj.onrender.com/ws';
 
 const getToken = () => {
     return Cookies.get('Authorization');
@@ -24,7 +26,7 @@ class ChatService {
 
     async getUserList() {
         try {
-            const response = await axios.get(`http://localhost:8080/api/users/all`, {
+            const response = await axios.get(`${API_URLS.USERS}/all`, {
                 headers: {
                     Authorization: `Bearer ${getToken()}`
                 }
@@ -49,7 +51,7 @@ class ChatService {
         }
 
         return new Promise((resolve, reject) => {
-            const socket = new SockJS('http://localhost:8080/ws');
+            const socket = new SockJS(WS_URL);
             this.stompClient = new Client({
                 webSocketFactory: () => socket,
                 connectHeaders: {
@@ -128,7 +130,6 @@ class ChatService {
         const token = getToken();
         const formData = new FormData();
         
-        // Thêm file với tên gốc
         formData.append('file', file, file.name);
         formData.append('senderId', senderId);
         formData.append('receiverId', receiverId);
@@ -149,7 +150,6 @@ class ChatService {
                     'Content-Type': 'multipart/form-data',
                     'Accept': 'application/json'
                 },
-                // Thêm options để theo dõi tiến trình upload
                 onUploadProgress: (progressEvent) => {
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                     console.log('Upload progress:', percentCompleted);
@@ -161,11 +161,10 @@ class ChatService {
             // Ensure the response includes the complete file URL
             const message = response.data;
             if (message.fileUrl && !message.fileUrl.startsWith('http')) {
-                // Sử dụng BASE_URL thay vì window.location.origin để đảm bảo URL đúng
-                message.fileUrl = `http://localhost:8080${message.fileUrl}`;
+                message.fileUrl = `${API_URLS.API_BASE_URL}${message.fileUrl}`;
             }
 
-            // Thêm thông tin về file vào message
+            // Add file information to message
             message.fileName = file.name;
             message.fileType = file.type;
             message.fileSize = file.size;
