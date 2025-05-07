@@ -1,9 +1,23 @@
 import axios from "axios";
 // import bcrypt from 'bcrypt';
 import API_URLS from "../config/api";
+import Cookies from 'js-cookie';
 
 export const axiosJWT = axios.create();
 const API_URL = API_URLS.USERS;
+
+const getHeaders = () => {
+  const token = Cookies.get('Authorization');
+  const userName = Cookies.get('userName');
+  if (!token) {
+    throw new Error("Access token is missing");
+  }
+  return {
+    Authorization: "Bearer " + token,
+    "Content-Type": "application/json",
+    userName: userName,
+  };
+};
 
 export const loginUser = async (data) => {
   try {

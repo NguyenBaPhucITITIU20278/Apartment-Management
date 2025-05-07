@@ -148,7 +148,7 @@ const ChatBox = ({ onClose, role, userName }) => {
             console.log('Loaded chat history:', history);
             
             if (Array.isArray(history)) {
-                setMessages(history);
+            setMessages(history);
             } else {
                 console.error('Invalid chat history format:', history);
                 message.error('Failed to load chat history: Invalid format');
@@ -230,8 +230,8 @@ const ChatBox = ({ onClose, role, userName }) => {
                         newMessage || `Sent ${file.name}`
                     );
                     console.log("File upload result:", result);
-                    setMessages(prev => [...prev, result]);
-                    setFile(null);
+                setMessages(prev => [...prev, result]);
+                setFile(null);
                     setUploadProgress(0);
                     message.success('File uploaded successfully');
                 } catch (error) {
@@ -291,10 +291,10 @@ const ChatBox = ({ onClose, role, userName }) => {
                             <FiRefreshCw className={`${isConnecting ? 'animate-spin' : ''}`} />
                         </button>
                     )}
-                    <button onClick={onClose} className="hover:text-gray-300">
-                        <FiX size={24} />
-                    </button>
-                </div>
+                <button onClick={onClose} className="hover:text-gray-300">
+                    <FiX size={24} />
+                </button>
+            </div>
             </div>
 
             {/* Connection Status */}
@@ -334,17 +334,17 @@ const ChatBox = ({ onClose, role, userName }) => {
                     const senderName = isOwnMessage ? 'You' : (msg.senderName || msg.senderId);
                     
                     return (
-                        <div
-                            key={index}
+                    <div
+                        key={index}
                             className={`mb-4 flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
-                        >
-                            <div
-                                className={`max-w-[70%] rounded-lg p-3 ${
+                    >
+                        <div
+                            className={`max-w-[70%] rounded-lg p-3 ${
                                     isOwnMessage
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-200 text-gray-800'
-                                }`}
-                            >
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-200 text-gray-800'
+                            }`}
+                        >
                                 {!isOwnMessage && (
                                     <div className="text-xs font-semibold mb-1">
                                         {senderName}
@@ -390,17 +390,17 @@ const ChatBox = ({ onClose, role, userName }) => {
                                                 href={msg.fileUrl}
                                                 download={msg.fileName}
                                                 className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                                 onClick={(e) => {
                                                     e.preventDefault();
                                                     window.open(msg.fileUrl, '_blank');
                                                 }}
-                                            >
+                                        >
                                                 <FiDownload size={16} />
-                                            </a>
+                                        </a>
                                         </div>
-                                    </div>
+                                </div>
                                 ) : msg.fileUrl && msg.fileName ? (
                                     <a
                                         href={msg.fileUrl}
@@ -467,7 +467,7 @@ const ChatBox = ({ onClose, role, userName }) => {
                                 <FiLoader size={20} />
                             </div>
                         ) : (
-                            <FiSend size={20} />
+                        <FiSend size={20} />
                         )}
                     </button>
                 </div>
@@ -475,7 +475,7 @@ const ChatBox = ({ onClose, role, userName }) => {
                     <div className="mt-2 text-sm text-gray-600">
                         <div className="flex items-center justify-between">
                             <span>Selected file: {file.name}</span>
-                            <button
+                        <button
                                 onClick={() => {
                                     setFile(null);
                                     setUploadProgress(0);
@@ -483,10 +483,10 @@ const ChatBox = ({ onClose, role, userName }) => {
                                         fileInputRef.current.value = '';
                                     }
                                 }}
-                                className="ml-2 text-red-500 hover:text-red-700"
-                            >
+                            className="ml-2 text-red-500 hover:text-red-700"
+                        >
                                 <FiX size={16} />
-                            </button>
+                        </button>
                         </div>
                         {uploadProgress > 0 && uploadProgress < 100 && (
                             <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
@@ -503,4 +503,4 @@ const ChatBox = ({ onClose, role, userName }) => {
     );
 };
 
-export default ChatBox;
+export default ChatBox; 

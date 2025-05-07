@@ -1,26 +1,38 @@
 import axios from "axios";
 import API_URLS from "../config/api";
+import Cookies from 'js-cookie';
 
 export const axiosJWT = axios.create();
 const API_URL = API_URLS.ADMIN;
 
+const getAdminHeaders = () => {
+  const token = Cookies.get('Authorization');
+  const userName = Cookies.get('userName');
+  const role = Cookies.get('role');
+
+  if (!token) {
+    throw new Error("Access token is missing");
+  }
+  if (role !== 'admin') {
+    throw new Error("Admin access required");
+  }
+
+  return {
+    Authorization: "Bearer " + token,
+    "Content-Type": "application/json",
+    userName: userName,
+  };
+};
+
 export const findUser = async (name) => {
   try {
-    const accessToken = localStorage.getItem("admin_token");
-    if (!accessToken) {
-      throw new Error("Missing admin access token");
-    }
-    const userName = localStorage.getItem("admin_username");
+    const headers = getAdminHeaders();
     const userData = {
       userName: name,
-      accessToken: accessToken,
     };
+    
     const response = await axiosJWT.post(`${API_URL}/find-user`, userData, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-        username: `${userName}`,
-      },
+      headers: headers
     });
     return response.data;
   } catch (error) {
@@ -42,6 +54,15 @@ export const loginAdmin = async (data) => {
         'Content-Type': 'application/json',
       },
     });
+    
+    if (response.data) {
+      // Save admin data in cookies
+      Cookies.set('Authorization', response.data.accessToken, { expires: 7 });
+      Cookies.set('refresh_token', response.data.refreshToken, { expires: 7 });
+      Cookies.set('userName', response.data.userName, { expires: 7 });
+      Cookies.set('role', 'admin', { expires: 7 });
+    }
+    
     return response.data;
   } catch (error) {
     if (error.response) {
@@ -57,14 +78,9 @@ export const loginAdmin = async (data) => {
 
 export const deleteUser = async (userName) => {
   try {
-    const accessToken = localStorage.getItem("admin_token");
-    if (!accessToken) {
-      throw new Error("Missing admin access token");
-    }
+    const headers = getAdminHeaders();
     const response = await axiosJWT.delete(`${API_URL}/delete-user/${userName}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: headers
     });
     return response.data;
   } catch (error) {
@@ -75,14 +91,9 @@ export const deleteUser = async (userName) => {
 
 export const updateUser = async (user) => {
   try {
-    const accessToken = localStorage.getItem("admin_token");
-    if (!accessToken) {
-      throw new Error("Missing admin access token");
-    }
+    const headers = getAdminHeaders();
     const response = await axiosJWT.post(`${API_URL}/updateUser`, user, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: headers
     });
     return response.data;
   } catch (error) {

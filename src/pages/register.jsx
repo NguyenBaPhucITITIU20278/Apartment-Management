@@ -4,6 +4,7 @@ import { registerUser } from "../services/user";
 import { useMutationHook } from "../hooks/useMutationHook";
 import { message } from "antd";
 import Header from "../components/header.jsx";
+import Cookies from 'js-cookie';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -53,7 +54,11 @@ const Register = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      navigate("/login");
+      Cookies.set('Authorization', data.accessToken, { expires: 7 });
+      Cookies.set('refresh_token', data.refreshToken, { expires: 7 });
+      Cookies.set('userName', data.userName, { expires: 7 });
+      Cookies.set('role', data.role, { expires: 7 });
+      navigate("/");
       message.success("Register successful");
     }
     if (isError) {
@@ -68,7 +73,7 @@ const Register = () => {
         message.error("An error occurred. Please try again.");
       }
     }
-  }, [isSuccess, isError, error, navigate]);
+  }, [isSuccess, isError, error, navigate, data]);
 
   return (
     <div>

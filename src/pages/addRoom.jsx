@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { addRoomWithModel } from "../services/room";
 import { useMutationHook } from "../hooks/useMutationHook";
 import { message } from "antd";
+import Cookies from 'js-cookie';
 
 const AddRoom = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const AddRoom = () => {
   const { isError: isAddError, isSuccess: isAddSuccess } = mutation;
 
   useEffect(() => {
-    const token = localStorage.getItem("Authorization");
+    const token = Cookies.get('Authorization');
     if (!token) {
       message.error("Please log in to add a room.");
       navigate("/login");
@@ -50,7 +51,7 @@ const AddRoom = () => {
       phoneNumber,
       address,
       area: parseFloat(area),
-      username: localStorage.getItem("username") || ""
+      username: Cookies.get('userName') || ""
     };
 
     const formData = new FormData();

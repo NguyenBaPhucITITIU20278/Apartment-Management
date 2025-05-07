@@ -11,6 +11,7 @@ import { useMutationHook } from "../hooks/useMutationHook";
 import { message } from "antd";
 import * as XLSX from "xlsx";
 import { fetchWithAuth } from "../services/auth";
+import Cookies from 'js-cookie';
 
 const AdminPage = () => {
   const [name, setName] = useState("");
@@ -24,6 +25,27 @@ const AdminPage = () => {
 
   const mutation = useMutationHook((data) => findUser(name));
   const mutationGetAllUsers = useMutationHook(() => getAllUsers());
+
+  useEffect(() => {
+    const token = Cookies.get('Authorization');
+    const role = Cookies.get('role');
+    
+    if (!token || role !== 'admin') {
+      navigate("/login-admin");
+      return;
+    }
+
+    const fetchUsers = async () => {
+      try {
+        const response = await getAllUsers();
+        setAllUsers(response);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, [navigate]);
 
   const handleSearch = () => {
     setAction("findUser");

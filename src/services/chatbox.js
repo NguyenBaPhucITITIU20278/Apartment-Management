@@ -7,12 +7,17 @@ import API_URLS from "../config/api";
 const BASE_URL = API_URLS.CHAT;
 const WS_URL = 'https://apartment-backend-30kj.onrender.com/ws';
 
-const getToken = () => {
-    return Cookies.get('Authorization');
-};
-
-const getUserName = () => {
-    return Cookies.get('userName');
+const getHeaders = () => {
+    const token = Cookies.get('Authorization');
+    const userName = Cookies.get('userName');
+    if (!token) {
+        throw new Error("Access token is missing");
+    }
+    return {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+        userName: userName,
+    };
 };
 
 class ChatService {
@@ -28,7 +33,7 @@ class ChatService {
         try {
             const response = await axios.get(`${API_URLS.USERS}/all`, {
                 headers: {
-                    Authorization: `Bearer ${getToken()}`
+                    Authorization: `Bearer ${getHeaders().Authorization}`
                 }
             });
             // Filter out admin users and transform the response if needed
@@ -44,7 +49,7 @@ class ChatService {
     }
 
     connect(userName, onMessageReceived, onMessageRead) {
-        const token = getToken();
+        const token = getHeaders().Authorization;
         
         if (!token) {
             throw new Error('No authentication token found');
@@ -114,7 +119,7 @@ class ChatService {
             throw new Error('Not connected to WebSocket');
         }
 
-        const token = getToken();
+        const token = getHeaders().Authorization;
 
         this.stompClient.publish({
             destination: '/app/chat',
@@ -127,7 +132,7 @@ class ChatService {
     }
 
     async uploadFile(file, senderId, receiverId, content) {
-        const token = getToken();
+        const token = getHeaders().Authorization;
         const formData = new FormData();
         
         formData.append('file', file, file.name);
@@ -184,7 +189,7 @@ class ChatService {
         try {
             const response = await axios.get(`${BASE_URL}/history/${userId}/${adminId}`, {
                 headers: {
-                    Authorization: `Bearer ${getToken()}`
+                    Authorization: `Bearer ${getHeaders().Authorization}`
                 }
             });
 
@@ -202,7 +207,7 @@ class ChatService {
     }
 
     async getAllUsers() {
-        const token = getToken();
+        const token = getHeaders().Authorization;
         if (!token) {
             throw new Error('No admin token found');
         }
@@ -248,7 +253,7 @@ class ChatService {
 
     // Lấy tin nhắn chưa đọc
     async getUnreadMessages(adminId) {
-        const token = getToken();
+        const token = getHeaders().Authorization;
         try {
             const response = await axios.get(
                 `${BASE_URL}/unread/${adminId}`,
@@ -267,7 +272,7 @@ class ChatService {
 
     // Đánh dấu tin nhắn đã đọc
     async markMessageAsRead(messageId, adminId) {
-        const token = getToken();
+        const token = getHeaders().Authorization;
         try {
             await axios.post(
                 `${BASE_URL}/read/${messageId}/${adminId}`,
@@ -286,7 +291,7 @@ class ChatService {
 
     // Xóa tất cả tin nhắn
     async deleteAllMessages(userId, adminId) {
-        const token = getToken();
+        const token = getHeaders().Authorization;
         try {
             await axios.delete(
                 `${BASE_URL}/messages/${userId}/${adminId}`,

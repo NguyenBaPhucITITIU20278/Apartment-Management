@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import { message } from "antd";
 import { updateUser, checkUser } from "../services/user";
 import { image } from "@nextui-org/react";
-import userProfile from "../assets/user1.jpg"
+import userProfile from "../assets/user1.jpg";
+import { useNavigate } from "react-router-dom";
+import Cookies from 'js-cookie';
 
 const UpdateProfile = () => {
+  const navigate = useNavigate();
   const [profileImage, setProfileImage] = useState(null);
-  const userName = localStorage.getItem("userName");
+  const userName = Cookies.get('userName');
   const [foundUser, setFoundUser] = useState({
     userName: "",
     email: "",
@@ -25,10 +28,21 @@ const UpdateProfile = () => {
   const [mutation, setMutation] = useState({ isSuccess: false });
 
   useEffect(() => {
+    const token = Cookies.get('Authorization');
+    if (!token) {
+      message.error("Please log in to update your profile");
+      navigate("/login");
+      return;
+    }
+
     const fetchUser = async () => {
       try {
         const user = await checkUser(userName);
-        console.log(user);
+        console.log('Current user data:', user);
+        if (!user) {
+          message.error("User not found");
+          return;
+        }
         setFoundUser({
           userName: user.userName,
           email: user.email,
@@ -45,56 +59,77 @@ const UpdateProfile = () => {
           },
         });
       } catch (error) {
-        message.error("User not found");
+        console.error('Error fetching user:', error);
+        message.error("Failed to fetch user data");
       }
     };
-    fetchUser();
-  }, [userName]);
+
+    if (userName) {
+      fetchUser();
+    } else {
+      message.error("User information not found");
+      navigate("/login");
+    }
+  }, [userName, navigate]);
 
   const handleImageChange = (e) => {
     setProfileImage(e.target.files[0]);
   };
 
-  const handleUpdateUser = () => {
-    updateUser({
-      userName: foundUser.userName,
-      email: foundUser.email,
-      password: foundUser.password,
-      contact: {
-        id: foundUser.contact.id,
-        firstName: foundUser.contact.firstName,
-        lastName: foundUser.contact.lastName,
-        phone: foundUser.contact.phone,
-      },
-      role: {
-        id: foundUser.role.id,
-        roleName: foundUser.role.roleName,
-      },
-    })
-      .then((response) => {
-        setMutation({ isSuccess: true });
-        setFoundUser({
-          ...foundUser,
-          userName: foundUser.userName,
-          email: foundUser.email,
-          password: foundUser.password,
-          contact: {
-            id: foundUser.contact.id,
-            firstName: foundUser.contact.firstName,
-            lastName: foundUser.contact.lastName,
-            phone: foundUser.contact.phone,
-          },
-          role: {
-            id: foundUser.role.id,
-            roleName: foundUser.role.roleName,
-          },
-        });
-        message.success("User updated successfully");
-      })
-      .catch((error) => {
-        setMutation({ isSuccess: false });
-        message.error("User not updated");
+  const handleUpdateUser = async () => {
+    const token = Cookies.get('Authorization');
+    if (!token) {
+      message.error("Please log in to update your profile");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await updateUser({
+        userName: foundUser.userName,
+        email: foundUser.email,
+        password: foundUser.password,
+        contact: {
+          id: foundUser.contact.id,
+          firstName: foundUser.contact.firstName,
+          lastName: foundUser.contact.lastName,
+          phone: foundUser.contact.phone,
+        },
+        role: {
+          id: foundUser.role.id,
+          roleName: foundUser.role.roleName,
+        },
       });
+
+      setMutation({ isSuccess: true });
+      message.success("Profile updated successfully");
+      
+      // Update cookies with new user data if needed
+      Cookies.set('userName', response.userName, { expires: 7 });
+      Cookies.set('email', response.email, { expires: 7 });
+      
+      // Refresh user data
+      const updatedUser = await checkUser(response.userName);
+      setFoundUser({
+        userName: updatedUser.userName,
+        email: updatedUser.email,
+        password: updatedUser.password,
+        contact: {
+          id: updatedUser.contact.id,
+          firstName: updatedUser.contact.firstName,
+          lastName: updatedUser.contact.lastName,
+          phone: updatedUser.contact.phone,
+        },
+        role: {
+          id: updatedUser.role.id,
+          roleName: updatedUser.role.roleName,
+        },
+      });
+    } catch (error) {
+      console.error('Error updating user:', error);
+      setMutation({ isSuccess: false });
+      message.error("Failed to update profile");
+    }
   };
 
   const handleDeleteUser = () => {
@@ -176,7 +211,7 @@ const UpdateProfile = () => {
                 active:border-b-[2px] active:brightness-90 active:translate-y-[2px]"
               onClick={handleUpdateUser}
             >
-              Update User
+              Update Profile
             </button>
           </div>
         </div>

@@ -2,40 +2,29 @@ import React, { useEffect, useState } from "react";
 import RoomCard from "../components/RoomCard";
 import { getMyRooms } from "../services/room";
 import { useNavigate } from "react-router-dom";
+import Cookies from 'js-cookie';
 
 const MyRooms = () => {
   const [rooms, setRooms] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchMyRooms = async () => {
-      try {
-        // Check if token exists
-        const token = localStorage.getItem('Authorization');
-        if (!token) {
-          alert("Please log in to view your apartments");
-          navigate('/');
-          return;
-        }
+    const token = Cookies.get('Authorization');
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-        const data = await getMyRooms();
-        if (Array.isArray(data)) {
-          setRooms(data);
-        } else {
-          alert("Error loading apartments. Please try again.");
-          navigate('/');
-        }
+    const fetchRooms = async () => {
+      try {
+        const response = await getMyRooms();
+        setRooms(response);
       } catch (error) {
-        if (error.response && error.response.status === 401) {
-          alert("Please log in to view your apartments");
-        } else {
-          alert("Error loading apartments. Please try again.");
-        }
-        navigate('/');
+        console.error("Error fetching rooms:", error);
       }
     };
 
-    fetchMyRooms();
+    fetchRooms();
   }, [navigate]);
 
   const handleRoomClick = (roomId) => {

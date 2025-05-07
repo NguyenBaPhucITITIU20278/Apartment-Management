@@ -27,6 +27,7 @@ import {
 } from "../services/room.js";
 import { formatAddress } from '../utils/addressFormatter';
 import API_URLS from "../config/api";
+import Cookies from 'js-cookie';
 // import { toast } from 'react-hot-toast';
 
 // Add this after your imports to fix Leaflet icon issues
@@ -58,12 +59,7 @@ const RoomDetail = () => {
   const [videoPaths, setVideoPaths] = useState([]);
   const [images, setImages] = useState([]);
 
-  useEffect(() => {
-    const token = localStorage.getItem("Authorization");
-    setIsLoggedIn(!!token);
-  }, []);
-
-  const fetchRoomData = useCallback(async () => {
+  const fetchRoomData = async () => {
     try {
       const response = await axios.get(`${API_URLS.ROOMS}/room-by-id/${roomId}`);
       setRoom(response.data);
@@ -95,11 +91,22 @@ const RoomDetail = () => {
       alert("Please log in to see the details of the apartment.");
       window.location.reload();
     }
-  }, [roomId]);
+  };
 
   useEffect(() => {
+    const token = Cookies.get('Authorization');
+    const currentUser = Cookies.get('userName');
+    console.log('Current token:', token);
+    console.log('Current user:', currentUser);
+    console.log('Room owner:', room?.username);
+    
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    setIsLoggedIn(true);
     fetchRoomData();
-  }, [roomId, fetchRoomData]);
+  }, [roomId, navigate]);
 
   const handleView3D = () => {
     setShow3DViewer(true);
@@ -223,7 +230,7 @@ const RoomDetail = () => {
     }
   };
 
-  const isRoomOwner = room && room.username === localStorage.getItem("userName");
+  const isRoomOwner = room && room.username === Cookies.get('userName');
 
   if (loading) {
     return <div>Loading...</div>;
@@ -466,11 +473,6 @@ const RoomDetail = () => {
         <button
           className="fixed bottom-4 left-4 bg-blue-500 text-white py-2 px-4 rounded"
           onClick={() => {
-            if (!isLoggedIn) {
-              alert("Please log in to edit this room.");
-              window.location.reload();
-              return;
-            }
             if (isEditing) {
               handleUpdateRoomDetails(room);
             }
@@ -484,14 +486,7 @@ const RoomDetail = () => {
       {isRoomOwner && (
         <button
           className="fixed bottom-4 right-10 bg-red-500 text-white py-2 px-4 rounded"
-          onClick={() => {
-            if (!isLoggedIn) {
-              alert("Please log in to delete this room.");
-              window.location.reload();
-              return;
-            }
-            handleDeleteRoom();
-          }}
+          onClick={handleDeleteRoom}
         >
           Delete Room
         </button>

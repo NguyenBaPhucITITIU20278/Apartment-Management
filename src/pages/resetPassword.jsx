@@ -5,6 +5,7 @@ import { useMutationHook } from "../hooks/useMutationHook";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/header.jsx";
+import Cookies from 'js-cookie';
 
 const ResetPassword = () => {
   const [step, setStep] = useState(1);
@@ -46,6 +47,11 @@ const ResetPassword = () => {
     if (resetPasswordMutation.isSuccess) {
       toast.success("Password reset successfully");
       setStep(1);
+      // Clear any existing auth cookies
+      Cookies.remove('Authorization');
+      Cookies.remove('refresh_token');
+      Cookies.remove('userName');
+      Cookies.remove('role');
     }
   }, [resetPasswordMutation.isSuccess]);
 

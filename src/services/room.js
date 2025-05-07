@@ -1,16 +1,17 @@
 import axios from "axios";
 import API_URLS from "../config/api";
+import Cookies from 'js-cookie';
 
 const API_URL = API_URLS.ROOMS;
 
 const getHeaders = () => {
-  const accessToken = localStorage.getItem("Authorization");
-  const userName = localStorage.getItem("userName");
-  if (!accessToken) {
+  const token = Cookies.get('Authorization');
+  const userName = Cookies.get('userName');
+  if (!token) {
     throw new Error("Access token is missing");
   }
   return {
-    Authorization: "Bearer " + accessToken,
+    Authorization: "Bearer " + token,
     "Content-Type": "application/json",
     userName: userName,
   };
@@ -308,5 +309,3 @@ export const deleteRoomVideo = async (roomId) => {
     throw error;
   }
 };
-
-
