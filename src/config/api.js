@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'https://apartment-backend-30kj.onrender.com';
 
 export const API_URLS = {
     USERS: `${API_BASE_URL}/api/users`,
