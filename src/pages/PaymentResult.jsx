@@ -25,15 +25,17 @@ const PaymentResult = () => {
         try {
             // Get saved room data
             const savedData = sessionStorage.getItem('pendingRoomData');
-            console.log('Saved room data:', savedData);
+            console.log('Raw saved data:', savedData);
             
             if (!savedData) {
                 throw new Error('No room data found in session storage');
             }
 
             const parsedData = JSON.parse(savedData);
+            console.log('Parsed saved data:', parsedData);
+            
             const savedRoomData = parsedData.roomData;
-            console.log('Parsed room data:', savedRoomData);
+            console.log('Room data from storage:', savedRoomData);
 
             // Prepare room data without file fields
             const roomDataToSend = {
@@ -51,73 +53,58 @@ const PaymentResult = () => {
 
             // Convert to string and parse back to ensure clean object
             const cleanRoomData = JSON.parse(JSON.stringify(roomDataToSend));
-            console.log('Clean room data:', cleanRoomData);
+            console.log('Clean room data to send:', cleanRoomData);
 
             // Append room data
             formDataToSend.append('data', JSON.stringify(cleanRoomData));
             
             // Handle files
             const files = savedRoomData.files;
-            console.log('Files from savedRoomData:', files);
+            console.log('Files to process:', files);
 
             if (files) {
                 // Handle images
                 if (files.images && files.images.length > 0) {
-                    console.log('Processing images:', files.images);
+                    console.log('Processing images:', files.images.length, 'files');
                     files.images.forEach((image, index) => {
-                        // Convert base64/blob URL back to File if necessary
-                        if (typeof image === 'string' && image.startsWith('data:')) {
-                            const file = dataURLtoFile(image, `image${index}.jpg`);
-                            formDataToSend.append('files', file);
-                        } else if (image instanceof File) {
-                            formDataToSend.append('files', image);
-                        }
+                        console.log(`Processing image ${index}:`, image);
+                        formDataToSend.append('files', image);
                     });
                 }
 
                 // Handle video
                 if (files.video) {
                     console.log('Processing video:', files.video);
-                    if (typeof files.video === 'string' && files.video.startsWith('data:')) {
-                        const file = dataURLtoFile(files.video, 'video.mp4');
-                        formDataToSend.append('video', file);
-                    } else if (files.video instanceof File) {
-                        formDataToSend.append('video', files.video);
-                    }
+                    formDataToSend.append('video', files.video);
                 }
 
                 // Handle 3D model
                 if (files.model3D) {
                     console.log('Processing 3D model:', files.model3D);
-                    if (typeof files.model3D === 'string' && files.model3D.startsWith('data:')) {
-                        const file = dataURLtoFile(files.model3D, 'model.glb');
-                        formDataToSend.append('model', file);
-                    } else if (files.model3D instanceof File) {
-                        formDataToSend.append('model', files.model3D);
-                    }
+                    formDataToSend.append('model', files.model3D);
                 }
 
                 // Handle 360 views
                 if (files.view360 && files.view360.length > 0) {
-                    console.log('Processing 360 views:', files.view360);
+                    console.log('Processing 360 views:', files.view360.length, 'files');
                     files.view360.forEach((view, index) => {
-                        if (typeof view === 'string' && view.startsWith('data:')) {
-                            const file = dataURLtoFile(view, `360view${index}.jpg`);
-                            formDataToSend.append('web360', file);
-                        } else if (view instanceof File) {
-                            formDataToSend.append('web360', view);
-                        }
+                        console.log(`Processing 360 view ${index}:`, view);
+                        formDataToSend.append('web360', view);
                     });
                 }
             }
 
-            // Log FormData contents
-            console.log('FormData contents:');
+            // Log final FormData contents
+            console.log('Final FormData contents:');
             for (let pair of formDataToSend.entries()) {
                 if (pair[1] instanceof File) {
-                    console.log(pair[0], pair[1].name, pair[1].size);
+                    console.log(pair[0], '(File):', {
+                        name: pair[1].name,
+                        type: pair[1].type,
+                        size: pair[1].size
+                    });
                 } else {
-                    console.log(pair[0], pair[1]);
+                    console.log(pair[0], '(Data):', pair[1]);
                 }
             }
             
@@ -130,7 +117,8 @@ const PaymentResult = () => {
     
             return response;
         } catch (error) {
-            console.error('Error creating room:', error.response?.data || error.message);
+            console.error('Error creating room:', error);
+            console.error('Error details:', error.response?.data || error.message);
             setError(error.message);
             throw error;
         }
