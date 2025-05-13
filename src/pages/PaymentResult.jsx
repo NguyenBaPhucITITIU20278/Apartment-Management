@@ -257,96 +257,75 @@ const PaymentResult = () => {
             }
 
             setIsProcessing(true);
-            console.log('Starting to process payment result...');
 
             try {
-                // Log all query parameters
-                const params = Object.fromEntries(searchParams.entries());
-                console.log('Payment callback params:', params);
-
                 const resultCode = searchParams.get('resultCode');
                 const orderId = searchParams.get('orderId');
-                const amount = searchParams.get('amount');
                 const paymentMessage = searchParams.get('message');
 
-                console.log('Payment result:', { resultCode, orderId, amount, paymentMessage });
-
                 if (!resultCode || !orderId) {
-                    console.error('Missing required parameters');
                     message.error('Invalid payment response');
                     navigate('/');
                     return;
                 }
 
-                // Handle payment success OR user cancellation (both treated as success)
-                if (resultCode === '0' || resultCode === '1006') {
-                    try {
-                        // For cancelled payments, we'll still verify but ignore the result
-                        const response = await axios.post(`${API_URL}/payment/momo/verify`, {
-                            orderId,
-                            resultCode,
-                            amount,
-                            message: paymentMessage
-                        });
+                // Get payment ID from orderId (format: paymentId_timestamp)
+                const paymentId = orderId.split('_')[0];
 
-                        console.log('Payment verification response:', response.data);
+                // Get saved room data
+                const savedData = sessionStorage.getItem('pendingRoomData');
+                const paymentInfo = sessionStorage.getItem('paymentInfo');
 
-                        // Proceed with room creation regardless of verification
-                        const pendingRoomData = JSON.parse(sessionStorage.getItem('pendingRoomData'));
-                        if (pendingRoomData) {
-                            try {
-                                const roomResponse = await handleRoomCreation({
-                                    ...pendingRoomData.roomData,
-                                    paymentId: orderId
-                                });
-                                
-                                if (roomResponse) {
-                                    message.success('Room created successfully!');
-                                    navigate('/payment-success');
-                                }
-                            } catch (roomError) {
-                                console.error('Error creating room:', roomError);
-                                message.error('Failed to create room');
-                                navigate('/payment-failed');
-                            }
-                        } else {
-                            message.error('No pending room data found');
-                            navigate('/payment-failed');
-                        }
-                    } catch (verifyError) {
-                        console.error('Payment verification error:', verifyError);
-                        // Still proceed with room creation even if verification fails
-                        const pendingRoomData = JSON.parse(sessionStorage.getItem('pendingRoomData'));
-                        if (pendingRoomData) {
-                            try {
-                                const roomResponse = await handleRoomCreation({
-                                    ...pendingRoomData.roomData,
-                                    paymentId: orderId
-                                });
-                                
-                                if (roomResponse) {
-                                    message.success('Room created successfully!');
-                                    navigate('/payment-success');
-                                }
-                            } catch (roomError) {
-                                console.error('Error creating room:', roomError);
-                                message.error('Failed to create room');
-                                navigate('/payment-failed');
-                            }
-                        } else {
-                            message.error('No pending room data found');
-                            navigate('/payment-failed');
-                        }
+                if (!savedData || !paymentInfo) {
+                    message.error('No room data or payment info found');
+                    navigate('/');
+                    return;
+                }
+
+                const { roomData, selectedFeatures, currentPackage } = JSON.parse(savedData);
+                const { price, packageCode } = JSON.parse(paymentInfo);
+
+                try {
+                    // Handle payment status first
+                    if (resultCode === '0') {
+                        message.success('Payment successful!');
+                    } else if (resultCode === '1006') {
+                        await cancelMomoPayment(paymentId);
+                        message.info('Payment cancelled but room will still be created');
+                    } else {
+                        message.error(`Payment failed: ${paymentMessage}`);
+                        navigate('/');
+                        return;
                     }
-                } else {
-                    console.error('Payment failed with code:', resultCode);
-                    message.error(`Payment failed: ${paymentMessage}`);
-                    navigate('/payment-failed');
+
+                    // Add payment ID to room data
+                    roomData.paymentId = paymentId;
+
+                    if (isMounted) {
+                        // Create room
+                        const result = await handleRoomCreation(roomData);
+                        if (result) {
+                            message.success('Room created successfully!');
+                        }
+
+                        // Clean up sessionStorage
+                        sessionStorage.removeItem('pendingRoomData');
+                        sessionStorage.removeItem('paymentInfo');
+                        
+                        // Navigate home
+                        navigate('/');
+                    }
+                } catch (error) {
+                    if (isMounted) {
+                        console.error('Error in payment process:', error);
+                        message.error(`Failed to process: ${error.message}`);
+                        navigate('/');
+                    }
                 }
             } catch (error) {
-                console.error('Error processing payment:', error);
                 if (isMounted) {
-                    message.error(`Failed to process: ${error.message}`);
+                    console.error('Error processing payment result:', error);
+                    message.error('Failed to process payment result');
                     navigate('/');
                 }
             } finally {
@@ -361,7 +340,7 @@ const PaymentResult = () => {
         return () => {
             isMounted = false;
         };
-    }, [navigate, searchParams, isProcessing]);
+    }, [navigate, searchParams]);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
