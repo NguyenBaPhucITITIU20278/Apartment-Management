@@ -27,17 +27,28 @@ const PaymentResult = () => {
 
             const { roomData: savedRoomData } = JSON.parse(savedData);
             
-            // Append room data
-            formDataToSend.append('data', JSON.stringify({
-                ...roomData,
-                paymentId: roomData.paymentId
-            }));
+            // Prepare room data
+            const roomDataToSend = {
+                ...savedRoomData,
+                paymentId: roomData.paymentId,
+                postedTime: new Date().toISOString()
+            };
             
-            // Add files if they exist
+            // Remove file references from room data
+            delete roomDataToSend.files;
+            delete roomDataToSend.imagePaths;
+            delete roomDataToSend.videoPaths;
+            delete roomDataToSend.modelPath;
+            delete roomDataToSend.web360Paths;
+
+            // Append room data
+            formDataToSend.append('data', JSON.stringify(roomDataToSend));
+            
+            // Add files if they exist in savedRoomData
             if (savedRoomData.files) {
                 // Add images
                 if (savedRoomData.files.images && savedRoomData.files.images.length > 0) {
-                    savedRoomData.files.images.forEach((image, index) => {
+                    savedRoomData.files.images.forEach(image => {
                         formDataToSend.append('files', image);
                     });
                 }
@@ -54,13 +65,14 @@ const PaymentResult = () => {
                 
                 // Add 360 views
                 if (savedRoomData.files.view360 && savedRoomData.files.view360.length > 0) {
-                    savedRoomData.files.view360.forEach((view, index) => {
+                    savedRoomData.files.view360.forEach(view => {
                         formDataToSend.append('web360', view);
                     });
                 }
             }
     
-            console.log('Attempting to create room with payment ID:', roomData.paymentId);
+            console.log('Room data being sent:', roomDataToSend);
+            console.log('Files being sent:', savedRoomData.files);
             
             const response = await addRoomWithModel(formDataToSend);
             console.log('Room creation response:', response);

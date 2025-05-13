@@ -143,6 +143,12 @@ export const addRoomWithModel = async (formData) => {
       throw new Error("Access token is missing");
     }
 
+    // Log the FormData contents for debugging
+    console.log('FormData contents:');
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+    }
+
     const response = await axios.post(`${API_URL}/add-room-with-model`, formData, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -150,11 +156,14 @@ export const addRoomWithModel = async (formData) => {
       }
     });
     
-    console.log("API Response:", response); // Thêm log để debug
+    console.log("API Response:", response);
     return response.data;
   } catch (error) {
     console.error("Error adding room with model:", error);
-    console.error("Error details:", error.response ? error.response.data : error.message);
+    if (error.response) {
+      console.error("Server response:", error.response.data);
+      console.error("Status code:", error.response.status);
+    }
     throw error;
   }
 };
