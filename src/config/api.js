@@ -6,7 +6,8 @@ export const API_URLS = {
     ADMIN: `${API_BASE_URL}/api/admin`,
     AUTH: `${API_BASE_URL}/api/auth`,
     IMAGES: `${API_BASE_URL}/images`,
-    CHAT: `${API_BASE_URL}/api/chat`
+    CHAT: `${API_BASE_URL}/api/chat`,
+    PAYMENT: `${API_BASE_URL}/api/payment`
 };
 
 export default API_URLS; 

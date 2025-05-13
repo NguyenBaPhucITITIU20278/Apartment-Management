@@ -13,6 +13,7 @@ import Draggable from 'react-draggable';
 import button360Image from '../assets/360button.png';
 import button3DImage from '../assets/3Dbutton.png';
 import FeaturedListings from '../components/FeaturedListings';
+import Comments from '../components/Comments';  
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -418,6 +419,9 @@ const RoomDetail = () => {
                     </MapContainer>
                   </div>
                 </div>
+
+                {/* Comments Section */}
+                <Comments roomId={roomId} />
               </div>
             </>
           )}

@@ -16,6 +16,7 @@
     "antd": "^5.19.4",
     "apartment-control": "file:",
     "axios": "^1.7.2",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.9.4",
     "js-cookie": "^2.2.1",
     "jwt-decode": "^4.0.0",

@@ -1,286 +1,479 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { addRoomWithModel } from "../services/room";
-import { useMutationHook } from "../hooks/useMutationHook";
-import { message } from "antd";
+import { useNavigate, useLocation } from "react-router-dom";
+import { message, Alert, Space, Typography, Modal, Spin } from "antd";
 import Cookies from 'js-cookie';
+import { POSTING_PACKAGES, getPackageForFeatures } from '../config/postingPackages';
+import { createMomoPayment, cancelMomoPayment } from '../services/momoService';
+import axios from 'axios';
+
+const { Text } = Typography;
 
 const AddRoom = () => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [loading, setLoading] = useState(false);
+    const [selectedFeatures, setSelectedFeatures] = useState({
+        images: false,
+        video: false,
+        model3D: false,
+        view360: false
+    });
+    const [currentPackage, setCurrentPackage] = useState(POSTING_PACKAGES.STANDARD);
+    const [formData, setFormData] = useState({
+        roomName: '',
+        rentalPrice: '',
+        status: '',
+        numberOfBedrooms: '0',
+        area: '',
+        phoneNumber: '',
+        address: '',
+        description: '',
+        images: null,
+        video: null,
+        model3D: null,
+        view360: null
+    });
 
-  const [error, setError] = useState("");
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [status, setStatus] = useState("");
-  const [numberOfBedrooms, setNumberOfBedrooms] = useState(0);
-  const [description, setDescription] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [address, setAddress] = useState("");
-  const [area, setArea] = useState("");
-  const [images, setImages] = useState([]);
-  const [model, setModel] = useState(null);
-  const [web360, setWeb360] = useState([]);
-  const [video, setVideo] = useState(null);
-  const [username, setUsername] = useState("");
+    useEffect(() => {
+        const token = Cookies.get('Authorization');
+        if (!token) {
+            message.error("Please log in to add a room.");
+            navigate("/login");
+            return;
+        }
+    }, [navigate]);
 
-  const mutation = useMutationHook((data) => addRoomWithModel(data));
-  const { isError: isAddError, isSuccess: isAddSuccess } = mutation;
+    // Update package when features change
+    useEffect(() => {
+        const features = [];
+        if (selectedFeatures.images) features.push('images');
+        if (selectedFeatures.video) features.push('video');
+        if (selectedFeatures.model3D) features.push('3D');
+        if (selectedFeatures.view360) features.push('360');
 
-  useEffect(() => {
-    const token = Cookies.get('Authorization');
-    if (!token) {
-      message.error("Please log in to add a room.");
-      navigate("/login");
-    }
-  }, [navigate]);
+        const newPackage = getPackageForFeatures(features);
+        setCurrentPackage(newPackage);
+    }, [selectedFeatures]);
 
-  const handleAddRoom = async (e) => {
-    e.preventDefault();
-    
-    if (images.length === 0) {
-      message.error("Please select at least one image for the image section.");
-      return;
-    }
-
-    const roomData = {
-      name,
-      price: parseFloat(price),
-      status,
-      numberOfBedrooms: parseInt(numberOfBedrooms),
-      description,
-      phoneNumber,
-      address,
-      area: parseFloat(area),
-      username: Cookies.get('userName') || ""
+    const handleFeatureChange = (feature, value) => {
+        setSelectedFeatures(prev => ({
+            ...prev,
+            [feature]: value
+        }));
     };
 
-    const formData = new FormData();
-    formData.append("data", JSON.stringify(roomData));
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
-    images.forEach((file) => {
-      formData.append("files", file);
-    });
+    const handleFileChange = (e) => {
+        const { name, files } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: files
+        }));
 
-    if (model) {
-      formData.append("model", model);
-    }
+        // Update selected features based on file uploads
+        switch (name) {
+            case 'images':
+                handleFeatureChange('images', files.length > 0);
+                break;
+            case 'video':
+                handleFeatureChange('video', files.length > 0);
+                break;
+            case 'model3D':
+                handleFeatureChange('model3D', files.length > 0);
+                break;
+            case 'view360':
+                handleFeatureChange('view360', files.length > 0);
+                break;
+            default:
+                break;
+        }
+    };
 
-    web360.forEach((file) => {
-      formData.append("web360", file);
-    });
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            setLoading(true);
 
-    if (video) {
-      formData.append("video", video);
-    }
+            // Validate required fields
+            if (!formData.roomName || !formData.rentalPrice || !formData.status ||
+                !formData.numberOfBedrooms || !formData.area || !formData.phoneNumber ||
+                !formData.address || !formData.description) {
+                message.error('Please fill in all required fields');
+                return;
+            }
 
-    try {
-      await addRoomWithModel(formData);
-      message.success("Room added successfully");
-      navigate("/");
-    } catch (error) {
-      console.error("Error adding room:", error);
-      message.error("Error adding room: " + (error?.response?.data?.message || error.message));
-    }
-  };
+            // Prepare room data
+            const roomData = {
+                name: formData.roomName,
+                price: parseFloat(formData.rentalPrice),
+                status: formData.status,
+                numberOfBedrooms: parseInt(formData.numberOfBedrooms),
+                area: parseFloat(formData.area),
+                phoneNumber: formData.phoneNumber,
+                address: formData.address,
+                description: formData.description,
+                imagePaths: [],
+                videoPaths: [],
+                web360Paths: [],
+                modelPath: '',
+                username: Cookies.get('userName')
+            };
 
-  const handleImageChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    setImages(selectedFiles);
-  };
+            // Tạo FormData để lưu trữ files
+            const formDataToStore = new FormData();
 
-  const handleWeb360Change = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    setWeb360(selectedFiles);
-  };
+            // Append files với key riêng để dễ nhận dạng
+            if (formData.images) {
+                Array.from(formData.images).forEach((file, index) => {
+                    formDataToStore.append(`image_${index}`, file);
+                });
+                formDataToStore.append('imageCount', formData.images.length);
+            }
 
-  const handleVideoChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setVideo(selectedFile);
-  };
+            if (formData.model3D && formData.model3D.length > 0) {
+                formDataToStore.append('model3D', formData.model3D[0]);
+            }
 
-  useEffect(() => {
-    if (isAddSuccess) {
-      message.success("Room added successfully");
-    }
-    if (isAddError) {
-      message.error("Please sign in to add room");
-    }
-  }, [isAddSuccess, isAddError]);
+            if (formData.view360) {
+                Array.from(formData.view360).forEach((file, index) => {
+                    formDataToStore.append(`view360_${index}`, file);
+                });
+                formDataToStore.append('view360Count', formData.view360.length);
+            }
 
-  return (
-    <div className="container mx-auto p-4 lg:p-8 bg-gray-50">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Post Rental Listing</h1>
+            if (formData.video && formData.video.length > 0) {
+                formDataToStore.append('video', formData.video[0]);
+            }
 
-      <form onSubmit={handleAddRoom} className="space-y-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4 text-gray-700">Basic Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Room Name <span className="text-red-500">(*)</span>
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              />
+            // Lưu metadata của files
+            const filesMetadata = {
+                images: formData.images ? Array.from(formData.images).map(file => ({
+                    name: file.name,
+                    type: file.type
+                })) : [],
+                model3D: formData.model3D && formData.model3D.length > 0 ? {
+                    name: formData.model3D[0].name,
+                    type: formData.model3D[0].type
+                } : null,
+                view360: formData.view360 ? Array.from(formData.view360).map(file => ({
+                    name: file.name,
+                    type: file.type
+                })) : [],
+                video: formData.video && formData.video.length > 0 ? {
+                    name: formData.video[0].name,
+                    type: formData.video[0].type
+                } : null
+            };
+
+            // Lưu vào sessionStorage
+            sessionStorage.setItem('pendingRoomData', JSON.stringify({
+                roomData,
+                selectedFeatures,
+                currentPackage,
+                filesMetadata
+            }));
+
+            // Store the payment info
+            sessionStorage.setItem('paymentInfo', JSON.stringify({
+                price: currentPackage.price,
+                packageCode: currentPackage.code,
+                timestamp: new Date().getTime()
+            }));
+
+            // Lưu FormData vào IndexedDB
+            await saveFormDataToIndexedDB(formDataToStore);
+
+            // Create MoMo payment
+            const response = await createMomoPayment(
+                currentPackage.price,
+                currentPackage.code,
+                1
+            );
+
+            if (response.payUrl) {
+                window.location.href = response.payUrl;
+            } else {
+                throw new Error('No payment URL received');
+            }
+
+        } catch (error) {
+            message.error('Failed to create payment: ' + error.message);
+            console.error('Error:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Thay thế hàm saveFormDataToIndexedDB hiện tại bằng hàm mới này
+    const saveFormDataToIndexedDB = async (formData) => {
+        // Đầu tiên, chuyển đổi tất cả files thành ArrayBuffer
+        const convertFilesToArrayBuffer = async () => {
+            const filesObject = {};
+            for (const [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    const buffer = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = () => reject(reader.error);
+                        reader.readAsArrayBuffer(value);
+                    });
+                    filesObject[key] = buffer;
+                } else {
+                    filesObject[key] = value;
+                }
+            }
+            return filesObject;
+        };
+
+        try {
+            const filesObject = await convertFilesToArrayBuffer();
+            
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('RoomFiles', 1);
+
+                request.onerror = () => reject(new Error('Failed to open IndexedDB'));
+
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('files')) {
+                        db.createObjectStore('files');
+                    }
+                };
+
+                request.onsuccess = (event) => {
+                    const db = event.target.result;
+                    const transaction = db.transaction(['files'], 'readwrite');
+                    const store = transaction.objectStore('files');
+
+                    transaction.oncomplete = () => {
+                        db.close();
+                        resolve();
+                    };
+
+                    transaction.onerror = () => {
+                        db.close();
+                        reject(new Error('Transaction failed'));
+                    };
+
+                    store.put(filesObject, 'currentFiles');
+                };
+            });
+        } catch (error) {
+            console.error('Error in saveFormDataToIndexedDB:', error);
+            throw error;
+        }
+    };
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold mb-6">Post Rental Listing</h2>
+
+                <Alert
+                    message="Posting Package Information"
+                    description={
+                        <Space direction="vertical">
+                            <Text>Current Package: {currentPackage.icon} {currentPackage.name}</Text>
+                            <Text>Price: {new Intl.NumberFormat('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND'
+                            }).format(currentPackage.price)}/month</Text>
+                            <Text>Features included: {currentPackage.features.join(', ')}</Text>
+                        </Space>
+                    }
+                    type="info"
+                    showIcon
+                    className="mb-6"
+                />
+
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block mb-2">
+                                    Room Name <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="roomName"
+                                    required
+                                    className="w-full p-2 border rounded"
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-2">
+                                    Rental Price <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    name="rentalPrice"
+                                    required
+                                    className="w-full p-2 border rounded"
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-2">
+                                    Status <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    name="status"
+                                    required
+                                    className="w-full p-2 border rounded"
+                                    onChange={handleInputChange}
+                                >
+                                    <option value="">Select Status</option>
+                                    <option value="available">Available</option>
+                                    <option value="rented">Rented</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block mb-2">
+                                    Number of Bedrooms <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    name="numberOfBedrooms"
+                                    required
+                                    className="w-full p-2 border rounded"
+                                    onChange={handleInputChange}
+                                    value={formData.numberOfBedrooms}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-2">
+                                    Area (m²) <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    name="area"
+                                    required
+                                    className="w-full p-2 border rounded"
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-2">
+                                    Phone Number <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="tel"
+                                    name="phoneNumber"
+                                    required
+                                    className="w-full p-2 border rounded"
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-4">
+                            <label className="block mb-2">
+                                Address <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                name="address"
+                                required
+                                className="w-full p-2 border rounded"
+                                onChange={handleInputChange}
+                            />
+                        </div>
+
+                        <div className="mt-4">
+                            <label className="block mb-2">
+                                Description <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                name="description"
+                                required
+                                className="w-full p-2 border rounded h-32"
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-4">Images and Media</h3>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block mb-2">
+                                    Images <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="file"
+                                    name="images"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="w-full"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-2">3D Model</label>
+                                <input
+                                    type="file"
+                                    name="model3D"
+                                    accept=".glb,.gltf"
+                                    onChange={handleFileChange}
+                                    className="w-full"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-2">360° Images</label>
+                                <input
+                                    type="file"
+                                    name="view360"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="w-full"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-2">Video</label>
+                                <input
+                                    type="file"
+                                    name="video"
+                                    accept="video/*"
+                                    onChange={handleFileChange}
+                                    className="w-full"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="text-right">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:bg-blue-300"
+                        >
+                            {loading ? 'Processing...' : 'Continue to Payment'}
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Rental Price <span className="text-red-500">(*)</span>
-              </label>
-              <input
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Status <span className="text-red-500">(*)</span>
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              >
-                <option value="">Select Status</option>
-                <option value="AVAILABLE">Available</option>
-                <option value="RENTED">Rented</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Number of Bedrooms <span className="text-red-500">(*)</span>
-              </label>
-              <input
-                type="number"
-                value={numberOfBedrooms}
-                onChange={(e) => setNumberOfBedrooms(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Area (m²) <span className="text-red-500">(*)</span>
-              </label>
-              <input
-                type="number"
-                value={area}
-                onChange={(e) => setArea(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Phone Number <span className="text-red-500">(*)</span>
-              </label>
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              />
-            </div>
-          </div>
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Address <span className="text-red-500">(*)</span>
-            </label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              required
-            />
-          </div>
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Description <span className="text-red-500">(*)</span>
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              rows="4"
-              required
-            />
-          </div>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4 text-gray-700">Images and Media</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Images <span className="text-red-500">(*)</span>
-              </label>
-              <input
-                type="file"
-                multiple
-                onChange={handleImageChange}
-                accept="image/*"
-                className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                3D Model
-              </label>
-              <input
-                type="file"
-                onChange={(e) => setModel(e.target.files[0])}
-                accept=".glb,.gltf"
-                className="w-full p-2 border border-gray-300 rounded-md"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                360° Images
-              </label>
-              <input
-                type="file"
-                multiple
-                onChange={handleWeb360Change}
-                accept="image/*"
-                className="w-full p-2 border border-gray-300 rounded-md"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Video
-              </label>
-              <input
-                type="file"
-                onChange={handleVideoChange}
-                accept="video/*"
-                className="w-full p-2 border border-gray-300 rounded-md"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end pt-4">
-          <button
-            className="bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold py-2 px-6 rounded-md hover:from-red-600 hover:to-orange-600 transition ease-in-out duration-150"
-            type="submit"
-          >
-            Post Listing
-          </button>
-        </div>
-      </form>
-    </div>
-  );
+    );
 };
 
 export default AddRoom;

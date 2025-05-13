@@ -18,6 +18,8 @@ import FloatingButtons from "./components/FloatingButtons";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { login } from "./redux/slice/Authslice";
+import Payment from './pages/Payment';
+import PaymentResult from './pages/PaymentResult';
 
 export default function App() {
   const queryClient = new QueryClient();
@@ -67,6 +69,8 @@ export default function App() {
                 <Route path="/news" element={<News />} />
                 <Route path="/news/:id" element={<NewsDetail />} />
                 <Route path="/room-detail/:roomId" element={<RoomDetail />} />
+                <Route path="/payment" element={<Payment />} />
+                <Route path="/payment/result" element={<PaymentResult />} />
               </Routes>
               <WhyUs />
               <FloatingButtons />

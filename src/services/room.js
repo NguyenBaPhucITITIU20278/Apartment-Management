@@ -138,12 +138,16 @@ export const searchRooms = async ({ address }) => {
 
 export const addRoomWithModel = async (formData) => {
   try {
-    const headers = getHeaders();
+    const token = Cookies.get('Authorization');
+    if (!token) {
+      throw new Error("Access token is missing");
+    }
+
     const response = await axios.post(`${API_URL}/add-room-with-model`, formData, {
       headers: {
-        ...headers,
-        "Content-Type": "multipart/form-data",
-      },
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+      }
     });
     return response.data;
   } catch (error) {
@@ -188,8 +192,16 @@ export const deleteRoomWeb360 = async (roomId, web360Name) => {
 
 export const deleteEntireRoom = async (roomId) => {
   try {
-    const headers = getHeaders(); // Ensure headers include Authorization
-    const response = await axios.delete(`${API_URL}/delete-room/${roomId}`, { headers });
+    const token = Cookies.get('Authorization');
+    if (!token) {
+      throw new Error("Access token is missing");
+    }
+
+    const response = await axios.delete(`${API_URL}/delete-room/${roomId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     return response.data;
   } catch (error) {
     console.error("Error deleting entire room:", error);
