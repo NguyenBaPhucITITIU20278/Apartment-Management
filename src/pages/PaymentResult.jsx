@@ -6,7 +6,7 @@ import { addRoomWithModel } from '../services/room';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://apartment-backend-30kj.onrender.com/api';
 
 const PaymentResult = () => {
     const navigate = useNavigate();
