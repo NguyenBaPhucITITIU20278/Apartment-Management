@@ -37,74 +37,63 @@ const PaymentResult = () => {
         const formDataToSend = new FormData();
     
         try {
-            // Check payment processed
-            const isProcessed = await checkPaymentProcessed(roomData.paymentId);
-            if (isProcessed) {
-                console.log('Payment already processed:', roomData.paymentId);
-                return null;
+            // Get saved room data
+            const savedData = sessionStorage.getItem('pendingRoomData');
+            if (!savedData) {
+                throw new Error('No room data found in session storage');
             }
-    
+
+            const { roomData: savedRoomData } = JSON.parse(savedData);
+            
             // Append room data
-            formDataToSend.append('data', JSON.stringify(roomData));
-    
-            // Lấy files từ IndexedDB
-            const files = await getFilesFromIndexedDB();
-            if (files) {
-                const pendingRoomData = JSON.parse(sessionStorage.getItem('pendingRoomData'));
-                const { filesMetadata } = pendingRoomData;
-    
-                // Restore images
-                if (filesMetadata.images.length > 0) {
-                    filesMetadata.images.forEach((metadata, index) => {
-                        const arrayBuffer = files[`image_${index}`];
-                        if (arrayBuffer) {
-                            const blob = new Blob([arrayBuffer], { type: metadata.type });
-                            formDataToSend.append('files', blob, metadata.name);
-                        }
+            formDataToSend.append('data', JSON.stringify({
+                ...roomData,
+                paymentId: roomData.paymentId
+            }));
+            
+            // Add files if they exist
+            if (savedRoomData.files) {
+                // Add images
+                if (savedRoomData.files.images && savedRoomData.files.images.length > 0) {
+                    savedRoomData.files.images.forEach((image, index) => {
+                        formDataToSend.append('files', image);
                     });
                 }
-    
-                // Restore 3D model
-                if (filesMetadata.model3D) {
-                    const modelArrayBuffer = files['model3D'];
-                    if (modelArrayBuffer) {
-                        const blob = new Blob([modelArrayBuffer], { type: filesMetadata.model3D.type });
-                        formDataToSend.append('model', blob, filesMetadata.model3D.name);
-                    }
+                
+                // Add video
+                if (savedRoomData.files.video) {
+                    formDataToSend.append('video', savedRoomData.files.video);
                 }
-    
-                // Restore 360 views
-                if (filesMetadata.view360.length > 0) {
-                    filesMetadata.view360.forEach((metadata, index) => {
-                        const arrayBuffer = files[`view360_${index}`];
-                        if (arrayBuffer) {
-                            const blob = new Blob([arrayBuffer], { type: metadata.type });
-                            formDataToSend.append('web360', blob, metadata.name);
-                        }
+                
+                // Add 3D model
+                if (savedRoomData.files.model3D) {
+                    formDataToSend.append('model', savedRoomData.files.model3D);
+                }
+                
+                // Add 360 views
+                if (savedRoomData.files.view360 && savedRoomData.files.view360.length > 0) {
+                    savedRoomData.files.view360.forEach((view, index) => {
+                        formDataToSend.append('web360', view);
                     });
-                }
-    
-                // Restore video
-                if (filesMetadata.video) {
-                    const videoArrayBuffer = files['video'];
-                    if (videoArrayBuffer) {
-                        const blob = new Blob([videoArrayBuffer], { type: filesMetadata.video.type });
-                        formDataToSend.append('video', blob, filesMetadata.video.name);
-                    }
                 }
             }
     
             console.log('Attempting to create room with payment ID:', roomData.paymentId);
             
-            const response = await addRoomWithModel(formDataToSend);
+            const response = await axios.post(`${API_URL}/rooms/add-room-with-model`, formDataToSend, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
             console.log('Room creation response:', response);
     
-            // Clean up
-            await clearIndexedDB();
+            // Clean up storage
             sessionStorage.removeItem('pendingRoomData');
             sessionStorage.removeItem('paymentInfo');
     
-            return response;
+            return response.data;
         } catch (error) {
             console.error('Error creating room:', error.response?.data || error.message);
             throw error;

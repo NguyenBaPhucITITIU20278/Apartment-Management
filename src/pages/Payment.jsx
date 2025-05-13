@@ -73,7 +73,7 @@ const Payment = () => {
                         orderId: paymentResponse.orderId
                     }
                 };
-                localStorage.setItem('pendingRoomData', JSON.stringify(pendingData));
+                sessionStorage.setItem('pendingRoomData', JSON.stringify(pendingData));
                 
                 // Redirect to MoMo payment page
                 window.location.href = paymentResponse.payUrl;
