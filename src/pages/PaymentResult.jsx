@@ -31,9 +31,11 @@ const PaymentResult = () => {
                 throw new Error('No room data found in session storage');
             }
 
-            const { roomData: savedRoomData } = JSON.parse(savedData);
-            
-            // Prepare room data without date fields first
+            const parsedData = JSON.parse(savedData);
+            const savedRoomData = parsedData.roomData;
+            console.log('Parsed room data:', savedRoomData);
+
+            // Prepare room data without file fields
             const roomDataToSend = {
                 ...savedRoomData,
                 paymentId: roomData.paymentId
@@ -45,7 +47,7 @@ const PaymentResult = () => {
             delete roomDataToSend.videoPaths;
             delete roomDataToSend.modelPath;
             delete roomDataToSend.web360Paths;
-            delete roomDataToSend.postedTime; // Remove any existing postedTime
+            delete roomDataToSend.postedTime;
 
             // Convert to string and parse back to ensure clean object
             const cleanRoomData = JSON.parse(JSON.stringify(roomDataToSend));
@@ -54,37 +56,66 @@ const PaymentResult = () => {
             // Append room data
             formDataToSend.append('data', JSON.stringify(cleanRoomData));
             
-            // Add files if they exist in savedRoomData
-            if (savedRoomData.files) {
-                // Add images
-                if (savedRoomData.files.images && savedRoomData.files.images.length > 0) {
-                    savedRoomData.files.images.forEach(image => {
-                        formDataToSend.append('files', image);
+            // Handle files
+            const files = savedRoomData.files;
+            console.log('Files from savedRoomData:', files);
+
+            if (files) {
+                // Handle images
+                if (files.images && files.images.length > 0) {
+                    console.log('Processing images:', files.images);
+                    files.images.forEach((image, index) => {
+                        // Convert base64/blob URL back to File if necessary
+                        if (typeof image === 'string' && image.startsWith('data:')) {
+                            const file = dataURLtoFile(image, `image${index}.jpg`);
+                            formDataToSend.append('files', file);
+                        } else if (image instanceof File) {
+                            formDataToSend.append('files', image);
+                        }
                     });
                 }
-                
-                // Add video
-                if (savedRoomData.files.video) {
-                    formDataToSend.append('video', savedRoomData.files.video);
+
+                // Handle video
+                if (files.video) {
+                    console.log('Processing video:', files.video);
+                    if (typeof files.video === 'string' && files.video.startsWith('data:')) {
+                        const file = dataURLtoFile(files.video, 'video.mp4');
+                        formDataToSend.append('video', file);
+                    } else if (files.video instanceof File) {
+                        formDataToSend.append('video', files.video);
+                    }
                 }
-                
-                // Add 3D model
-                if (savedRoomData.files.model3D) {
-                    formDataToSend.append('model', savedRoomData.files.model3D);
+
+                // Handle 3D model
+                if (files.model3D) {
+                    console.log('Processing 3D model:', files.model3D);
+                    if (typeof files.model3D === 'string' && files.model3D.startsWith('data:')) {
+                        const file = dataURLtoFile(files.model3D, 'model.glb');
+                        formDataToSend.append('model', file);
+                    } else if (files.model3D instanceof File) {
+                        formDataToSend.append('model', files.model3D);
+                    }
                 }
-                
-                // Add 360 views
-                if (savedRoomData.files.view360 && savedRoomData.files.view360.length > 0) {
-                    savedRoomData.files.view360.forEach(view => {
-                        formDataToSend.append('web360', view);
+
+                // Handle 360 views
+                if (files.view360 && files.view360.length > 0) {
+                    console.log('Processing 360 views:', files.view360);
+                    files.view360.forEach((view, index) => {
+                        if (typeof view === 'string' && view.startsWith('data:')) {
+                            const file = dataURLtoFile(view, `360view${index}.jpg`);
+                            formDataToSend.append('web360', file);
+                        } else if (view instanceof File) {
+                            formDataToSend.append('web360', view);
+                        }
                     });
                 }
             }
-    
-            console.log('FormData being sent:');
+
+            // Log FormData contents
+            console.log('FormData contents:');
             for (let pair of formDataToSend.entries()) {
                 if (pair[1] instanceof File) {
-                    console.log(pair[0], pair[1].name);
+                    console.log(pair[0], pair[1].name, pair[1].size);
                 } else {
                     console.log(pair[0], pair[1]);
                 }
@@ -103,6 +134,25 @@ const PaymentResult = () => {
             setError(error.message);
             throw error;
         }
+    };
+
+    // Helper function to convert data URL to File
+    const dataURLtoFile = (dataurl, filename) => {
+        if (!dataurl) return null;
+        
+        const arr = dataurl.split(',');
+        if (arr.length < 2) return null;
+        
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        
+        while(n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        
+        return new File([u8arr], filename, {type: mime});
     };
 
     useEffect(() => {
