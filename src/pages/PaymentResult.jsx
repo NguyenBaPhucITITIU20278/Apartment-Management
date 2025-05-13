@@ -37,7 +37,7 @@ const PaymentResult = () => {
             const roomDataToSend = {
                 ...savedRoomData,
                 paymentId: roomData.paymentId,
-                postedTime: new Date().toISOString()
+                postedTime: new Date().toISOString().replace('Z', '')
             };
             
             // Remove file references from room data
