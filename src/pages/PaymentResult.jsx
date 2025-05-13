@@ -43,10 +43,6 @@ const PaymentResult = () => {
             const files = await getFiles(orderId);
             console.log('Retrieved files from IndexedDB:', files);
 
-            if (!files) {
-                throw new Error('No files found in storage');
-            }
-
             // Prepare room data
             const roomDataToSend = {
                 ...savedRoomData,
@@ -56,29 +52,33 @@ const PaymentResult = () => {
             // Append room data
             formDataToSend.append('data', JSON.stringify(roomDataToSend));
             
-            // Handle files
-            if (files.images && files.images.length > 0) {
-                console.log('Adding images:', files.images.length);
-                files.images.forEach(image => {
-                    formDataToSend.append('files', image);
-                });
-            }
+            // Handle files if they exist
+            if (files) {
+                if (files.images && files.images.length > 0) {
+                    console.log('Adding images:', files.images.length);
+                    files.images.forEach(image => {
+                        formDataToSend.append('files', image);
+                    });
+                }
 
-            if (files.video) {
-                console.log('Adding video');
-                formDataToSend.append('video', files.video);
-            }
+                if (files.video) {
+                    console.log('Adding video');
+                    formDataToSend.append('video', files.video);
+                }
 
-            if (files.model3D) {
-                console.log('Adding 3D model');
-                formDataToSend.append('model', files.model3D);
-            }
+                if (files.model3D) {
+                    console.log('Adding 3D model');
+                    formDataToSend.append('model', files.model3D);
+                }
 
-            if (files.view360 && files.view360.length > 0) {
-                console.log('Adding 360 views:', files.view360.length);
-                files.view360.forEach(view => {
-                    formDataToSend.append('web360', view);
-                });
+                if (files.view360 && files.view360.length > 0) {
+                    console.log('Adding 360 views:', files.view360.length);
+                    files.view360.forEach(view => {
+                        formDataToSend.append('web360', view);
+                    });
+                }
+            } else {
+                console.log('No files found in storage, proceeding with room data only');
             }
 
             // Log final FormData contents

@@ -49,6 +49,7 @@ const Payment = () => {
         try {
             setLoading(true);
             console.log('Starting payment process...');
+            console.log('Original room data:', roomData);
             
             // Create payment request
             const paymentResponse = await createMomoPayment(
@@ -59,16 +60,42 @@ const Payment = () => {
             console.log('Payment response:', paymentResponse);
 
             if (paymentResponse.payUrl) {
-                // Save files to IndexedDB
-                const files = {
-                    images: roomData.files || [],
-                    video: roomData.videoFile || null,
-                    model3D: roomData.modelFile || null,
-                    view360: roomData.web360Files || []
+                // Prepare files object
+                const filesToSave = {
+                    images: [],
+                    video: null,
+                    model3D: null,
+                    view360: []
                 };
 
-                console.log('Saving files to IndexedDB:', files);
-                await saveFiles(paymentResponse.orderId, files);
+                // Get files from the file input elements
+                const fileInputs = document.querySelectorAll('input[type="file"]');
+                fileInputs.forEach(input => {
+                    if (input.files && input.files.length > 0) {
+                        const files = Array.from(input.files);
+                        if (input.name.includes('image')) {
+                            filesToSave.images.push(...files);
+                        } else if (input.name.includes('video')) {
+                            filesToSave.video = files[0];
+                        } else if (input.name.includes('model')) {
+                            filesToSave.model3D = files[0];
+                        } else if (input.name.includes('360')) {
+                            filesToSave.view360.push(...files);
+                        }
+                    }
+                });
+
+                console.log('Files to save:', filesToSave);
+
+                try {
+                    // Save files to IndexedDB
+                    await saveFiles(paymentResponse.orderId, filesToSave);
+                    console.log('Files saved to IndexedDB successfully');
+                } catch (error) {
+                    console.error('Error saving files to IndexedDB:', error);
+                    message.error('Failed to save files');
+                    return;
+                }
 
                 // Save room data without files to sessionStorage
                 const pendingData = {
