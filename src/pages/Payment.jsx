@@ -14,6 +14,12 @@ const Payment = () => {
     const [selectedDuration, setSelectedDuration] = useState(1);
     const roomData = location.state?.roomData;
     const [currentPackage, setCurrentPackage] = useState(null);
+    const [selectedImages, setSelectedImages] = useState([]);
+    const [model3DFile, setModel3DFile] = useState(null);
+    const [view360Files, setView360Files] = useState([]);
+    const [videoFile, setVideoFile] = useState(null);
+    const [orderId, setOrderId] = useState(null);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (roomData) {
@@ -45,7 +51,8 @@ const Payment = () => {
         return currentPackage.price * selectedDuration;
     };
 
-    const handlePayment = async () => {
+    const handlePayment = async (e) => {
+        e.preventDefault();
         try {
             setLoading(true);
             console.log('Starting payment process...');
@@ -60,42 +67,16 @@ const Payment = () => {
             console.log('Payment response:', paymentResponse);
 
             if (paymentResponse.payUrl) {
-                // Prepare files object
-                const filesToSave = {
-                    images: [],
-                    video: null,
-                    model3D: null,
-                    view360: []
+                // Save files to IndexedDB with correct names
+                const files = {
+                    images: selectedImages,
+                    model: model3DFile,
+                    web360: view360Files,
+                    video: videoFile
                 };
-
-                // Get files from the file input elements
-                const fileInputs = document.querySelectorAll('input[type="file"]');
-                fileInputs.forEach(input => {
-                    if (input.files && input.files.length > 0) {
-                        const files = Array.from(input.files);
-                        if (input.name.includes('image')) {
-                            filesToSave.images.push(...files);
-                        } else if (input.name.includes('video')) {
-                            filesToSave.video = files[0];
-                        } else if (input.name.includes('model')) {
-                            filesToSave.model3D = files[0];
-                        } else if (input.name.includes('360')) {
-                            filesToSave.view360.push(...files);
-                        }
-                    }
-                });
-
-                console.log('Files to save:', filesToSave);
-
-                try {
-                    // Save files to IndexedDB
-                    await saveFiles(paymentResponse.orderId, filesToSave);
-                    console.log('Files saved to IndexedDB successfully');
-                } catch (error) {
-                    console.error('Error saving files to IndexedDB:', error);
-                    message.error('Failed to save files');
-                    return;
-                }
+                
+                await saveFiles(paymentResponse.orderId, files);
+                console.log('Files saved to IndexedDB with correct names');
 
                 // Save room data without files to sessionStorage
                 const pendingData = {
@@ -127,8 +108,8 @@ const Payment = () => {
                 message.error('Failed to create payment');
             }
         } catch (error) {
-            console.error('Payment error:', error);
-            message.error('Payment creation failed');
+            console.error('Error in payment process:', error);
+            setError('Payment processing failed. Please try again.');
         } finally {
             setLoading(false);
         }

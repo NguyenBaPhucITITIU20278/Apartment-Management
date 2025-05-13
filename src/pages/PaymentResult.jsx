@@ -5,6 +5,7 @@ import { cancelMomoPayment } from '../services/momoService';
 import { addRoomWithModel } from '../services/room';
 import { getFiles, deleteFiles } from '../services/fileStorage';
 import Cookies from 'js-cookie';
+import axios from 'axios';
 
 const PaymentResult = () => {
     console.log('PaymentResult component rendered');
@@ -13,7 +14,7 @@ const PaymentResult = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState(null);
 
-    const handleRoomCreation = async (roomData, orderId) => {
+    const handleRoomCreation = async (roomData, files) => {
         const token = Cookies.get('Authorization') || localStorage.getItem('Authorization');
         console.log('Token available:', !!token);
         
@@ -24,90 +25,57 @@ const PaymentResult = () => {
         const formDataToSend = new FormData();
     
         try {
-            // Get saved room data
-            const savedData = sessionStorage.getItem('pendingRoomData');
-            console.log('Raw saved data:', savedData);
+            // Add room data
+            formDataToSend.append('data', JSON.stringify(roomData));
             
-            if (!savedData) {
-                throw new Error('No room data found in session storage');
+            // Add images
+            if (files.images && files.images.length > 0) {
+                console.log('Adding images:', files.images.length);
+                files.images.forEach(image => {
+                    formDataToSend.append('files', image);
+                });
             }
 
-            const parsedData = JSON.parse(savedData);
-            console.log('Parsed saved data:', parsedData);
-            
-            const savedRoomData = parsedData.roomData;
-            console.log('Room data from storage:', savedRoomData);
-
-            // Get files from IndexedDB
-            console.log('Getting files from IndexedDB for orderId:', orderId);
-            const files = await getFiles(orderId);
-            console.log('Retrieved files from IndexedDB:', files);
-
-            // Prepare room data
-            const roomDataToSend = {
-                ...savedRoomData,
-                paymentId: roomData.paymentId
-            };
-
-            // Append room data
-            formDataToSend.append('data', JSON.stringify(roomDataToSend));
-            
-            // Handle files if they exist
-            if (files) {
-                if (files.images && files.images.length > 0) {
-                    console.log('Adding images:', files.images.length);
-                    files.images.forEach(image => {
-                        formDataToSend.append('files', image);
-                    });
-                }
-
-                if (files.video) {
-                    console.log('Adding video');
-                    formDataToSend.append('video', files.video);
-                }
-
-                if (files.model3D) {
-                    console.log('Adding 3D model');
-                    formDataToSend.append('model', files.model3D);
-                }
-
-                if (files.view360 && files.view360.length > 0) {
-                    console.log('Adding 360 views:', files.view360.length);
-                    files.view360.forEach(view => {
-                        formDataToSend.append('web360', view);
-                    });
-                }
-            } else {
-                console.log('No files found in storage, proceeding with room data only');
+            // Add 3D model - send as array to match backend expectation
+            if (files.model) {
+                console.log('Adding 3D model');
+                formDataToSend.append('model', files.model);
             }
 
-            // Log final FormData contents
-            console.log('Final FormData contents:');
-            for (let pair of formDataToSend.entries()) {
-                if (pair[1] instanceof File) {
-                    console.log(pair[0], '(File):', {
-                        name: pair[1].name,
-                        type: pair[1].type,
-                        size: pair[1].size
-                    });
-                } else {
-                    console.log(pair[0], '(Data):', pair[1]);
-                }
+            // Add 360 views
+            if (files.web360 && files.web360.length > 0) {
+                console.log('Adding 360 views:', files.web360.length);
+                files.web360.forEach(view => {
+                    formDataToSend.append('web360', view);
+                });
             }
-            
-            const response = await addRoomWithModel(formDataToSend);
-            console.log('Room creation response:', response);
-    
-            // Clean up storage
-            await deleteFiles(orderId);
-            sessionStorage.removeItem('pendingRoomData');
-            sessionStorage.removeItem('paymentInfo');
-    
-            return response;
+
+            // Add video
+            if (files.video) {
+                console.log('Adding video');
+                formDataToSend.append('video', files.video);
+            }
+
+            // Log FormData contents for debugging
+            for (let [key, value] of formDataToSend.entries()) {
+                console.log(`FormData contains - ${key}:`, value instanceof File ? value.name : value);
+            }
+
+            const response = await axios.post(
+                `${API_BASE_URL}/api/rooms/add-room-with-model`,
+                formDataToSend,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data',
+                    }
+                }
+            );
+
+            console.log('Room creation response:', response.data);
+            return response.data;
         } catch (error) {
             console.error('Error creating room:', error);
-            console.error('Error details:', error.response?.data || error.message);
-            setError(error.message);
             throw error;
         }
     };
