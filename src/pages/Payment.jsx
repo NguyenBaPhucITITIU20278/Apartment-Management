@@ -58,15 +58,23 @@ const Payment = () => {
             console.log('Payment response:', paymentResponse);
 
             if (paymentResponse.payUrl) {
+                console.log('Original room data:', roomData);
+                console.log('Files to save:', {
+                    images: roomData.imagePaths,
+                    video: roomData.videoPaths,
+                    model3D: roomData.modelPath,
+                    view360: roomData.web360Paths
+                });
+
                 // Save room data and payment info to sessionStorage
                 const pendingData = {
                     roomData: {
                         ...roomData,
                         files: {
-                            images: roomData.imagePaths,
-                            video: roomData.videoPaths,
-                            model3D: roomData.modelPath,
-                            view360: roomData.web360Paths
+                            images: roomData.files || [], // Use the original files array
+                            video: roomData.videoFile || null, // Use the original video file
+                            model3D: roomData.modelFile || null, // Use the original model file
+                            view360: roomData.web360Files || [] // Use the original 360 files array
                         }
                     },
                     paymentInfo: {
@@ -77,7 +85,7 @@ const Payment = () => {
                     }
                 };
 
-                console.log('Saving to sessionStorage:', pendingData);
+                console.log('Data being saved to sessionStorage:', pendingData);
                 sessionStorage.setItem('pendingRoomData', JSON.stringify(pendingData));
                 
                 console.log('Redirecting to:', paymentResponse.payUrl);
