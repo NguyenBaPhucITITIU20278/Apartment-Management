@@ -10,9 +10,12 @@ const PaymentResult = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [isProcessing, setIsProcessing] = useState(false);
+    const [error, setError] = useState(null);
 
     const handleRoomCreation = async (roomData) => {
-        const token = Cookies.get('Authorization');
+        const token = Cookies.get('Authorization') || localStorage.getItem('Authorization');
+        console.log('Token available:', !!token);
+        
         if (!token) {
             throw new Error('No authorization token found');
         }
@@ -22,6 +25,8 @@ const PaymentResult = () => {
         try {
             // Get saved room data
             const savedData = sessionStorage.getItem('pendingRoomData');
+            console.log('Saved room data:', savedData);
+            
             if (!savedData) {
                 throw new Error('No room data found in session storage');
             }
@@ -85,6 +90,7 @@ const PaymentResult = () => {
             return response;
         } catch (error) {
             console.error('Error creating room:', error.response?.data || error.message);
+            setError(error.message);
             throw error;
         }
     };
@@ -168,7 +174,7 @@ const PaymentResult = () => {
                         if (result) {
                             message.success('Room created successfully!');
                         }
-
+                        
                         // Navigate home
                         navigate('/');
                     }

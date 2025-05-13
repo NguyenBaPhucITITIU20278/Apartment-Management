@@ -29,7 +29,7 @@ export default function App() {
     // Check if user is logged in from localStorage
     const token = localStorage.getItem('Authorization');
     const role = localStorage.getItem('role');
-    console.log('App initialization - localStorage:', { token, role });
+
     
     if (token && role) {
       console.log('Dispatching login with role:', role);
