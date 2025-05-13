@@ -54,27 +54,34 @@ const PaymentResult = () => {
             
             // Handle files if they exist
             if (files) {
+                // Handle images
                 if (files.images && files.images.length > 0) {
                     console.log('Adding images:', files.images.length);
-                    files.images.forEach(image => {
-                        formDataToSend.append('files', image);
+                    files.images.forEach((image, index) => {
+                        formDataToSend.append(`files`, image);
+                        console.log(`Added image ${index}:`, image.name);
                     });
                 }
 
+                // Handle video
                 if (files.video) {
-                    console.log('Adding video');
+                    console.log('Adding video:', files.video.name);
                     formDataToSend.append('video', files.video);
                 }
 
+                // Handle 3D model
                 if (files.model3D) {
-                    console.log('Adding 3D model');
-                    formDataToSend.append('model[]', files.model3D);
+                    console.log('Adding 3D model:', files.model3D.name);
+                    // Create an array with a single model file
+                    formDataToSend.append('model', files.model3D);
                 }
 
+                // Handle 360 views
                 if (files.view360 && files.view360.length > 0) {
                     console.log('Adding 360 views:', files.view360.length);
-                    files.view360.forEach(view => {
+                    files.view360.forEach((view, index) => {
                         formDataToSend.append('web360', view);
+                        console.log(`Added 360 view ${index}:`, view.name);
                     });
                 }
             } else {
