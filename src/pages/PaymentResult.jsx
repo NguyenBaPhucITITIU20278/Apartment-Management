@@ -6,6 +6,7 @@ import { addRoomWithModel } from '../services/room';
 import Cookies from 'js-cookie';
 
 const PaymentResult = () => {
+    console.log('PaymentResult component rendered');
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [isProcessing, setIsProcessing] = useState(false);
@@ -92,18 +93,24 @@ const PaymentResult = () => {
         let isMounted = true;
 
         const handlePaymentResult = async () => {
+            console.log('Starting payment result handling...');
             if (isProcessing) {
+                console.log('Already processing, skipping...');
                 return;
             }
 
             setIsProcessing(true);
+            console.log('Set processing to true');
 
             try {
                 const resultCode = searchParams.get('resultCode');
                 const orderId = searchParams.get('orderId');
                 const paymentMessage = searchParams.get('message');
 
+                console.log('Payment response:', { resultCode, orderId, paymentMessage });
+
                 if (!resultCode || !orderId) {
+                    console.error('Missing resultCode or orderId');
                     message.error('Invalid payment response');
                     navigate('/');
                     return;
@@ -111,12 +118,16 @@ const PaymentResult = () => {
 
                 // Get payment ID from orderId (format: paymentId_timestamp)
                 const paymentId = orderId.split('_')[0];
+                console.log('Extracted payment ID:', paymentId);
 
                 // Get saved room data
                 const savedData = sessionStorage.getItem('pendingRoomData');
                 const paymentInfo = sessionStorage.getItem('paymentInfo');
 
+                console.log('Saved data from session:', { savedData, paymentInfo });
+
                 if (!savedData || !paymentInfo) {
+                    console.error('Missing saved data or payment info');
                     message.error('No room data or payment info found');
                     navigate('/');
                     return;
@@ -125,14 +136,20 @@ const PaymentResult = () => {
                 const { roomData, selectedFeatures, currentPackage } = JSON.parse(savedData);
                 const { price, packageCode } = JSON.parse(paymentInfo);
 
+                console.log('Parsed room data:', roomData);
+                console.log('Package info:', { selectedFeatures, currentPackage, price, packageCode });
+
                 try {
                     // Handle payment status first
                     if (resultCode === '0') {
+                        console.log('Payment successful');
                         message.success('Payment successful!');
                     } else if (resultCode === '1006') {
+                        console.log('Payment cancelled, proceeding with room creation');
                         await cancelMomoPayment(paymentId);
                         message.info('Payment cancelled but room will still be created');
                     } else {
+                        console.error('Payment failed:', paymentMessage);
                         message.error(`Payment failed: ${paymentMessage}`);
                         navigate('/');
                         return;
@@ -140,10 +157,14 @@ const PaymentResult = () => {
 
                     // Add payment ID to room data
                     roomData.paymentId = paymentId;
+                    console.log('Updated room data with payment ID:', roomData);
 
                     if (isMounted) {
+                        console.log('Attempting room creation...');
                         // Create room
                         const result = await handleRoomCreation(roomData);
+                        console.log('Room creation result:', result);
+                        
                         if (result) {
                             message.success('Room created successfully!');
                         }
@@ -166,6 +187,7 @@ const PaymentResult = () => {
                 }
             } finally {
                 if (isMounted) {
+                    console.log('Finishing payment process...');
                     setIsProcessing(false);
                 }
             }

@@ -137,8 +137,11 @@ export const searchRooms = async ({ address }) => {
 };
 
 export const addRoomWithModel = async (formData) => {
+  console.log('Starting addRoomWithModel...');
   try {
     const token = Cookies.get('Authorization');
+    console.log('Token retrieved:', token ? 'Token exists' : 'No token');
+    
     if (!token) {
       throw new Error("Access token is missing");
     }
@@ -146,9 +149,16 @@ export const addRoomWithModel = async (formData) => {
     // Log the FormData contents for debugging
     console.log('FormData contents:');
     for (let pair of formData.entries()) {
-      console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+      if (pair[1] instanceof File) {
+        console.log(`${pair[0]}: File - ${pair[1].name} (${pair[1].size} bytes)`);
+      } else if (pair[0] === 'data') {
+        console.log(`${pair[0]}: ${pair[1].substring(0, 100)}...`); // Log first 100 chars of data
+      } else {
+        console.log(`${pair[0]}: ${pair[1]}`);
+      }
     }
 
+    console.log('Making API request to:', `${API_URL}/add-room-with-model`);
     const response = await axios.post(`${API_URL}/add-room-with-model`, formData, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -156,13 +166,19 @@ export const addRoomWithModel = async (formData) => {
       }
     });
     
-    console.log("API Response:", response);
+    console.log("API Response status:", response.status);
+    console.log("API Response data:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error adding room with model:", error);
+    console.error("Error in addRoomWithModel:");
+    console.error("Error name:", error.name);
+    console.error("Error message:", error.message);
     if (error.response) {
-      console.error("Server response:", error.response.data);
-      console.error("Status code:", error.response.status);
+      console.error("Server response status:", error.response.status);
+      console.error("Server response data:", error.response.data);
+      console.error("Server response headers:", error.response.headers);
+    } else if (error.request) {
+      console.error("No response received. Request:", error.request);
     }
     throw error;
   }

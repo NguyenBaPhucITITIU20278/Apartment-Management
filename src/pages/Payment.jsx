@@ -47,6 +47,7 @@ const Payment = () => {
     const handlePayment = async () => {
         try {
             setLoading(true);
+            console.log('Starting payment process...');
             
             // Create payment request
             const paymentResponse = await createMomoPayment(
@@ -54,8 +55,10 @@ const Payment = () => {
                 `Room Posting - ${currentPackage.name} Package (${selectedDuration} month${selectedDuration > 1 ? 's' : ''})`
             );
 
+            console.log('Payment response:', paymentResponse);
+
             if (paymentResponse.payUrl) {
-                // Save room data and payment info to localStorage
+                // Save room data and payment info to sessionStorage
                 const pendingData = {
                     roomData: {
                         ...roomData,
@@ -73,8 +76,11 @@ const Payment = () => {
                         orderId: paymentResponse.orderId
                     }
                 };
+
+                console.log('Saving to sessionStorage:', pendingData);
                 sessionStorage.setItem('pendingRoomData', JSON.stringify(pendingData));
                 
+                console.log('Redirecting to:', paymentResponse.payUrl);
                 // Redirect to MoMo payment page
                 window.location.href = paymentResponse.payUrl;
             } else {
