@@ -149,6 +149,8 @@ export const addRoomWithModel = async (formData) => {
         'Content-Type': 'multipart/form-data'
       }
     });
+    
+    console.log("API Response:", response); // Thêm log để debug
     return response.data;
   } catch (error) {
     console.error("Error adding room with model:", error);

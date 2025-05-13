@@ -3,30 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { message, Spin } from 'antd';
 import { cancelMomoPayment } from '../services/momoService';
 import { addRoomWithModel } from '../services/room';
-import axios from 'axios';
 import Cookies from 'js-cookie';
-
-const API_URL = process.env.REACT_APP_API_URL || 'https://apartment-backend-30kj.onrender.com/api';
 
 const PaymentResult = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [isProcessing, setIsProcessing] = useState(false);
-
-    const checkPaymentProcessed = async (paymentId) => {
-        try {
-            const token = Cookies.get('Authorization');
-            const response = await axios.get(`${API_URL}/rooms/check-payment/${paymentId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            return response.data.processed;
-        } catch (error) {
-            console.error('Error checking payment status:', error);
-            return false;
-        }
-    };
 
     const handleRoomCreation = async (roomData) => {
         const token = Cookies.get('Authorization');
@@ -80,160 +62,17 @@ const PaymentResult = () => {
     
             console.log('Attempting to create room with payment ID:', roomData.paymentId);
             
-            const response = await axios.post(`${API_URL}/rooms/add-room-with-model`, formDataToSend, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            
+            const response = await addRoomWithModel(formDataToSend);
             console.log('Room creation response:', response);
     
             // Clean up storage
             sessionStorage.removeItem('pendingRoomData');
             sessionStorage.removeItem('paymentInfo');
     
-            return response.data;
+            return response;
         } catch (error) {
             console.error('Error creating room:', error.response?.data || error.message);
             throw error;
-        }
-    };
-    
-    // Hàm để lấy files từ IndexedDB
-    const getFilesFromIndexedDB = () => {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open('RoomFiles', 1);
-    
-            request.onerror = () => {
-                reject(new Error('Failed to open IndexedDB'));
-            };
-    
-            request.onsuccess = (event) => {
-                const db = event.target.result;
-                const transaction = db.transaction(['files'], 'readonly');
-                const store = transaction.objectStore('files');
-    
-                const getRequest = store.get('currentFiles');
-    
-                transaction.oncomplete = () => {
-                    db.close();
-                };
-    
-                getRequest.onsuccess = () => {
-                    resolve(getRequest.result);
-                };
-    
-                getRequest.onerror = () => {
-                    db.close();
-                    reject(new Error('Failed to get files'));
-                };
-            };
-        });
-    };
-    
-    // Hàm để xóa dữ liệu trong IndexedDB
-    const clearIndexedDB = () => {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open('RoomFiles', 1);
-    
-            request.onerror = () => {
-                reject(new Error('Failed to open IndexedDB'));
-            };
-    
-            request.onsuccess = (event) => {
-                const db = event.target.result;
-                const transaction = db.transaction(['files'], 'readwrite');
-                const store = transaction.objectStore('files');
-    
-                const clearRequest = store.clear();
-    
-                transaction.oncomplete = () => {
-                    db.close();
-                    resolve();
-                };
-    
-                clearRequest.onerror = () => {
-                    db.close();
-                    reject(new Error('Failed to clear IndexedDB'));
-                };
-            };
-        });
-    };
-
-    const saveFormDataToIndexedDB = async (formData) => {
-        return new Promise(async (resolve, reject) => {
-            try {
-                // Chuyển đổi tất cả files thành ArrayBuffer trước
-                const filesObject = {};
-                for (const [key, value] of formData.entries()) {
-                    if (value instanceof File) {
-                        filesObject[key] = await new Promise((resolve) => {
-                            const reader = new FileReader();
-                            reader.onloadend = () => resolve(reader.result);
-                            reader.readAsArrayBuffer(value);
-                        });
-                    } else {
-                        filesObject[key] = value;
-                    }
-                }
-
-                // Sau khi có tất cả ArrayBuffer, mở IndexedDB và lưu trữ
-                const request = indexedDB.open('RoomFiles', 1);
-
-                request.onerror = () => {
-                    reject(new Error('Failed to open IndexedDB'));
-                };
-
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    if (!db.objectStoreNames.contains('files')) {
-                        db.createObjectStore('files');
-                    }
-                };
-
-                request.onsuccess = (event) => {
-                    const db = event.target.result;
-                    const transaction = db.transaction(['files'], 'readwrite');
-                    const store = transaction.objectStore('files');
-
-                    const storeRequest = store.put(filesObject, 'currentFiles');
-
-                    storeRequest.onsuccess = () => {
-                        resolve();
-                    };
-
-                    storeRequest.onerror = () => {
-                        reject(new Error('Failed to store files'));
-                    };
-
-                    // Xử lý lỗi transaction
-                    transaction.onerror = () => {
-                        reject(new Error('Transaction failed'));
-                    };
-
-                    // Đảm bảo transaction hoàn thành
-                    transaction.oncomplete = () => {
-                        db.close();
-                    };
-                };
-            } catch (error) {
-                reject(error);
-            }
-        });
-    };
-
-    const checkFilesSize = (formData) => {
-        let totalSize = 0;
-        for (const [key, value] of formData.entries()) {
-            if (value instanceof File) {
-                totalSize += value.size;
-            }
-        }
-        // Giới hạn tổng kích thước là 50MB
-        const MAX_SIZE = 50 * 1024 * 1024; // 50MB in bytes
-        if (totalSize > MAX_SIZE) {
-            throw new Error(`Total file size exceeds ${MAX_SIZE / (1024 * 1024)}MB limit`);
         }
     };
 
@@ -297,10 +136,6 @@ const PaymentResult = () => {
                             message.success('Room created successfully!');
                         }
 
-                        // Clean up sessionStorage
-                        sessionStorage.removeItem('pendingRoomData');
-                        sessionStorage.removeItem('paymentInfo');
-                        
                         // Navigate home
                         navigate('/');
                     }
