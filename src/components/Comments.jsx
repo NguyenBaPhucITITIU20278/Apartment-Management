@@ -21,10 +21,11 @@ const Comments = ({ roomId }) => {
     const fetchComments = async () => {
         try {
             const response = await axios.get(`/api/comments/room/${roomId}`);
-            setComments(response.data);
+            setComments(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
             console.error('Error fetching comments:', error);
             toast.error('Failed to load comments');
+            setComments([]);
         }
     };
 
@@ -43,8 +44,7 @@ const Comments = ({ roomId }) => {
             });
             
             setNewComment('');
-            // Add the new comment to the list immediately
-            setComments(prevComments => [...prevComments, response.data]);
+            setComments(prevComments => [...(Array.isArray(prevComments) ? prevComments : []), response.data]);
             toast.success('Comment posted successfully!');
         } catch (error) {
             console.error('Error posting comment:', error);
@@ -89,18 +89,19 @@ const Comments = ({ roomId }) => {
 
             {/* Comments List */}
             <div className="space-y-4">
-                {comments.map((comment) => (
-                    <div key={comment.id} className="bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition duration-200">
-                        <div className="flex justify-between items-start">
-                            <div className="font-medium text-blue-600">{comment.username}</div>
-                            <div className="text-sm text-gray-500">
-                                {format(new Date(comment.createdAt), 'MMM d, yyyy HH:mm')}
+                {Array.isArray(comments) && comments.length > 0 ? (
+                    comments.map((comment) => (
+                        <div key={comment.id} className="bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition duration-200">
+                            <div className="flex justify-between items-start">
+                                <div className="font-medium text-blue-600">{comment.username}</div>
+                                <div className="text-sm text-gray-500">
+                                    {format(new Date(comment.createdAt), 'MMM d, yyyy HH:mm')}
+                                </div>
                             </div>
+                            <p className="mt-2 text-gray-700 whitespace-pre-wrap">{comment.content}</p>
                         </div>
-                        <p className="mt-2 text-gray-700 whitespace-pre-wrap">{comment.content}</p>
-                    </div>
-                ))}
-                {comments.length === 0 && (
+                    ))
+                ) : (
                     <p className="text-gray-500 text-center py-4">No comments yet</p>
                 )}
             </div>
