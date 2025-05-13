@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, Button, message, Row, Col, Typography, Space, Divider, Radio } from 'antd';
 import { POSTING_PACKAGES, getPackageForFeatures } from '../config/postingPackages';
-import { createMomoPayment, createRoomWithPayment } from '../services/payment';
+import { createMomoPayment } from '../services/payment';
+import { saveFiles } from '../services/fileStorage';
 
 const { Title, Text } = Typography;
 
@@ -58,24 +59,22 @@ const Payment = () => {
             console.log('Payment response:', paymentResponse);
 
             if (paymentResponse.payUrl) {
-                console.log('Original room data:', roomData);
-                console.log('Files to save:', {
-                    images: roomData.imagePaths,
-                    video: roomData.videoPaths,
-                    model3D: roomData.modelPath,
-                    view360: roomData.web360Paths
-                });
+                // Save files to IndexedDB
+                const files = {
+                    images: roomData.files || [],
+                    video: roomData.videoFile || null,
+                    model3D: roomData.modelFile || null,
+                    view360: roomData.web360Files || []
+                };
 
-                // Save room data and payment info to sessionStorage
+                console.log('Saving files to IndexedDB:', files);
+                await saveFiles(paymentResponse.orderId, files);
+
+                // Save room data without files to sessionStorage
                 const pendingData = {
                     roomData: {
                         ...roomData,
-                        files: {
-                            images: roomData.files || [], // Use the original files array
-                            video: roomData.videoFile || null, // Use the original video file
-                            model3D: roomData.modelFile || null, // Use the original model file
-                            view360: roomData.web360Files || [] // Use the original 360 files array
-                        }
+                        orderId: paymentResponse.orderId
                     },
                     paymentInfo: {
                         package: currentPackage.name,
@@ -85,11 +84,17 @@ const Payment = () => {
                     }
                 };
 
-                console.log('Data being saved to sessionStorage:', pendingData);
+                // Remove file references from room data
+                delete pendingData.roomData.files;
+                delete pendingData.roomData.imagePaths;
+                delete pendingData.roomData.videoPaths;
+                delete pendingData.roomData.modelPath;
+                delete pendingData.roomData.web360Paths;
+
+                console.log('Saving to sessionStorage:', pendingData);
                 sessionStorage.setItem('pendingRoomData', JSON.stringify(pendingData));
                 
                 console.log('Redirecting to:', paymentResponse.payUrl);
-                // Redirect to MoMo payment page
                 window.location.href = paymentResponse.payUrl;
             } else {
                 message.error('Failed to create payment');

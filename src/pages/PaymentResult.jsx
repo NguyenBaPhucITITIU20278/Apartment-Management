@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { message, Spin } from 'antd';
 import { cancelMomoPayment } from '../services/momoService';
 import { addRoomWithModel } from '../services/room';
+import { getFiles, deleteFiles } from '../services/fileStorage';
 import Cookies from 'js-cookie';
 
 const PaymentResult = () => {
@@ -12,7 +13,7 @@ const PaymentResult = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState(null);
 
-    const handleRoomCreation = async (roomData) => {
+    const handleRoomCreation = async (roomData, orderId) => {
         const token = Cookies.get('Authorization') || localStorage.getItem('Authorization');
         console.log('Token available:', !!token);
         
@@ -37,61 +38,47 @@ const PaymentResult = () => {
             const savedRoomData = parsedData.roomData;
             console.log('Room data from storage:', savedRoomData);
 
-            // Prepare room data without file fields
+            // Get files from IndexedDB
+            console.log('Getting files from IndexedDB for orderId:', orderId);
+            const files = await getFiles(orderId);
+            console.log('Retrieved files from IndexedDB:', files);
+
+            if (!files) {
+                throw new Error('No files found in storage');
+            }
+
+            // Prepare room data
             const roomDataToSend = {
                 ...savedRoomData,
                 paymentId: roomData.paymentId
             };
-            
-            // Remove file references and unnecessary fields
-            delete roomDataToSend.files;
-            delete roomDataToSend.imagePaths;
-            delete roomDataToSend.videoPaths;
-            delete roomDataToSend.modelPath;
-            delete roomDataToSend.web360Paths;
-            delete roomDataToSend.postedTime;
-
-            // Convert to string and parse back to ensure clean object
-            const cleanRoomData = JSON.parse(JSON.stringify(roomDataToSend));
-            console.log('Clean room data to send:', cleanRoomData);
 
             // Append room data
-            formDataToSend.append('data', JSON.stringify(cleanRoomData));
+            formDataToSend.append('data', JSON.stringify(roomDataToSend));
             
             // Handle files
-            const files = savedRoomData.files;
-            console.log('Files to process:', files);
+            if (files.images && files.images.length > 0) {
+                console.log('Adding images:', files.images.length);
+                files.images.forEach(image => {
+                    formDataToSend.append('files', image);
+                });
+            }
 
-            if (files) {
-                // Handle images
-                if (files.images && files.images.length > 0) {
-                    console.log('Processing images:', files.images.length, 'files');
-                    files.images.forEach((image, index) => {
-                        console.log(`Processing image ${index}:`, image);
-                        formDataToSend.append('files', image);
-                    });
-                }
+            if (files.video) {
+                console.log('Adding video');
+                formDataToSend.append('video', files.video);
+            }
 
-                // Handle video
-                if (files.video) {
-                    console.log('Processing video:', files.video);
-                    formDataToSend.append('video', files.video);
-                }
+            if (files.model3D) {
+                console.log('Adding 3D model');
+                formDataToSend.append('model', files.model3D);
+            }
 
-                // Handle 3D model
-                if (files.model3D) {
-                    console.log('Processing 3D model:', files.model3D);
-                    formDataToSend.append('model', files.model3D);
-                }
-
-                // Handle 360 views
-                if (files.view360 && files.view360.length > 0) {
-                    console.log('Processing 360 views:', files.view360.length, 'files');
-                    files.view360.forEach((view, index) => {
-                        console.log(`Processing 360 view ${index}:`, view);
-                        formDataToSend.append('web360', view);
-                    });
-                }
+            if (files.view360 && files.view360.length > 0) {
+                console.log('Adding 360 views:', files.view360.length);
+                files.view360.forEach(view => {
+                    formDataToSend.append('web360', view);
+                });
             }
 
             // Log final FormData contents
@@ -112,6 +99,7 @@ const PaymentResult = () => {
             console.log('Room creation response:', response);
     
             // Clean up storage
+            await deleteFiles(orderId);
             sessionStorage.removeItem('pendingRoomData');
             sessionStorage.removeItem('paymentInfo');
     
@@ -122,25 +110,6 @@ const PaymentResult = () => {
             setError(error.message);
             throw error;
         }
-    };
-
-    // Helper function to convert data URL to File
-    const dataURLtoFile = (dataurl, filename) => {
-        if (!dataurl) return null;
-        
-        const arr = dataurl.split(',');
-        if (arr.length < 2) return null;
-        
-        const mime = arr[0].match(/:(.*?);/)[1];
-        const bstr = atob(arr[1]);
-        let n = bstr.length;
-        const u8arr = new Uint8Array(n);
-        
-        while(n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-        
-        return new File([u8arr], filename, {type: mime});
     };
 
     useEffect(() => {
@@ -174,25 +143,6 @@ const PaymentResult = () => {
                 const paymentId = orderId.split('_')[0];
                 console.log('Extracted payment ID:', paymentId);
 
-                // Get saved room data
-                const savedData = sessionStorage.getItem('pendingRoomData');
-                const paymentInfo = sessionStorage.getItem('paymentInfo');
-
-                console.log('Saved data from session:', { savedData, paymentInfo });
-
-                if (!savedData || !paymentInfo) {
-                    console.error('Missing saved data or payment info');
-                    message.error('No room data or payment info found');
-                    navigate('/');
-                    return;
-                }
-
-                const { roomData, selectedFeatures, currentPackage } = JSON.parse(savedData);
-                const { price, packageCode } = JSON.parse(paymentInfo);
-
-                console.log('Parsed room data:', roomData);
-                console.log('Package info:', { selectedFeatures, currentPackage, price, packageCode });
-
                 try {
                     // Handle payment status first
                     if (resultCode === '0') {
@@ -209,14 +159,10 @@ const PaymentResult = () => {
                         return;
                     }
 
-                    // Add payment ID to room data
-                    roomData.paymentId = paymentId;
-                    console.log('Updated room data with payment ID:', roomData);
-
                     if (isMounted) {
                         console.log('Attempting room creation...');
                         // Create room
-                        const result = await handleRoomCreation(roomData);
+                        const result = await handleRoomCreation({ paymentId }, orderId);
                         console.log('Room creation result:', result);
                         
                         if (result) {
@@ -258,6 +204,7 @@ const PaymentResult = () => {
         <div className="flex flex-col items-center justify-center min-h-screen">
             <Spin size="large" />
             <p className="mt-4">Processing payment result...</p>
+            {error && <p className="mt-2 text-red-500">{error}</p>}
         </div>
     );
 };
