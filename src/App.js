@@ -70,7 +70,15 @@ export default function App() {
                 <Route path="/news/:id" element={<NewsDetail />} />
                 <Route path="/room-detail/:roomId" element={<RoomDetail />} />
                 <Route path="/payment" element={<Payment />} />
-                <Route path="/payment/result" element={<PaymentResult />} />
+                <Route 
+                  path="/payment-result" 
+                  element={
+                    <div className="flex flex-col flex-grow">
+                      <Header />
+                      <PaymentResult />
+                    </div>
+                  } 
+                />
               </Routes>
               <WhyUs />
               <FloatingButtons />
