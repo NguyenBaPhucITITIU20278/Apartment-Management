@@ -126,53 +126,39 @@ const AddRoom = () => {
                 username: Cookies.get('userName')
             };
 
-            // Tạo FormData để lưu trữ files
-            const formDataToStore = new FormData();
-
-            // Append files với key riêng để dễ nhận dạng
-            if (formData.images) {
-                Array.from(formData.images).forEach((file, index) => {
-                    formDataToStore.append(`image_${index}`, file);
-                });
-                formDataToStore.append('imageCount', formData.images.length);
-            }
-
-            if (formData.model3D && formData.model3D.length > 0) {
-                formDataToStore.append('model3D', formData.model3D[0]);
-            }
-
-            if (formData.view360) {
-                Array.from(formData.view360).forEach((file, index) => {
-                    formDataToStore.append(`view360_${index}`, file);
-                });
-                formDataToStore.append('view360Count', formData.view360.length);
-            }
-
-            if (formData.video && formData.video.length > 0) {
-                formDataToStore.append('video', formData.video[0]);
-            }
-
-            // Lưu metadata của files
-            const filesMetadata = {
-                images: formData.images ? Array.from(formData.images).map(file => ({
-                    name: file.name,
-                    type: file.type
-                })) : [],
-                model3D: formData.model3D && formData.model3D.length > 0 ? {
-                    name: formData.model3D[0].name,
-                    type: formData.model3D[0].type
-                } : null,
-                view360: formData.view360 ? Array.from(formData.view360).map(file => ({
-                    name: file.name,
-                    type: file.type
-                })) : [],
-                video: formData.video && formData.video.length > 0 ? {
-                    name: formData.video[0].name,
-                    type: formData.video[0].type
-                } : null
+            // Prepare files for storage
+            const filesToStore = {
+                images: formData.images ? Array.from(formData.images) : [],
+                video: formData.video && formData.video.length > 0 ? formData.video[0] : null,
+                model3D: formData.model3D && formData.model3D.length > 0 ? formData.model3D[0] : null,
+                view360: formData.view360 ? Array.from(formData.view360) : []
             };
 
-            // Lưu vào sessionStorage
+            // Prepare files metadata
+            const filesMetadata = {
+                images: filesToStore.images.map(file => ({
+                    name: file.name,
+                    type: file.type
+                })),
+                video: filesToStore.video ? {
+                    name: filesToStore.video.name,
+                    type: filesToStore.video.type
+                } : null,
+                model3D: filesToStore.model3D ? {
+                    name: filesToStore.model3D.name,
+                    type: filesToStore.model3D.type
+                } : null,
+                view360: filesToStore.view360.map(file => ({
+                    name: file.name,
+                    type: file.type
+                }))
+            };
+
+            // Save files to IndexedDB
+            const filesKey = await saveFormDataToIndexedDB(filesToStore);
+            console.log('Files saved with key:', filesKey);
+
+            // Save data to sessionStorage
             sessionStorage.setItem('pendingRoomData', JSON.stringify({
                 roomData,
                 selectedFeatures,
@@ -181,20 +167,18 @@ const AddRoom = () => {
             }));
 
             // Store the payment info
+            const timestamp = new Date().getTime();
             sessionStorage.setItem('paymentInfo', JSON.stringify({
                 price: currentPackage.price,
                 packageCode: currentPackage.code,
-                timestamp: new Date().getTime()
+                timestamp
             }));
-
-            // Lưu FormData vào IndexedDB
-            await saveFormDataToIndexedDB(formDataToStore);
 
             // Create MoMo payment
             const response = await createMomoPayment(
                 currentPackage.price,
                 currentPackage.code,
-                1
+                filesKey
             );
 
             if (response.payUrl) {
@@ -202,71 +186,58 @@ const AddRoom = () => {
             } else {
                 throw new Error('No payment URL received');
             }
-
         } catch (error) {
-            message.error('Failed to create payment: ' + error.message);
-            console.error('Error:', error);
+            console.error('Error in handleSubmit:', error);
+            message.error('Failed to process your request. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
-    // Thay thế hàm saveFormDataToIndexedDB hiện tại bằng hàm mới này
     const saveFormDataToIndexedDB = async (formData) => {
-        // Đầu tiên, chuyển đổi tất cả files thành ArrayBuffer
-        const convertFilesToArrayBuffer = async () => {
-            const filesObject = {};
-            for (const [key, value] of formData.entries()) {
-                if (value instanceof File) {
-                    const buffer = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
-                        reader.onerror = () => reject(reader.error);
-                        reader.readAsArrayBuffer(value);
-                    });
-                    filesObject[key] = buffer;
-                } else {
-                    filesObject[key] = value;
-                }
-            }
-            return filesObject;
-        };
-
         try {
-            const filesObject = await convertFilesToArrayBuffer();
+            // Prepare files object in the correct format
+            const files = {
+                images: [],
+                video: null,
+                model3D: null,
+                view360: []
+            };
+
+            // Process images
+            if (formData.images) {
+                files.images = Array.from(formData.images);
+            }
+
+            // Process video
+            if (formData.video && formData.video.length > 0) {
+                files.video = formData.video[0];
+            }
+
+            // Process 3D model
+            if (formData.model3D && formData.model3D.length > 0) {
+                files.model3D = formData.model3D[0];
+            }
+
+            // Process 360 views
+            if (formData.view360) {
+                files.view360 = Array.from(formData.view360);
+            }
+
+            // Generate a unique key for this submission
+            const timestamp = new Date().getTime();
+            const paymentId = sessionStorage.getItem('paymentId');
+            const key = paymentId ? `${paymentId}_${timestamp}` : `temp_${timestamp}`;
+
+            // Save to IndexedDB using the fileStorage service
+            await saveFiles(key, files);
             
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open('RoomFiles', 1);
+            // Store the key for later retrieval
+            sessionStorage.setItem('filesKey', key);
 
-                request.onerror = () => reject(new Error('Failed to open IndexedDB'));
-
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    if (!db.objectStoreNames.contains('files')) {
-                        db.createObjectStore('files');
-                    }
-                };
-
-                request.onsuccess = (event) => {
-                    const db = event.target.result;
-                    const transaction = db.transaction(['files'], 'readwrite');
-                    const store = transaction.objectStore('files');
-
-                    transaction.oncomplete = () => {
-                        db.close();
-                        resolve();
-                    };
-
-                    transaction.onerror = () => {
-                        db.close();
-                        reject(new Error('Transaction failed'));
-                    };
-
-                    store.put(filesObject, 'currentFiles');
-                };
-            });
+            return key;
         } catch (error) {
-            console.error('Error in saveFormDataToIndexedDB:', error);
+            console.error('Error saving files to IndexedDB:', error);
             throw error;
         }
     };
