@@ -282,7 +282,7 @@ const PaymentResult = () => {
                 if (resultCode === '0' || resultCode === '1006') {
                     try {
                         // For cancelled payments, we'll still verify but ignore the result
-                        const response = await axios.post('/api/payment/verify', {
+                        const response = await axios.post(`${API_URL}/payment/momo/verify`, {
                             orderId,
                             resultCode,
                             amount,
