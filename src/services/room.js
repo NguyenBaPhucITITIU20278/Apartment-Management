@@ -150,9 +150,15 @@ export const addRoomWithModel = async (formData) => {
     console.log('FormData contents:');
     for (let pair of formData.entries()) {
       if (pair[1] instanceof File) {
-        console.log(`${pair[0]}: File - ${pair[1].name} (${pair[1].size} bytes)`);
+        console.log(`${pair[0]}: File - ${pair[1].name} (${pair[1].size} bytes, type: ${pair[1].type})`);
       } else if (pair[0] === 'data') {
         console.log(`${pair[0]}: ${pair[1].substring(0, 100)}...`); // Log first 100 chars of data
+        try {
+          const parsedData = JSON.parse(pair[1]);
+          console.log('Parsed room data:', parsedData);
+        } catch (e) {
+          console.error('Failed to parse room data:', e);
+        }
       } else {
         console.log(`${pair[0]}: ${pair[1]}`);
       }

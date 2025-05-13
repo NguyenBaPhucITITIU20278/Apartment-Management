@@ -68,7 +68,7 @@ const PaymentResult = () => {
 
                 if (files.model3D) {
                     console.log('Adding 3D model');
-                    formDataToSend.append('model', files.model3D);
+                    formDataToSend.append('model[]', files.model3D);
                 }
 
                 if (files.view360 && files.view360.length > 0) {
