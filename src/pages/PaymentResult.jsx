@@ -33,22 +33,26 @@ const PaymentResult = () => {
 
             const { roomData: savedRoomData } = JSON.parse(savedData);
             
-            // Prepare room data
+            // Prepare room data without date fields first
             const roomDataToSend = {
                 ...savedRoomData,
-                paymentId: roomData.paymentId,
-                postedTime: new Date().toISOString().replace('Z', '')
+                paymentId: roomData.paymentId
             };
             
-            // Remove file references from room data
+            // Remove file references and unnecessary fields
             delete roomDataToSend.files;
             delete roomDataToSend.imagePaths;
             delete roomDataToSend.videoPaths;
             delete roomDataToSend.modelPath;
             delete roomDataToSend.web360Paths;
+            delete roomDataToSend.postedTime; // Remove any existing postedTime
+
+            // Convert to string and parse back to ensure clean object
+            const cleanRoomData = JSON.parse(JSON.stringify(roomDataToSend));
+            console.log('Clean room data:', cleanRoomData);
 
             // Append room data
-            formDataToSend.append('data', JSON.stringify(roomDataToSend));
+            formDataToSend.append('data', JSON.stringify(cleanRoomData));
             
             // Add files if they exist in savedRoomData
             if (savedRoomData.files) {
@@ -77,8 +81,14 @@ const PaymentResult = () => {
                 }
             }
     
-            console.log('Room data being sent:', roomDataToSend);
-            console.log('Files being sent:', savedRoomData.files);
+            console.log('FormData being sent:');
+            for (let pair of formDataToSend.entries()) {
+                if (pair[1] instanceof File) {
+                    console.log(pair[0], pair[1].name);
+                } else {
+                    console.log(pair[0], pair[1]);
+                }
+            }
             
             const response = await addRoomWithModel(formDataToSend);
             console.log('Room creation response:', response);
