@@ -1,5 +1,6 @@
 // API URLs
 export const API_URL = 'https://apartment-backend-30kj.onrender.com';
+export const API_BASE_URL = API_URL;
 
 // MoMo Payment Configuration
 export const MOMO_CONFIG = {

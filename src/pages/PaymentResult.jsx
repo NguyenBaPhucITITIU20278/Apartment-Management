@@ -6,6 +6,7 @@ import { addRoomWithModel } from '../services/room';
 import { getFiles, deleteFiles } from '../services/fileStorage';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { API_URL } from '../config/constants';
 
 const PaymentResult = () => {
     console.log('PaymentResult component rendered');
@@ -62,7 +63,7 @@ const PaymentResult = () => {
             }
 
             const response = await axios.post(
-                `${API_BASE_URL}/api/rooms/add-room-with-model`,
+                `${API_URL}/api/rooms/add-room-with-model`,
                 formDataToSend,
                 {
                     headers: {
