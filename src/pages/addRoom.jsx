@@ -4,6 +4,7 @@ import { message, Alert, Space, Typography, Modal, Spin } from "antd";
 import Cookies from 'js-cookie';
 import { POSTING_PACKAGES, getPackageForFeatures } from '../config/postingPackages';
 import { createMomoPayment, cancelMomoPayment } from '../services/momoService';
+import { saveFiles } from '../services/fileStorage';
 import axios from 'axios';
 
 const { Text } = Typography;
