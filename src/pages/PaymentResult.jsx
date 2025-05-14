@@ -58,7 +58,7 @@ const PaymentResult = () => {
                 imagePaths: savedRoomData.imagePaths || [],
                 videoPaths: savedRoomData.videoPaths || [],
                 web360Paths: savedRoomData.web360Paths || [],
-                modelPath: savedRoomData.modelPath || ''
+                modelPath: savedRoomData.modelPath || []
             };
 
             // Handle files if they exist
