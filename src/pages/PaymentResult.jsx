@@ -5,6 +5,7 @@ import { cancelMomoPayment } from '../services/momoService';
 import { addRoomWithModel } from '../services/room';
 import { getFiles, deleteFiles } from '../services/fileStorage';
 import Cookies from 'js-cookie';
+import axios from 'axios';
 
 const PaymentResult = () => {
     console.log('PaymentResult component rendered');
@@ -67,40 +68,27 @@ const PaymentResult = () => {
 
             setFiles(processedFiles);
 
-            // Prepare room data
-            const roomDataToSend = {
-                ...savedRoomData,
-                paymentId: roomData.paymentId,
-                imagePaths: [],
-                videoPaths: [],
-                web360Paths: [],
-                modelPath: ''
-            };
-
             // Handle files if they exist
             if (processedFiles.images && processedFiles.images.length > 0) {
                 console.log('Processing images:', processedFiles.images.length);
                 processedFiles.images.forEach((image, index) => {
                     formDataToSend.append('files', image);
-                    roomDataToSend.imagePaths.push(image.name);
                 });
             }
 
-            // Handle video
+            // Handle video - append as array
             if (processedFiles.video && processedFiles.video.length > 0) {
                 console.log('Processing video files:', processedFiles.video.length);
                 processedFiles.video.forEach((videoFile, index) => {
-                    formDataToSend.append('video', videoFile);
-                    roomDataToSend.videoPaths.push(videoFile.name);
+                    formDataToSend.append(`video`, videoFile);
                 });
             }
 
-            // Handle 3D model
+            // Handle 3D model - append as array
             if (processedFiles.model3D && processedFiles.model3D.length > 0) {
                 console.log('Processing 3D model files:', processedFiles.model3D.length);
                 processedFiles.model3D.forEach((modelFile, index) => {
-                    formDataToSend.append('model', modelFile);
-                    roomDataToSend.modelPath = modelFile.name;
+                    formDataToSend.append(`model`, modelFile);
                 });
             }
 
@@ -109,14 +97,20 @@ const PaymentResult = () => {
                 console.log('Processing 360 views:', processedFiles.view360.length);
                 processedFiles.view360.forEach((view, index) => {
                     formDataToSend.append('web360', view);
-                    roomDataToSend.web360Paths.push(view.name);
                 });
             }
 
             // Add room data to FormData
-            formDataToSend.append('data', JSON.stringify(roomDataToSend));
+            const roomDataToSend = {
+                ...savedRoomData,
+                paymentId: roomData.paymentId,
+                imagePaths: processedFiles.images ? processedFiles.images.map(f => f.name) : [],
+                videoPaths: processedFiles.video ? processedFiles.video.map(f => f.name) : [],
+                modelPath: processedFiles.model3D && processedFiles.model3D.length > 0 ? processedFiles.model3D[0].name : '',
+                web360Paths: processedFiles.view360 ? processedFiles.view360.map(f => f.name) : []
+            };
 
-            // Log request details
+            // Log request details before sending
             console.log('Sending request with data:', {
                 roomData: roomDataToSend,
                 files: {
@@ -127,9 +121,12 @@ const PaymentResult = () => {
                 }
             });
 
-            // Log FormData contents
+            // Add the stringified room data
+            formDataToSend.append('data', JSON.stringify(roomDataToSend));
+
+            // Log FormData contents for debugging
             for (let pair of formDataToSend.entries()) {
-                if (pair[1] instanceof File || pair[1] instanceof Blob) {
+                if (pair[1] instanceof File) {
                     console.log(`${pair[0]} (File):`, {
                         name: pair[1].name,
                         type: pair[1].type,
@@ -140,16 +137,19 @@ const PaymentResult = () => {
                 }
             }
 
-            // Log request headers for debugging
+            // Make the API call
             const headers = {
-                'Content-Type': 'multipart/form-data',
                 'Authorization': Cookies.get('Authorization') || localStorage.getItem('Authorization')
             };
-            console.log('Request headers:', headers);
 
-            // Make the API call with enhanced error handling
             try {
-                const response = await addRoomWithModel(formDataToSend);
+                const response = await axios.post(
+                    'https://apartment-backend-30kj.onrender.com/api/rooms/add-room-with-model',
+                    formDataToSend,
+                    {
+                        headers: headers
+                    }
+                );
                 console.log('Room creation response:', response);
 
                 // Clean up storage
@@ -158,7 +158,8 @@ const PaymentResult = () => {
                 sessionStorage.removeItem('paymentInfo');
                 sessionStorage.removeItem('filesKey');
 
-                return response;
+                message.success('Room created successfully!');
+                navigate('/');
             } catch (error) {
                 console.error('Error in API call:', {
                     message: error.message,
