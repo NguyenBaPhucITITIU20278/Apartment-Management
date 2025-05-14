@@ -74,11 +74,6 @@ const AddRoom = () => {
     const handleFileChange = (e) => {
         const { name, files } = e.target;
         
-        setFormData(prev => ({
-            ...prev,
-            [name]: files
-        }));
-
         // Validate file size based on type
         const maxSizes = {
             images: 5 * 1024 * 1024, // 5MB
@@ -87,31 +82,63 @@ const AddRoom = () => {
             view360: 10 * 1024 * 1024 // 10MB
         };
 
-        // Check file size
+        // Validate file types
+        const allowedTypes = {
+            images: ['image/jpeg', 'image/png', 'image/gif'],
+            video: ['video/mp4', 'video/webm', 'video/quicktime'],
+            model3D: ['model/gltf-binary', '.glb', '.gltf', 'application/octet-stream'],
+            view360: ['image/jpeg', 'image/png']
+        };
+
+        // Check each file
+        let isValid = true;
         Array.from(files).forEach(file => {
+            // Check file size
             if (file.size > maxSizes[name]) {
                 message.error(`File ${file.name} size must be less than ${maxSizes[name] / (1024 * 1024)}MB`);
+                isValid = false;
+                return;
+            }
+
+            // Special handling for 3D models
+            if (name === 'model3D') {
+                const isValidModel = file.name.endsWith('.glb') || 
+                                   file.name.endsWith('.gltf') || 
+                                   allowedTypes.model3D.includes(file.type);
+                if (!isValidModel) {
+                    message.error(`Invalid 3D model format. Please use .glb or .gltf files.`);
+                    isValid = false;
+                    return;
+                }
+            } else if (!allowedTypes[name].includes(file.type)) {
+                message.error(`Invalid file type for ${name}. Allowed types: ${allowedTypes[name].join(', ')}`);
+                isValid = false;
                 return;
             }
         });
 
-        // Update selected features based on file uploads
-        switch (name) {
-            case 'images':
-                handleFeatureChange('images', files.length > 0);
-                break;
-            case 'video':
-                handleFeatureChange('video', files.length > 0);
-                break;
-            case 'model3D':
-                handleFeatureChange('model3D', files.length > 0);
-                break;
-            case 'view360':
-                handleFeatureChange('view360', files.length > 0);
-                break;
-            default:
-                break;
+        if (!isValid) {
+            return;
         }
+
+        // Update form data
+        setFormData(prev => ({
+            ...prev,
+            [name]: files
+        }));
+
+        // Update selected features
+        handleFeatureChange(name, files.length > 0);
+
+        // Log file details
+        console.log(`${name} files updated:`, {
+            count: files.length,
+            files: Array.from(files).map(f => ({
+                name: f.name,
+                type: f.type,
+                size: f.size
+            }))
+        });
     };
 
     const handleSubmit = async (e) => {
@@ -221,12 +248,37 @@ const AddRoom = () => {
                 view360: formData.view360 ? Array.from(formData.view360) : []
             };
 
+            // Log files being saved
+            console.log('Saving files to IndexedDB:', {
+                images: files.images.length,
+                video: files.video ? 1 : 0,
+                model3D: files.model3D ? 1 : 0,
+                view360: files.view360.length
+            });
+
+            if (files.video) {
+                console.log('Video file details:', {
+                    name: files.video.name,
+                    type: files.video.type,
+                    size: files.video.size
+                });
+            }
+
+            if (files.model3D) {
+                console.log('3D Model file details:', {
+                    name: files.model3D.name,
+                    type: files.model3D.type,
+                    size: files.model3D.size
+                });
+            }
+
             // Generate a unique key using timestamp
             const timestamp = new Date().getTime();
             const key = `room_${timestamp}`;
 
             // Save to IndexedDB
             await saveFiles(key, files);
+            console.log('Files saved to IndexedDB with key:', key);
             
             // Store the key for later retrieval
             sessionStorage.setItem('filesKey', key);

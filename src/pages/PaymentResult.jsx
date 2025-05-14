@@ -70,38 +70,29 @@ const PaymentResult = () => {
                     });
                 }
 
-                // Enhanced video handling
+                // Handle video - as single file
                 if (files.video && selectedFeatures.video) {
                     const videoFile = files.video;
                     console.log('Processing video file:', {
                         name: videoFile.name,
                         type: videoFile.type,
-                        size: videoFile.size,
-                        lastModified: videoFile.lastModified
+                        size: videoFile.size
                     });
-
-                    // Ensure video file is properly formatted
-                    const videoBlob = new Blob([videoFile], { type: videoFile.type });
-                    formDataToSend.append('video', videoBlob, videoFile.name);
+                    formDataToSend.append('video', videoFile);
                     roomDataToSend.videoPaths = [videoFile.name];
-                    console.log('Video file added to FormData');
                 }
 
-                // Enhanced 3D model handling
+                // Handle 3D model - as array
                 if (files.model3D && selectedFeatures.model3D) {
                     const modelFile = files.model3D;
                     console.log('Processing 3D model file:', {
                         name: modelFile.name,
                         type: modelFile.type,
-                        size: modelFile.size,
-                        lastModified: modelFile.lastModified
+                        size: modelFile.size
                     });
-
-                    // Ensure model file is properly formatted
-                    const modelBlob = new Blob([modelFile], { type: modelFile.type || 'application/octet-stream' });
-                    formDataToSend.append('model', modelBlob, modelFile.name);
+                    // Server expects model as an array
+                    formDataToSend.append('model', modelFile);
                     roomDataToSend.modelPath = modelFile.name;
-                    console.log('3D model file added to FormData');
                 }
 
                 // Handle 360 views
@@ -117,24 +108,27 @@ const PaymentResult = () => {
             // Add room data to FormData
             formDataToSend.append('data', JSON.stringify(roomDataToSend));
 
-            // Enhanced logging for final FormData
-            console.log('Final room data:', roomDataToSend);
-            console.log('FormData entries:');
+            // Log request details
+            console.log('Sending request with data:', {
+                roomData: roomDataToSend,
+                files: {
+                    images: files?.images?.length || 0,
+                    video: files?.video ? 1 : 0,
+                    model3D: files?.model3D ? 1 : 0,
+                    web360: files?.view360?.length || 0
+                }
+            });
+
+            // Log FormData contents
             for (let pair of formDataToSend.entries()) {
                 if (pair[1] instanceof File || pair[1] instanceof Blob) {
-                    console.log(`${pair[0]} (File/Blob):`, {
-                        name: pair[1].name || 'unnamed blob',
-                        type: pair[1].type || 'unknown',
-                        size: pair[1].size,
-                        lastModified: pair[1] instanceof File ? pair[1].lastModified : 'N/A'
+                    console.log(`${pair[0]} (File):`, {
+                        name: pair[1].name,
+                        type: pair[1].type,
+                        size: pair[1].size
                     });
                 } else {
-                    try {
-                        const parsed = JSON.parse(pair[1]);
-                        console.log(`${pair[0]} (JSON):`, parsed);
-                    } catch (e) {
-                        console.log(`${pair[0]} (Data):`, pair[1]);
-                    }
+                    console.log(`${pair[0]} (Data):`, pair[1]);
                 }
             }
 
