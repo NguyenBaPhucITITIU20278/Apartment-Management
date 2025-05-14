@@ -63,62 +63,57 @@ const PaymentResult = () => {
 
             // Handle files if they exist
             if (files) {
-                // Handle images
-                if (files.images && files.images.length > 0 && selectedFeatures.images) {
+                // Handle images (multiple files)
+                if (files.images && files.images.length > 0) {
                     console.log('Processing images:', files.images.length);
-                    files.images.forEach((image, index) => {
-                        formDataToSend.append('files', image, filesMetadata.images[index].name);
-                        console.log(`Added image ${index}:`, filesMetadata.images[index].name);
+                    Array.from(files.images).forEach((image, index) => {
+                        formDataToSend.append('files', image);
+                        console.log(`Added image ${index}:`, image.name);
                     });
                 }
 
-                // Handle video
-                if (files.video && selectedFeatures.video) {
-                    console.log('Processing video file:', {
-                        name: files.video.name,
-                        type: files.video.type,
-                        size: files.video.size
+                // Handle video (single file)
+                if (files.video) {
+                    const videoFile = files.video instanceof FileList ? files.video[0] : files.video;
+                    console.log('Processing video:', {
+                        name: videoFile.name,
+                        type: videoFile.type,
+                        size: videoFile.size
                     });
-                    formDataToSend.append('video', files.video);
-                    console.log('Video file added to FormData');
+                    formDataToSend.append('video', videoFile);
                 }
 
-                // Handle 3D model
-                if (files.model3D && selectedFeatures.model3D) {
-                    console.log('Processing 3D model file:', {
-                        name: files.model3D.name,
-                        type: files.model3D.type,
-                        size: files.model3D.size
+                // Handle 3D model (single file)
+                if (files.model3D) {
+                    const modelFile = files.model3D instanceof FileList ? files.model3D[0] : files.model3D;
+                    console.log('Processing 3D model:', {
+                        name: modelFile.name,
+                        type: modelFile.type,
+                        size: modelFile.size
                     });
-                    formDataToSend.append('model', files.model3D);
-                    console.log('3D model file added to FormData');
+                    formDataToSend.append('model', modelFile);
                 }
 
-                // Handle 360 views
-                if (files.view360 && files.view360.length > 0 && selectedFeatures.view360) {
+                // Handle 360 views (multiple files)
+                if (files.view360 && files.view360.length > 0) {
                     console.log('Processing 360 views:', files.view360.length);
-                    files.view360.forEach((view, index) => {
-                        formDataToSend.append('web360', view, filesMetadata.view360[index].name);
-                        console.log(`Added 360 view ${index}:`, filesMetadata.view360[index].name);
+                    Array.from(files.view360).forEach((view, index) => {
+                        formDataToSend.append('web360', view);
+                        console.log(`Added 360 view ${index}:`, view.name);
                     });
                 }
             }
 
-            // Update room data in FormData
+            // Add room data
             formDataToSend.append('data', JSON.stringify(roomDataToSend));
 
-            // Log final FormData contents
-            console.log('Final room data being sent:', roomDataToSend);
+            // Log final FormData contents for debugging
             console.log('Final FormData contents:');
-            for (let pair of formDataToSend.entries()) {
-                if (pair[1] instanceof File) {
-                    console.log(pair[0], '(File):', {
-                        name: pair[1].name,
-                        type: pair[1].type,
-                        size: pair[1].size
-                    });
+            for (let [key, value] of formDataToSend.entries()) {
+                if (value instanceof File) {
+                    console.log(`${key}: File - ${value.name} (${value.size} bytes, ${value.type})`);
                 } else {
-                    console.log(pair[0], '(Data):', pair[1]);
+                    console.log(`${key}: ${value}`);
                 }
             }
 

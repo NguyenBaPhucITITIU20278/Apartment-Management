@@ -85,16 +85,39 @@ const AddRoom = () => {
 
     const handleFileChange = (e) => {
         const { name, files } = e.target;
-        const file = files[0];
-        
-        console.log('File change detected:', {
-            inputName: name,
-            fileName: file?.name,
-            fileType: file?.type,
-            fileSize: file?.size
+        console.log('File input change:', { name, filesCount: files?.length });
+
+        // Handle multiple files for images and 360 views
+        if (name === 'images' || name === 'view360') {
+            if (files && files.length > 0) {
+                const fileArray = Array.from(files);
+                console.log(`Processing ${name}:`, {
+                    count: fileArray.length,
+                    types: fileArray.map(f => f.type)
+                });
+
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: files
+                }));
+
+                // Update selected features
+                handleFeatureChange(name, true);
+            }
+            return;
+        }
+
+        // Handle single file uploads (video and 3D model)
+        const file = files?.[0];
+        if (!file) return;
+
+        console.log('Processing single file:', {
+            name: file.name,
+            type: file.type,
+            size: file.size
         });
 
-        // Validate file size based on type
+        // Validate file size
         const maxSizes = {
             images: 100 * 1024 * 1024, // 100MB
             video: 100 * 1024 * 1024, // 100MB
@@ -102,52 +125,44 @@ const AddRoom = () => {
             view360: 100 * 1024 * 1024 // 100MB
         };
 
-        if (file && file.size > maxSizes[name]) {
+        if (file.size > maxSizes[name]) {
             message.error(`File size must be less than ${maxSizes[name] / (1024 * 1024)}MB`);
             return;
         }
 
-        // Define allowed types for each file category
+        // Define allowed types
         const allowedTypes = {
-            images: ['image/jpeg', 'image/png', 'image/gif'],
+            images: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
             video: ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'],
             model3D: ['model/gltf-binary', 'model/gltf+json', 'application/octet-stream'],
-            view360: ['image/jpeg', 'image/png']
+            view360: ['image/jpeg', 'image/png', 'image/webp']
         };
 
         // Special handling for 3D models
         const is3DModel = name === 'model3D' && (
-            file.name.endsWith('.glb') || 
-            file.name.endsWith('.gltf') || 
+            file.name.toLowerCase().endsWith('.glb') || 
+            file.name.toLowerCase().endsWith('.gltf') || 
             allowedTypes.model3D.includes(file.type)
         );
 
-        if (file && !is3DModel && !allowedTypes[name]?.includes(file.type)) {
+        if (!is3DModel && !allowedTypes[name]?.includes(file.type)) {
             message.error(`Invalid file type for ${name}. Please check the allowed formats.`);
             return;
         }
 
-        if (file) {
-            setFiles(prev => ({
-                ...prev,
-                [name]: file
-            }));
-            
-            setFilesMetadata(prev => ({
-                ...prev,
-                [name]: {
-                    name: file.name,
-                    type: file.type,
-                    size: file.size
-                }
-            }));
+        setFormData(prev => ({
+            ...prev,
+            [name]: files
+        }));
 
-            console.log('Updated files state:', {
-                fileName: file.name,
-                fileType: file.type,
-                inputName: name
-            });
-        }
+        // Update selected features
+        handleFeatureChange(name, true);
+
+        console.log('File successfully processed:', {
+            name: file.name,
+            type: file.type,
+            inputType: name
+        });
     };
 
     const handleSubmit = async (e) => {
