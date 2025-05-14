@@ -65,7 +65,7 @@ const PaymentResult = () => {
                 if (files.images && files.images.length > 0 && selectedFeatures.images) {
                     console.log('Processing images:', files.images.length);
                     files.images.forEach((image, index) => {
-                        formDataToSend.append('images', image);
+                        formDataToSend.append('files', image);
                         roomDataToSend.imagePaths.push(image.name);
                     });
                 }
@@ -80,7 +80,7 @@ const PaymentResult = () => {
                 // Handle 3D model
                 if (files.model3D && selectedFeatures.model3D) {
                     console.log('Processing 3D model:', files.model3D.name);
-                    formDataToSend.append('model3D', files.model3D);
+                    formDataToSend.append('model', files.model3D);
                     roomDataToSend.modelPath = files.model3D.name;
                 }
 
@@ -94,8 +94,8 @@ const PaymentResult = () => {
                 }
             }
 
-            // Add room data to FormData
-            formDataToSend.append('roomData', JSON.stringify(roomDataToSend));
+            // Add room data to FormData with the correct parameter name 'data'
+            formDataToSend.append('data', JSON.stringify(roomDataToSend));
 
             // Log final FormData contents
             console.log('Final room data:', roomDataToSend);
