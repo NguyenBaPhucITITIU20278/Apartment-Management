@@ -34,18 +34,6 @@ const AddRoom = () => {
         model3D: null,
         view360: null
     });
-    const [files, setFiles] = useState({
-        images: null,
-        video: null,
-        model3D: null,
-        view360: null
-    });
-    const [filesMetadata, setFilesMetadata] = useState({
-        images: null,
-        video: null,
-        model3D: null,
-        view360: null
-    });
 
     useEffect(() => {
         const token = Cookies.get('Authorization');
@@ -85,84 +73,28 @@ const AddRoom = () => {
 
     const handleFileChange = (e) => {
         const { name, files } = e.target;
-        console.log('File input change:', { name, filesCount: files?.length });
-
-        // Handle multiple files for images and 360 views
-        if (name === 'images' || name === 'view360') {
-            if (files && files.length > 0) {
-                const fileArray = Array.from(files);
-                console.log(`Processing ${name}:`, {
-                    count: fileArray.length,
-                    types: fileArray.map(f => f.type)
-                });
-
-                setFormData(prev => ({
-                    ...prev,
-                    [name]: files
-                }));
-
-                // Update selected features
-                handleFeatureChange(name, true);
-            }
-            return;
-        }
-
-        // Handle single file uploads (video and 3D model)
-        const file = files?.[0];
-        if (!file) return;
-
-        console.log('Processing single file:', {
-            name: file.name,
-            type: file.type,
-            size: file.size
-        });
-
-        // Validate file size
-        const maxSizes = {
-            images: 100 * 1024 * 1024, // 100MB
-            video: 100 * 1024 * 1024, // 100MB
-            model3D: 100 * 1024 * 1024, // 100MB
-            view360: 100 * 1024 * 1024 // 100MB
-        };
-
-        if (file.size > maxSizes[name]) {
-            message.error(`File size must be less than ${maxSizes[name] / (1024 * 1024)}MB`);
-            return;
-        }
-
-        // Define allowed types
-        const allowedTypes = {
-            images: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-            video: ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'],
-            model3D: ['model/gltf-binary', 'model/gltf+json', 'application/octet-stream'],
-            view360: ['image/jpeg', 'image/png', 'image/webp']
-        };
-
-        // Special handling for 3D models
-        const is3DModel = name === 'model3D' && (
-            file.name.toLowerCase().endsWith('.glb') || 
-            file.name.toLowerCase().endsWith('.gltf') || 
-            allowedTypes.model3D.includes(file.type)
-        );
-
-        if (!is3DModel && !allowedTypes[name]?.includes(file.type)) {
-            message.error(`Invalid file type for ${name}. Please check the allowed formats.`);
-            return;
-        }
-
         setFormData(prev => ({
             ...prev,
             [name]: files
         }));
 
-        // Update selected features
-        handleFeatureChange(name, true);
-
-        console.log('File successfully processed:', {
-            name: file.name,
-            type: file.type,
-            inputType: name
-        });
+        // Update selected features based on file uploads
+        switch (name) {
+            case 'images':
+                handleFeatureChange('images', files.length > 0);
+                break;
+            case 'video':
+                handleFeatureChange('video', files.length > 0);
+                break;
+            case 'model3D':
+                handleFeatureChange('model3D', files.length > 0);
+                break;
+            case 'view360':
+                handleFeatureChange('view360', files.length > 0);
+                break;
+            default:
+                break;
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -188,10 +120,10 @@ const AddRoom = () => {
                 phoneNumber: formData.phoneNumber,
                 address: formData.address,
                 description: formData.description,
-                imagePaths: formData.images ? Array.from(formData.images).map(file => file.name) : [],
-                videoPaths: formData.video ? [formData.video[0].name] : [],
-                web360Paths: formData.view360 ? Array.from(formData.view360).map(file => file.name) : [],
-                modelPath: formData.model3D && formData.model3D.length > 0 ? formData.model3D[0].name : '',
+                imagePaths: [],
+                videoPaths: [],
+                web360Paths: [],
+                modelPath: '',
                 username: Cookies.get('userName')
             };
 
@@ -226,31 +158,13 @@ const AddRoom = () => {
             // Save files to IndexedDB
             const filesKey = await saveFormDataToIndexedDB(filesToStore);
             console.log('Files saved with key:', filesKey);
-            console.log('Room data with file paths:', roomData);
 
-            // Save data to sessionStorage with proper file paths
+            // Save data to sessionStorage
             sessionStorage.setItem('pendingRoomData', JSON.stringify({
                 roomData,
                 selectedFeatures,
                 currentPackage,
-                filesMetadata: {
-                    images: filesToStore.images.map(file => ({
-                        name: file.name,
-                        type: file.type
-                    })),
-                    video: filesToStore.video ? {
-                        name: filesToStore.video.name,
-                        type: filesToStore.video.type
-                    } : null,
-                    model3D: filesToStore.model3D ? {
-                        name: filesToStore.model3D.name,
-                        type: filesToStore.model3D.type
-                    } : null,
-                    view360: filesToStore.view360.map(file => ({
-                        name: file.name,
-                        type: file.type
-                    }))
-                }
+                filesMetadata
             }));
 
             // Store the payment info
