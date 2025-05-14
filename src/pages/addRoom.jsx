@@ -178,8 +178,8 @@ const AddRoom = () => {
             // Create MoMo payment
             const response = await createMomoPayment(
                 currentPackage.price,
-                currentPackage.code,
-                filesKey
+                currentPackage.name,
+                1
             );
 
             if (response.payUrl) {
