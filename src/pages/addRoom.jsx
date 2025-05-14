@@ -256,6 +256,14 @@ const AddRoom = () => {
                 view360: files.view360.length
             });
 
+            // Convert single files to array format for consistent storage
+            const filesForStorage = {
+                images: files.images,
+                video: files.video ? [files.video] : [],
+                model3D: files.model3D ? [files.model3D] : [],
+                view360: files.view360
+            };
+
             if (files.video) {
                 console.log('Video file details:', {
                     name: files.video.name,
@@ -277,7 +285,7 @@ const AddRoom = () => {
             const key = `room_${timestamp}`;
 
             // Save to IndexedDB
-            await saveFiles(key, files);
+            await saveFiles(key, filesForStorage);
             console.log('Files saved to IndexedDB with key:', key);
             
             // Store the key for later retrieval

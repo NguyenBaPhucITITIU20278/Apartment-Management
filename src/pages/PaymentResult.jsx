@@ -12,6 +12,7 @@ const PaymentResult = () => {
     const [searchParams] = useSearchParams();
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState(null);
+    const [files, setFiles] = useState(null);
 
     const handleRoomCreation = async (roomData, orderId) => {
         const token = Cookies.get('Authorization') || localStorage.getItem('Authorization');
@@ -44,10 +45,27 @@ const PaymentResult = () => {
             console.log('Files metadata:', filesMetadata);
     
             // Get files from IndexedDB
-            const filesKey = sessionStorage.getItem('filesKey');
-            console.log('Getting files from IndexedDB with key:', filesKey);
-            const files = await getFiles(filesKey);
+            const key = sessionStorage.getItem('filesKey');
+            console.log('Retrieving files with key:', key);
+            const files = await getFiles(key);
             console.log('Retrieved files from IndexedDB:', files);
+
+            // Convert array format back to single files where appropriate
+            const processedFiles = {
+                images: files.images || [],
+                video: files.video && files.video.length > 0 ? files.video[0] : null,
+                model3D: files.model3D && files.model3D.length > 0 ? files.model3D[0] : null,
+                view360: files.view360 || []
+            };
+
+            console.log('Processed files:', {
+                images: processedFiles.images.length,
+                video: processedFiles.video ? 'present' : 'null',
+                model3D: processedFiles.model3D ? 'present' : 'null',
+                view360: processedFiles.view360.length
+            });
+
+            setFiles(processedFiles);
 
             // Prepare room data
             const roomDataToSend = {
@@ -60,49 +78,41 @@ const PaymentResult = () => {
             };
 
             // Handle files if they exist
-            if (files) {
-                // Handle images
-                if (files.images && files.images.length > 0 && selectedFeatures.images) {
-                    console.log('Processing images:', files.images.length);
-                    files.images.forEach((image, index) => {
-                        formDataToSend.append('files', image);
-                        roomDataToSend.imagePaths.push(image.name);
-                    });
-                }
+            if (processedFiles.images) {
+                console.log('Processing images:', processedFiles.images.length);
+                processedFiles.images.forEach((image, index) => {
+                    formDataToSend.append('files', image);
+                    roomDataToSend.imagePaths.push(image.name);
+                });
+            }
 
-                // Handle video - as single file
-                if (files.video && selectedFeatures.video) {
-                    const videoFile = files.video;
-                    console.log('Processing video file:', {
-                        name: videoFile.name,
-                        type: videoFile.type,
-                        size: videoFile.size
-                    });
-                    formDataToSend.append('video', videoFile);
-                    roomDataToSend.videoPaths = [videoFile.name];
-                }
+            if (processedFiles.video) {
+                console.log('Processing video file:', {
+                    name: processedFiles.video.name,
+                    type: processedFiles.video.type,
+                    size: processedFiles.video.size
+                });
+                formDataToSend.append('video', processedFiles.video);
+                roomDataToSend.videoPaths = [processedFiles.video.name];
+            }
 
-                // Handle 3D model - as array
-                if (files.model3D && selectedFeatures.model3D) {
-                    const modelFile = files.model3D;
-                    console.log('Processing 3D model file:', {
-                        name: modelFile.name,
-                        type: modelFile.type,
-                        size: modelFile.size
-                    });
-                    // Server expects model as an array
-                    formDataToSend.append('model', modelFile);
-                    roomDataToSend.modelPath = modelFile.name;
-                }
+            if (processedFiles.model3D) {
+                console.log('Processing 3D model file:', {
+                    name: processedFiles.model3D.name,
+                    type: processedFiles.model3D.type,
+                    size: processedFiles.model3D.size
+                });
+                // Server expects model as an array
+                formDataToSend.append('model', processedFiles.model3D);
+                roomDataToSend.modelPath = processedFiles.model3D.name;
+            }
 
-                // Handle 360 views
-                if (files.view360 && files.view360.length > 0 && selectedFeatures.view360) {
-                    console.log('Processing 360 views:', files.view360.length);
-                    files.view360.forEach((view, index) => {
-                        formDataToSend.append('web360', view);
-                        roomDataToSend.web360Paths.push(view.name);
-                    });
-                }
+            if (processedFiles.view360) {
+                console.log('Processing 360 views:', processedFiles.view360.length);
+                processedFiles.view360.forEach((view, index) => {
+                    formDataToSend.append('web360', view);
+                    roomDataToSend.web360Paths.push(view.name);
+                });
             }
 
             // Add room data to FormData
@@ -112,10 +122,10 @@ const PaymentResult = () => {
             console.log('Sending request with data:', {
                 roomData: roomDataToSend,
                 files: {
-                    images: files?.images?.length || 0,
-                    video: files?.video ? 1 : 0,
-                    model3D: files?.model3D ? 1 : 0,
-                    web360: files?.view360?.length || 0
+                    images: processedFiles.images.length,
+                    video: processedFiles.video ? 1 : 0,
+                    model3D: processedFiles.model3D ? 1 : 0,
+                    web360: processedFiles.view360.length
                 }
             });
 
@@ -145,7 +155,7 @@ const PaymentResult = () => {
                 console.log('Room creation response:', response);
 
                 // Clean up storage
-                await deleteFiles(filesKey);
+                await deleteFiles(key);
                 sessionStorage.removeItem('pendingRoomData');
                 sessionStorage.removeItem('paymentInfo');
                 sessionStorage.removeItem('filesKey');
@@ -254,6 +264,43 @@ const PaymentResult = () => {
             isMounted = false;
         };
     }, [navigate, searchParams]);
+
+    useEffect(() => {
+        const fetchFiles = async () => {
+            try {
+                const key = sessionStorage.getItem('filesKey');
+                if (!key) {
+                    console.error('No files key found in sessionStorage');
+                    return;
+                }
+
+                console.log('Retrieving files with key:', key);
+                const files = await getFiles(key);
+                console.log('Retrieved files from IndexedDB:', files);
+
+                // Convert array format back to single files where appropriate
+                const processedFiles = {
+                    images: files.images || [],
+                    video: files.video && files.video.length > 0 ? files.video[0] : null,
+                    model3D: files.model3D && files.model3D.length > 0 ? files.model3D[0] : null,
+                    view360: files.view360 || []
+                };
+
+                console.log('Processed files:', {
+                    images: processedFiles.images.length,
+                    video: processedFiles.video ? 'present' : 'null',
+                    model3D: processedFiles.model3D ? 'present' : 'null',
+                    view360: processedFiles.view360.length
+                });
+
+                setFiles(processedFiles);
+            } catch (error) {
+                console.error('Error retrieving files:', error);
+            }
+        };
+
+        fetchFiles();
+    }, []);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
