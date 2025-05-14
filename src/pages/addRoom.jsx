@@ -34,6 +34,18 @@ const AddRoom = () => {
         model3D: null,
         view360: null
     });
+    const [files, setFiles] = useState({
+        images: null,
+        video: null,
+        model3D: null,
+        view360: null
+    });
+    const [filesMetadata, setFilesMetadata] = useState({
+        images: null,
+        video: null,
+        model3D: null,
+        view360: null
+    });
 
     useEffect(() => {
         const token = Cookies.get('Authorization');
@@ -73,27 +85,68 @@ const AddRoom = () => {
 
     const handleFileChange = (e) => {
         const { name, files } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: files
-        }));
+        const file = files[0];
+        
+        console.log('File change detected:', {
+            inputName: name,
+            fileName: file?.name,
+            fileType: file?.type,
+            fileSize: file?.size
+        });
 
-        // Update selected features based on file uploads
-        switch (name) {
-            case 'images':
-                handleFeatureChange('images', files.length > 0);
-                break;
-            case 'video':
-                handleFeatureChange('video', files.length > 0);
-                break;
-            case 'model3D':
-                handleFeatureChange('model3D', files.length > 0);
-                break;
-            case 'view360':
-                handleFeatureChange('view360', files.length > 0);
-                break;
-            default:
-                break;
+        // Validate file size based on type
+        const maxSizes = {
+            images: 5 * 1024 * 1024, // 5MB
+            video: 100 * 1024 * 1024, // 100MB
+            model3D: 50 * 1024 * 1024, // 50MB
+            view360: 10 * 1024 * 1024 // 10MB
+        };
+
+        if (file && file.size > maxSizes[name]) {
+            message.error(`File size must be less than ${maxSizes[name] / (1024 * 1024)}MB`);
+            return;
+        }
+
+        // Define allowed types for each file category
+        const allowedTypes = {
+            images: ['image/jpeg', 'image/png', 'image/gif'],
+            video: ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'],
+            model3D: ['model/gltf-binary', 'model/gltf+json', 'application/octet-stream'],
+            view360: ['image/jpeg', 'image/png']
+        };
+
+        // Special handling for 3D models
+        const is3DModel = name === 'model3D' && (
+            file.name.endsWith('.glb') || 
+            file.name.endsWith('.gltf') || 
+            allowedTypes.model3D.includes(file.type)
+        );
+
+        if (file && !is3DModel && !allowedTypes[name]?.includes(file.type)) {
+            message.error(`Invalid file type for ${name}. Please check the allowed formats.`);
+            return;
+        }
+
+        if (file) {
+            setFiles(prev => ({
+                ...prev,
+                [name]: file
+            }));
+            
+            setFilesMetadata(prev => ({
+                ...prev,
+                [name]: {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                }
+            }));
+
+            console.log('Updated files state:', {
+                fileName: file.name,
+                fileType: file.type,
+                inputName: name
+            });
         }
     };
 
@@ -120,10 +173,10 @@ const AddRoom = () => {
                 phoneNumber: formData.phoneNumber,
                 address: formData.address,
                 description: formData.description,
-                imagePaths: [],
-                videoPaths: [],
-                web360Paths: [],
-                modelPath: '',
+                imagePaths: formData.images ? Array.from(formData.images).map(file => file.name) : [],
+                videoPaths: formData.video ? [formData.video[0].name] : [],
+                web360Paths: formData.view360 ? Array.from(formData.view360).map(file => file.name) : [],
+                modelPath: formData.model3D && formData.model3D.length > 0 ? formData.model3D[0].name : '',
                 username: Cookies.get('userName')
             };
 
@@ -158,13 +211,31 @@ const AddRoom = () => {
             // Save files to IndexedDB
             const filesKey = await saveFormDataToIndexedDB(filesToStore);
             console.log('Files saved with key:', filesKey);
+            console.log('Room data with file paths:', roomData);
 
-            // Save data to sessionStorage
+            // Save data to sessionStorage with proper file paths
             sessionStorage.setItem('pendingRoomData', JSON.stringify({
                 roomData,
                 selectedFeatures,
                 currentPackage,
-                filesMetadata
+                filesMetadata: {
+                    images: filesToStore.images.map(file => ({
+                        name: file.name,
+                        type: file.type
+                    })),
+                    video: filesToStore.video ? {
+                        name: filesToStore.video.name,
+                        type: filesToStore.video.type
+                    } : null,
+                    model3D: filesToStore.model3D ? {
+                        name: filesToStore.model3D.name,
+                        type: filesToStore.model3D.type
+                    } : null,
+                    view360: filesToStore.view360.map(file => ({
+                        name: file.name,
+                        type: file.type
+                    }))
+                }
             }));
 
             // Store the payment info
