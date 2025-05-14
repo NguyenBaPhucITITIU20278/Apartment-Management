@@ -74,14 +74,24 @@ const PaymentResult = () => {
 
                 // Handle video
                 if (files.video && selectedFeatures.video) {
-                    console.log('Processing video:', filesMetadata.video.name);
-                    formDataToSend.append('video', files.video, filesMetadata.video.name);
+                    console.log('Processing video file:', {
+                        name: files.video.name,
+                        type: files.video.type,
+                        size: files.video.size
+                    });
+                    formDataToSend.append('video', files.video);
+                    console.log('Video file added to FormData');
                 }
 
                 // Handle 3D model
                 if (files.model3D && selectedFeatures.model3D) {
-                    console.log('Processing 3D model:', filesMetadata.model3D.name);
-                    formDataToSend.append('model', files.model3D, filesMetadata.model3D.name);
+                    console.log('Processing 3D model file:', {
+                        name: files.model3D.name,
+                        type: files.model3D.type,
+                        size: files.model3D.size
+                    });
+                    formDataToSend.append('model', files.model3D);
+                    console.log('3D model file added to FormData');
                 }
 
                 // Handle 360 views
