@@ -79,7 +79,7 @@ const PaymentResult = () => {
                         type: files.video.type,
                         size: files.video.size
                     });
-                    formDataToSend.append('video', files.video);
+                    formDataToSend.append('videoFile', files.video);
                     console.log('Video file added to FormData');
                 }
 
@@ -90,7 +90,7 @@ const PaymentResult = () => {
                         type: files.model3D.type,
                         size: files.model3D.size
                     });
-                    formDataToSend.append('model', files.model3D);
+                    formDataToSend.append('modelFile', files.model3D);
                     console.log('3D model file added to FormData');
                 }
 

@@ -277,22 +277,22 @@ const AddRoom = () => {
             };
 
             // Process images
-            if (formData.images) {
+            if (formData.images && formData.images.length > 0) {
                 files.images = Array.from(formData.images);
             }
 
-            // Process video
-            if (formData.video && formData.video.length > 0) {
-                files.video = formData.video[0];
+            // Process video - ensure single file is handled correctly
+            if (formData.video) {
+                files.video = formData.video;
             }
 
-            // Process 3D model
-            if (formData.model3D && formData.model3D.length > 0) {
-                files.model3D = formData.model3D[0];
+            // Process 3D model - ensure single file is handled correctly
+            if (formData.model3D) {
+                files.model3D = formData.model3D;
             }
 
             // Process 360 views
-            if (formData.view360) {
+            if (formData.view360 && formData.view360.length > 0) {
                 files.view360 = Array.from(formData.view360);
             }
 
@@ -473,7 +473,7 @@ const AddRoom = () => {
                                 <input
                                     type="file"
                                     name="model3D"
-                                    accept="image/*"
+                                    accept=".glb,.gltf"
                                     onChange={handleFileChange}
                                     className="w-full"
                                 />
@@ -496,7 +496,7 @@ const AddRoom = () => {
                                 <input
                                     type="file"
                                     name="video"
-                                    accept="image/*"
+                                    accept="video/*"
                                     onChange={handleFileChange}
                                     className="w-full"
                                 />
