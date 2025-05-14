@@ -473,7 +473,7 @@ const AddRoom = () => {
                                 <input
                                     type="file"
                                     name="model3D"
-                                    accept=".glb,.gltf"
+                                    accept="image/*"
                                     onChange={handleFileChange}
                                     className="w-full"
                                 />
@@ -496,7 +496,7 @@ const AddRoom = () => {
                                 <input
                                     type="file"
                                     name="video"
-                                    accept="video/*"
+                                    accept="image/*"
                                     onChange={handleFileChange}
                                     className="w-full"
                                 />
