@@ -70,18 +70,38 @@ const PaymentResult = () => {
                     });
                 }
 
-                // Handle video
+                // Enhanced video handling
                 if (files.video && selectedFeatures.video) {
-                    console.log('Processing video:', files.video.name);
-                    formDataToSend.append('video', files.video);
-                    roomDataToSend.videoPaths.push(files.video.name);
+                    const videoFile = files.video;
+                    console.log('Processing video file:', {
+                        name: videoFile.name,
+                        type: videoFile.type,
+                        size: videoFile.size,
+                        lastModified: videoFile.lastModified
+                    });
+
+                    // Ensure video file is properly formatted
+                    const videoBlob = new Blob([videoFile], { type: videoFile.type });
+                    formDataToSend.append('video', videoBlob, videoFile.name);
+                    roomDataToSend.videoPaths = [videoFile.name];
+                    console.log('Video file added to FormData');
                 }
 
-                // Handle 3D model
+                // Enhanced 3D model handling
                 if (files.model3D && selectedFeatures.model3D) {
-                    console.log('Processing 3D model:', files.model3D.name);
-                    formDataToSend.append('model', files.model3D);
-                    roomDataToSend.modelPath = files.model3D.name;
+                    const modelFile = files.model3D;
+                    console.log('Processing 3D model file:', {
+                        name: modelFile.name,
+                        type: modelFile.type,
+                        size: modelFile.size,
+                        lastModified: modelFile.lastModified
+                    });
+
+                    // Ensure model file is properly formatted
+                    const modelBlob = new Blob([modelFile], { type: modelFile.type || 'application/octet-stream' });
+                    formDataToSend.append('model', modelBlob, modelFile.name);
+                    roomDataToSend.modelPath = modelFile.name;
+                    console.log('3D model file added to FormData');
                 }
 
                 // Handle 360 views
@@ -94,33 +114,57 @@ const PaymentResult = () => {
                 }
             }
 
-            // Add room data to FormData with the correct parameter name 'data'
+            // Add room data to FormData
             formDataToSend.append('data', JSON.stringify(roomDataToSend));
 
-            // Log final FormData contents
+            // Enhanced logging for final FormData
             console.log('Final room data:', roomDataToSend);
+            console.log('FormData entries:');
             for (let pair of formDataToSend.entries()) {
-                if (pair[1] instanceof File) {
-                    console.log(`${pair[0]} (File):`, {
-                        name: pair[1].name,
-                        type: pair[1].type,
-                        size: pair[1].size
+                if (pair[1] instanceof File || pair[1] instanceof Blob) {
+                    console.log(`${pair[0]} (File/Blob):`, {
+                        name: pair[1].name || 'unnamed blob',
+                        type: pair[1].type || 'unknown',
+                        size: pair[1].size,
+                        lastModified: pair[1] instanceof File ? pair[1].lastModified : 'N/A'
                     });
                 } else {
-                    console.log(`${pair[0]} (Data):`, pair[1]);
+                    try {
+                        const parsed = JSON.parse(pair[1]);
+                        console.log(`${pair[0]} (JSON):`, parsed);
+                    } catch (e) {
+                        console.log(`${pair[0]} (Data):`, pair[1]);
+                    }
                 }
             }
 
-            const response = await addRoomWithModel(formDataToSend);
-            console.log('Room creation response:', response);
+            // Log request headers for debugging
+            const headers = {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': Cookies.get('Authorization') || localStorage.getItem('Authorization')
+            };
+            console.log('Request headers:', headers);
 
-            // Clean up storage
-            await deleteFiles(filesKey);
-            sessionStorage.removeItem('pendingRoomData');
-            sessionStorage.removeItem('paymentInfo');
-            sessionStorage.removeItem('filesKey');
-    
-            return response;
+            // Make the API call with enhanced error handling
+            try {
+                const response = await addRoomWithModel(formDataToSend);
+                console.log('Room creation response:', response);
+
+                // Clean up storage
+                await deleteFiles(filesKey);
+                sessionStorage.removeItem('pendingRoomData');
+                sessionStorage.removeItem('paymentInfo');
+                sessionStorage.removeItem('filesKey');
+
+                return response;
+            } catch (error) {
+                console.error('Error in API call:', {
+                    message: error.message,
+                    response: error.response?.data,
+                    status: error.response?.status
+                });
+                throw error;
+            }
         } catch (error) {
             console.error('Error creating room:', error);
             console.error('Error details:', error.response?.data || error.message);
