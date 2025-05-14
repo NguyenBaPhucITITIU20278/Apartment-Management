@@ -43,9 +43,13 @@ const AddRoom = () => {
             return;
         }
 
-        // Verify token format
-        if (!token.startsWith('Bearer ')) {
-            const formattedToken = `Bearer ${token}`;
+        // Fix and store token with correct format
+        const formattedToken = token.startsWith('Bearer ') ? token : 
+                             token.startsWith('Begrer ') ? `Bearer ${token.substring(7)}` : 
+                             `Bearer ${token}`;
+        
+        if (formattedToken !== token) {
+            console.log('Fixing token format...');
             Cookies.set('Authorization', formattedToken);
             localStorage.setItem('Authorization', formattedToken);
         }
@@ -153,12 +157,22 @@ const AddRoom = () => {
         try {
             setLoading(true);
 
-            // Validate token
+            // Validate and fix token if needed
             const token = Cookies.get('Authorization');
             if (!token) {
                 message.error("Please log in to continue.");
                 navigate("/login");
                 return;
+            }
+
+            // Ensure token has correct format
+            const formattedToken = token.startsWith('Bearer ') ? token : 
+                                 token.startsWith('Begrer ') ? `Bearer ${token.substring(7)}` : 
+                                 `Bearer ${token}`;
+            
+            if (formattedToken !== token) {
+                Cookies.set('Authorization', formattedToken);
+                localStorage.setItem('Authorization', formattedToken);
             }
 
             // Validate required fields

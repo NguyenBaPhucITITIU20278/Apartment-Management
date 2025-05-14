@@ -138,11 +138,16 @@ const PaymentResult = () => {
             }
 
             // Make the API call
+            const formattedToken = token.startsWith('Bearer ') ? token : 
+                                 token.startsWith('Begrer ') ? `Bearer ${token.substring(7)}` : 
+                                 `Bearer ${token}`;
+
             const headers = {
-                'Authorization': `Bearer ${token}`
+                'Authorization': formattedToken,
+                'Content-Type': 'multipart/form-data'
             };
 
-            console.log('Using authorization token:', token);
+            console.log('Using authorization token:', formattedToken);
             console.log('Request headers:', headers);
 
             try {
@@ -167,13 +172,15 @@ const PaymentResult = () => {
                 console.error('Error in API call:', {
                     message: error.message,
                     response: error.response?.data,
-                    status: error.response?.status
+                    status: error.response?.status,
+                    headers: error.response?.headers
                 });
                 if (error.response?.status === 401 || error.response?.status === 403) {
                     message.error('Authentication error. Please log in again.');
                     navigate('/login');
                     return;
                 }
+                message.error('Failed to create room. Please try again.');
                 throw error;
             }
         } catch (error) {
