@@ -271,28 +271,28 @@ const AddRoom = () => {
             // Prepare files object in the correct format
             const files = {
                 images: [],
-                video: null,
-                model3D: null,
+                video: [],
+                model3D: [],
                 view360: []
             };
 
             // Process images
-            if (formData.images && formData.images.length > 0) {
+            if (formData.images) {
                 files.images = Array.from(formData.images);
             }
 
-            // Process video - ensure single file is handled correctly
+            // Process video
             if (formData.video) {
-                files.video = formData.video;
+                files.video = Array.from(formData.video);
             }
 
-            // Process 3D model - ensure single file is handled correctly
+            // Process 3D model
             if (formData.model3D) {
-                files.model3D = formData.model3D;
+                files.model3D = Array.from(formData.model3D);
             }
 
             // Process 360 views
-            if (formData.view360 && formData.view360.length > 0) {
+            if (formData.view360) {
                 files.view360 = Array.from(formData.view360);
             }
 
