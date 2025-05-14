@@ -53,15 +53,15 @@ const PaymentResult = () => {
             // Convert array format back to single files where appropriate
             const processedFiles = {
                 images: files.images || [],
-                video: files.video && files.video.length > 0 ? files.video[0] : null,
-                model3D: files.model3D && files.model3D.length > 0 ? files.model3D[0] : null,
+                video: files.video || [],
+                model3D: files.model3D || [],
                 view360: files.view360 || []
             };
 
             console.log('Processed files:', {
                 images: processedFiles.images.length,
-                video: processedFiles.video ? 'present' : 'null',
-                model3D: processedFiles.model3D ? 'present' : 'null',
+                video: processedFiles.video.length,
+                model3D: processedFiles.model3D.length,
                 view360: processedFiles.view360.length
             });
 
@@ -78,7 +78,7 @@ const PaymentResult = () => {
             };
 
             // Handle files if they exist
-            if (processedFiles.images) {
+            if (processedFiles.images && processedFiles.images.length > 0) {
                 console.log('Processing images:', processedFiles.images.length);
                 processedFiles.images.forEach((image, index) => {
                     formDataToSend.append('files', image);
@@ -86,28 +86,26 @@ const PaymentResult = () => {
                 });
             }
 
-            if (processedFiles.video) {
-                console.log('Processing video file:', {
-                    name: processedFiles.video.name,
-                    type: processedFiles.video.type,
-                    size: processedFiles.video.size
+            // Handle video
+            if (processedFiles.video && processedFiles.video.length > 0) {
+                console.log('Processing video files:', processedFiles.video.length);
+                processedFiles.video.forEach((videoFile, index) => {
+                    formDataToSend.append('video', videoFile);
+                    roomDataToSend.videoPaths.push(videoFile.name);
                 });
-                formDataToSend.append('video', processedFiles.video);
-                roomDataToSend.videoPaths = [processedFiles.video.name];
             }
 
-            if (processedFiles.model3D) {
-                console.log('Processing 3D model file:', {
-                    name: processedFiles.model3D.name,
-                    type: processedFiles.model3D.type,
-                    size: processedFiles.model3D.size
+            // Handle 3D model
+            if (processedFiles.model3D && processedFiles.model3D.length > 0) {
+                console.log('Processing 3D model files:', processedFiles.model3D.length);
+                processedFiles.model3D.forEach((modelFile, index) => {
+                    formDataToSend.append('model', modelFile);
+                    roomDataToSend.modelPath = modelFile.name;
                 });
-                // Server expects model as an array
-                formDataToSend.append('model', processedFiles.model3D);
-                roomDataToSend.modelPath = processedFiles.model3D.name;
             }
 
-            if (processedFiles.view360) {
+            // Handle 360 views
+            if (processedFiles.view360 && processedFiles.view360.length > 0) {
                 console.log('Processing 360 views:', processedFiles.view360.length);
                 processedFiles.view360.forEach((view, index) => {
                     formDataToSend.append('web360', view);
@@ -123,8 +121,8 @@ const PaymentResult = () => {
                 roomData: roomDataToSend,
                 files: {
                     images: processedFiles.images.length,
-                    video: processedFiles.video ? 1 : 0,
-                    model3D: processedFiles.model3D ? 1 : 0,
+                    video: processedFiles.video.length,
+                    model3D: processedFiles.model3D.length,
                     web360: processedFiles.view360.length
                 }
             });
@@ -281,15 +279,15 @@ const PaymentResult = () => {
                 // Convert array format back to single files where appropriate
                 const processedFiles = {
                     images: files.images || [],
-                    video: files.video && files.video.length > 0 ? files.video[0] : null,
-                    model3D: files.model3D && files.model3D.length > 0 ? files.model3D[0] : null,
+                    video: files.video || [],
+                    model3D: files.model3D || [],
                     view360: files.view360 || []
                 };
 
                 console.log('Processed files:', {
                     images: processedFiles.images.length,
-                    video: processedFiles.video ? 'present' : 'null',
-                    model3D: processedFiles.model3D ? 'present' : 'null',
+                    video: processedFiles.video.length,
+                    model3D: processedFiles.model3D.length,
                     view360: processedFiles.view360.length
                 });
 

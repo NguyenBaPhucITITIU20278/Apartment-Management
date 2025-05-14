@@ -174,8 +174,8 @@ const AddRoom = () => {
             // Prepare files for storage
             const filesToStore = {
                 images: formData.images ? Array.from(formData.images) : [],
-                video: formData.video && formData.video.length > 0 ? formData.video[0] : null,
-                model3D: formData.model3D && formData.model3D.length > 0 ? formData.model3D[0] : null,
+                video: formData.video ? Array.from(formData.video) : [],
+                model3D: formData.model3D ? Array.from(formData.model3D) : [],
                 view360: formData.view360 ? Array.from(formData.view360) : []
             };
 
@@ -185,14 +185,14 @@ const AddRoom = () => {
                     name: file.name,
                     type: file.type
                 })),
-                video: filesToStore.video ? {
-                    name: filesToStore.video.name,
-                    type: filesToStore.video.type
-                } : null,
-                model3D: filesToStore.model3D ? {
-                    name: filesToStore.model3D.name,
-                    type: filesToStore.model3D.type
-                } : null,
+                video: filesToStore.video.map(file => ({
+                    name: file.name,
+                    type: file.type
+                })),
+                model3D: filesToStore.model3D.map(file => ({
+                    name: file.name,
+                    type: file.type
+                })),
                 view360: filesToStore.view360.map(file => ({
                     name: file.name,
                     type: file.type
@@ -243,40 +243,46 @@ const AddRoom = () => {
         try {
             const files = {
                 images: formData.images ? Array.from(formData.images) : [],
-                video: formData.video && formData.video.length > 0 ? formData.video[0] : null,
-                model3D: formData.model3D && formData.model3D.length > 0 ? formData.model3D[0] : null,
+                video: formData.video ? Array.from(formData.video) : [],
+                model3D: formData.model3D ? Array.from(formData.model3D) : [],
                 view360: formData.view360 ? Array.from(formData.view360) : []
             };
 
             // Log files being saved
             console.log('Saving files to IndexedDB:', {
                 images: files.images.length,
-                video: files.video ? 1 : 0,
-                model3D: files.model3D ? 1 : 0,
+                video: files.video.length,
+                model3D: files.model3D.length,
                 view360: files.view360.length
             });
 
             // Convert single files to array format for consistent storage
             const filesForStorage = {
                 images: files.images,
-                video: files.video ? [files.video] : [],
-                model3D: files.model3D ? [files.model3D] : [],
+                video: files.video,
+                model3D: files.model3D,
                 view360: files.view360
             };
 
-            if (files.video) {
+            if (files.video.length > 0) {
                 console.log('Video file details:', {
-                    name: files.video.name,
-                    type: files.video.type,
-                    size: files.video.size
+                    count: files.video.length,
+                    files: files.video.map(f => ({
+                        name: f.name,
+                        type: f.type,
+                        size: f.size
+                    }))
                 });
             }
 
-            if (files.model3D) {
+            if (files.model3D.length > 0) {
                 console.log('3D Model file details:', {
-                    name: files.model3D.name,
-                    type: files.model3D.type,
-                    size: files.model3D.size
+                    count: files.model3D.length,
+                    files: files.model3D.map(f => ({
+                        name: f.name,
+                        type: f.type,
+                        size: f.size
+                    }))
                 });
             }
 
