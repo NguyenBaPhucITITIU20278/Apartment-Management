@@ -42,6 +42,13 @@ const AddRoom = () => {
             navigate("/login");
             return;
         }
+
+        // Verify token format
+        if (!token.startsWith('Bearer ')) {
+            const formattedToken = `Bearer ${token}`;
+            Cookies.set('Authorization', formattedToken);
+            localStorage.setItem('Authorization', formattedToken);
+        }
     }, [navigate]);
 
     // Update package when features change
@@ -145,6 +152,14 @@ const AddRoom = () => {
         e.preventDefault();
         try {
             setLoading(true);
+
+            // Validate token
+            const token = Cookies.get('Authorization');
+            if (!token) {
+                message.error("Please log in to continue.");
+                navigate("/login");
+                return;
+            }
 
             // Validate required fields
             if (!formData.roomName || !formData.rentalPrice || !formData.status ||

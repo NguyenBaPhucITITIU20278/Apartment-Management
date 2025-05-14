@@ -139,8 +139,11 @@ const PaymentResult = () => {
 
             // Make the API call
             const headers = {
-                'Authorization': Cookies.get('Authorization') || localStorage.getItem('Authorization')
+                'Authorization': `Bearer ${token}`
             };
+
+            console.log('Using authorization token:', token);
+            console.log('Request headers:', headers);
 
             try {
                 const response = await axios.post(
@@ -166,6 +169,11 @@ const PaymentResult = () => {
                     response: error.response?.data,
                     status: error.response?.status
                 });
+                if (error.response?.status === 401 || error.response?.status === 403) {
+                    message.error('Authentication error. Please log in again.');
+                    navigate('/login');
+                    return;
+                }
                 throw error;
             }
         } catch (error) {
