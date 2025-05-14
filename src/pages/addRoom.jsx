@@ -73,10 +73,27 @@ const AddRoom = () => {
 
     const handleFileChange = (e) => {
         const { name, files } = e.target;
+        
         setFormData(prev => ({
             ...prev,
             [name]: files
         }));
+
+        // Validate file size based on type
+        const maxSizes = {
+            images: 5 * 1024 * 1024, // 5MB
+            video: 100 * 1024 * 1024, // 100MB
+            model3D: 50 * 1024 * 1024, // 50MB
+            view360: 10 * 1024 * 1024 // 10MB
+        };
+
+        // Check file size
+        Array.from(files).forEach(file => {
+            if (file.size > maxSizes[name]) {
+                message.error(`File ${file.name} size must be less than ${maxSizes[name] / (1024 * 1024)}MB`);
+                return;
+            }
+        });
 
         // Update selected features based on file uploads
         switch (name) {
@@ -197,40 +214,18 @@ const AddRoom = () => {
 
     const saveFormDataToIndexedDB = async (formData) => {
         try {
-            // Prepare files object in the correct format
             const files = {
-                images: [],
-                video: null,
-                model3D: null,
-                view360: []
+                images: formData.images ? Array.from(formData.images) : [],
+                video: formData.video && formData.video.length > 0 ? formData.video[0] : null,
+                model3D: formData.model3D && formData.model3D.length > 0 ? formData.model3D[0] : null,
+                view360: formData.view360 ? Array.from(formData.view360) : []
             };
 
-            // Process images
-            if (formData.images) {
-                files.images = Array.from(formData.images);
-            }
-
-            // Process video
-            if (formData.video && formData.video.length > 0) {
-                files.video = formData.video[0];
-            }
-
-            // Process 3D model
-            if (formData.model3D && formData.model3D.length > 0) {
-                files.model3D = formData.model3D[0];
-            }
-
-            // Process 360 views
-            if (formData.view360) {
-                files.view360 = Array.from(formData.view360);
-            }
-
-            // Generate a unique key for this submission
+            // Generate a unique key using timestamp
             const timestamp = new Date().getTime();
-            const paymentId = sessionStorage.getItem('paymentId');
-            const key = paymentId ? `${paymentId}_${timestamp}` : `temp_${timestamp}`;
+            const key = `room_${timestamp}`;
 
-            // Save to IndexedDB using the fileStorage service
+            // Save to IndexedDB
             await saveFiles(key, files);
             
             // Store the key for later retrieval

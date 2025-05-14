@@ -44,21 +44,20 @@ const PaymentResult = () => {
             console.log('Files metadata:', filesMetadata);
     
             // Get files from IndexedDB
-            console.log('Getting files from IndexedDB for orderId:', orderId);
-            const files = await getFiles(orderId);
+            const filesKey = sessionStorage.getItem('filesKey');
+            console.log('Getting files from IndexedDB with key:', filesKey);
+            const files = await getFiles(filesKey);
             console.log('Retrieved files from IndexedDB:', files);
 
             // Prepare room data
             const roomDataToSend = {
                 ...savedRoomData,
-                paymentId: roomData.paymentId
+                paymentId: roomData.paymentId,
+                imagePaths: [],
+                videoPaths: [],
+                web360Paths: [],
+                modelPath: ''
             };
-
-            // Initialize paths arrays
-            roomDataToSend.imagePaths = [];
-            roomDataToSend.videoPaths = [];
-            roomDataToSend.web360Paths = [];
-            roomDataToSend.modelPath = '';
 
             // Handle files if they exist
             if (files) {
@@ -66,11 +65,8 @@ const PaymentResult = () => {
                 if (files.images && files.images.length > 0 && selectedFeatures.images) {
                     console.log('Processing images:', files.images.length);
                     files.images.forEach((image, index) => {
-                        formDataToSend.append('files', image);
-                        if (filesMetadata.images && filesMetadata.images[index]) {
-                            roomDataToSend.imagePaths.push(filesMetadata.images[index].name);
-                        }
-                        console.log(`Added image ${index}:`, image.name);
+                        formDataToSend.append('images', image);
+                        roomDataToSend.imagePaths.push(image.name);
                     });
                 }
 
@@ -78,18 +74,14 @@ const PaymentResult = () => {
                 if (files.video && selectedFeatures.video) {
                     console.log('Processing video:', files.video.name);
                     formDataToSend.append('video', files.video);
-                    if (filesMetadata.video) {
-                        roomDataToSend.videoPaths.push(filesMetadata.video.name);
-                        }
+                    roomDataToSend.videoPaths.push(files.video.name);
                 }
-    
+
                 // Handle 3D model
                 if (files.model3D && selectedFeatures.model3D) {
                     console.log('Processing 3D model:', files.model3D.name);
-                    formDataToSend.append('model', files.model3D);
-                if (filesMetadata.model3D) {
-                        roomDataToSend.modelPath = filesMetadata.model3D.name;
-                    }
+                    formDataToSend.append('model3D', files.model3D);
+                    roomDataToSend.modelPath = files.model3D.name;
                 }
 
                 // Handle 360 views
@@ -97,39 +89,36 @@ const PaymentResult = () => {
                     console.log('Processing 360 views:', files.view360.length);
                     files.view360.forEach((view, index) => {
                         formDataToSend.append('web360', view);
-                        if (filesMetadata.view360 && filesMetadata.view360[index]) {
-                            roomDataToSend.web360Paths.push(filesMetadata.view360[index].name);
-                        }
-                        console.log(`Added 360 view ${index}:`, view.name);
+                        roomDataToSend.web360Paths.push(view.name);
                     });
                 }
             }
 
-            // Update room data in FormData with updated paths
-            formDataToSend.append('data', JSON.stringify(roomDataToSend));
+            // Add room data to FormData
+            formDataToSend.append('roomData', JSON.stringify(roomDataToSend));
 
             // Log final FormData contents
-            console.log('Final room data being sent:', roomDataToSend);
-            console.log('Final FormData contents:');
+            console.log('Final room data:', roomDataToSend);
             for (let pair of formDataToSend.entries()) {
                 if (pair[1] instanceof File) {
-                    console.log(pair[0], '(File):', {
+                    console.log(`${pair[0]} (File):`, {
                         name: pair[1].name,
                         type: pair[1].type,
                         size: pair[1].size
                     });
                 } else {
-                    console.log(pair[0], '(Data):', pair[1]);
+                    console.log(`${pair[0]} (Data):`, pair[1]);
                 }
             }
-            
+
             const response = await addRoomWithModel(formDataToSend);
             console.log('Room creation response:', response);
-    
+
             // Clean up storage
-            await deleteFiles(orderId);
+            await deleteFiles(filesKey);
             sessionStorage.removeItem('pendingRoomData');
             sessionStorage.removeItem('paymentInfo');
+            sessionStorage.removeItem('filesKey');
     
             return response;
         } catch (error) {
