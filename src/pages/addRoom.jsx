@@ -120,10 +120,10 @@ const AddRoom = () => {
                 phoneNumber: formData.phoneNumber,
                 address: formData.address,
                 description: formData.description,
-                imagePaths: [],
-                videoPaths: [],
-                web360Paths: [],
-                modelPath: '',
+                imagePaths: formData.images ? Array.from(formData.images).map(file => file.name) : [],
+                videoPaths: formData.video ? [formData.video[0].name] : [],
+                web360Paths: formData.view360 ? Array.from(formData.view360).map(file => file.name) : [],
+                modelPath: formData.model3D && formData.model3D.length > 0 ? formData.model3D[0].name : '',
                 username: Cookies.get('userName')
             };
 
@@ -158,13 +158,31 @@ const AddRoom = () => {
             // Save files to IndexedDB
             const filesKey = await saveFormDataToIndexedDB(filesToStore);
             console.log('Files saved with key:', filesKey);
+            console.log('Room data with file paths:', roomData);
 
-            // Save data to sessionStorage
+            // Save data to sessionStorage with proper file paths
             sessionStorage.setItem('pendingRoomData', JSON.stringify({
                 roomData,
                 selectedFeatures,
                 currentPackage,
-                filesMetadata
+                filesMetadata: {
+                    images: filesToStore.images.map(file => ({
+                        name: file.name,
+                        type: file.type
+                    })),
+                    video: filesToStore.video ? {
+                        name: filesToStore.video.name,
+                        type: filesToStore.video.type
+                    } : null,
+                    model3D: filesToStore.model3D ? {
+                        name: filesToStore.model3D.name,
+                        type: filesToStore.model3D.type
+                    } : null,
+                    view360: filesToStore.view360.map(file => ({
+                        name: file.name,
+                        type: file.type
+                    }))
+                }
             }));
 
             // Store the payment info

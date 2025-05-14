@@ -35,6 +35,7 @@ const PaymentResult = () => {
             const parsedData = JSON.parse(savedData);
             console.log('Parsed saved data:', parsedData);
             
+            // Keep the original paths from savedRoomData
             const savedRoomData = parsedData.roomData;
             const selectedFeatures = parsedData.selectedFeatures;
             const filesMetadata = parsedData.filesMetadata || {};
@@ -43,22 +44,22 @@ const PaymentResult = () => {
             console.log('Selected features:', selectedFeatures);
             console.log('Files metadata:', filesMetadata);
 
-            // Get files from IndexedDB
-            console.log('Getting files from IndexedDB for orderId:', orderId);
-            const files = await getFiles(orderId);
+            // Get files from IndexedDB using filesKey from sessionStorage
+            const filesKey = sessionStorage.getItem('filesKey');
+            console.log('Getting files from IndexedDB using filesKey:', filesKey);
+            const files = await getFiles(filesKey);
             console.log('Retrieved files from IndexedDB:', files);
 
-            // Prepare room data
+            // Prepare room data while preserving original paths
             const roomDataToSend = {
                 ...savedRoomData,
-                paymentId: roomData.paymentId
+                paymentId: roomData.paymentId,
+                // Keep the original paths
+                imagePaths: savedRoomData.imagePaths || [],
+                videoPaths: savedRoomData.videoPaths || [],
+                web360Paths: savedRoomData.web360Paths || [],
+                modelPath: savedRoomData.modelPath || ''
             };
-
-            // Initialize paths arrays
-            roomDataToSend.imagePaths = [];
-            roomDataToSend.videoPaths = [];
-            roomDataToSend.web360Paths = [];
-            roomDataToSend.modelPath = '';
 
             // Handle files if they exist
             if (files) {
@@ -66,46 +67,34 @@ const PaymentResult = () => {
                 if (files.images && files.images.length > 0 && selectedFeatures.images) {
                     console.log('Processing images:', files.images.length);
                     files.images.forEach((image, index) => {
-                        formDataToSend.append('files', image);
-                        if (filesMetadata.images && filesMetadata.images[index]) {
-                            roomDataToSend.imagePaths.push(filesMetadata.images[index].name);
-                        }
-                        console.log(`Added image ${index}:`, image.name);
+                        formDataToSend.append('files', image, filesMetadata.images[index].name);
+                        console.log(`Added image ${index}:`, filesMetadata.images[index].name);
                     });
                 }
 
                 // Handle video
                 if (files.video && selectedFeatures.video) {
-                    console.log('Processing video:', files.video.name);
-                    formDataToSend.append('video', files.video);
-                    if (filesMetadata.video) {
-                        roomDataToSend.videoPaths.push(filesMetadata.video.name);
-                    }
+                    console.log('Processing video:', filesMetadata.video.name);
+                    formDataToSend.append('video', files.video, filesMetadata.video.name);
                 }
 
                 // Handle 3D model
                 if (files.model3D && selectedFeatures.model3D) {
-                    console.log('Processing 3D model:', files.model3D.name);
-                    formDataToSend.append('model', files.model3D);
-                    if (filesMetadata.model3D) {
-                        roomDataToSend.modelPath = filesMetadata.model3D.name;
-                    }
+                    console.log('Processing 3D model:', filesMetadata.model3D.name);
+                    formDataToSend.append('model', files.model3D, filesMetadata.model3D.name);
                 }
 
                 // Handle 360 views
                 if (files.view360 && files.view360.length > 0 && selectedFeatures.view360) {
                     console.log('Processing 360 views:', files.view360.length);
                     files.view360.forEach((view, index) => {
-                        formDataToSend.append('web360', view);
-                        if (filesMetadata.view360 && filesMetadata.view360[index]) {
-                            roomDataToSend.web360Paths.push(filesMetadata.view360[index].name);
-                        }
-                        console.log(`Added 360 view ${index}:`, view.name);
+                        formDataToSend.append('web360', view, filesMetadata.view360[index].name);
+                        console.log(`Added 360 view ${index}:`, filesMetadata.view360[index].name);
                     });
                 }
             }
 
-            // Update room data in FormData with updated paths
+            // Update room data in FormData
             formDataToSend.append('data', JSON.stringify(roomDataToSend));
 
             // Log final FormData contents
@@ -127,9 +116,10 @@ const PaymentResult = () => {
             console.log('Room creation response:', response);
 
             // Clean up storage
-            await deleteFiles(orderId);
+            await deleteFiles(filesKey);
             sessionStorage.removeItem('pendingRoomData');
             sessionStorage.removeItem('paymentInfo');
+            sessionStorage.removeItem('filesKey');
 
             return response;
         } catch (error) {
