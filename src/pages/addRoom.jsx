@@ -10,7 +10,7 @@ import axios from 'axios';
 const { Text } = Typography;
 
 const AddRoom = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
     const location = useLocation();
     const [loading, setLoading] = useState(false);
     const [selectedFeatures, setSelectedFeatures] = useState({
@@ -35,11 +35,11 @@ const AddRoom = () => {
         view360: null
     });
 
-    useEffect(() => {
+  useEffect(() => {
         const token = Cookies.get('Authorization');
-        if (!token) {
-            message.error("Please log in to add a room.");
-            navigate("/login");
+    if (!token) {
+      message.error("Please log in to add a room.");
+      navigate("/login");
             return;
         }
 
@@ -52,8 +52,8 @@ const AddRoom = () => {
             console.log('Fixing token format...');
             Cookies.set('Authorization', formattedToken);
             localStorage.setItem('Authorization', formattedToken);
-        }
-    }, [navigate]);
+    }
+  }, [navigate]);
 
     // Update package when features change
     useEffect(() => {
@@ -129,8 +129,8 @@ const AddRoom = () => {
         });
 
         if (!isValid) {
-            return;
-        }
+      return;
+    }
 
         // Update form data
         setFormData(prev => ({
@@ -260,7 +260,7 @@ const AddRoom = () => {
             } else {
                 throw new Error('No payment URL received');
             }
-        } catch (error) {
+    } catch (error) {
             console.error('Error in handleSubmit:', error);
             message.error('Failed to process your request. Please try again.');
         } finally {
@@ -333,7 +333,7 @@ const AddRoom = () => {
         }
     };
 
-    return (
+  return (
         <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-2xl font-bold mb-6">Post Rental Listing</h2>
@@ -360,182 +360,182 @@ const AddRoom = () => {
                         <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
+            <div>
                                 <label className="block mb-2">
                                     Room Name <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
+              </label>
+              <input
+                type="text"
                                     name="roomName"
-                                    required
+                required
                                     className="w-full p-2 border rounded"
                                     onChange={handleInputChange}
-                                />
-                            </div>
+              />
+            </div>
 
-                            <div>
+            <div>
                                 <label className="block mb-2">
                                     Rental Price <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="number"
+              </label>
+              <input
+                type="number"
                                     name="rentalPrice"
-                                    required
+                required
                                     className="w-full p-2 border rounded"
                                     onChange={handleInputChange}
-                                />
-                            </div>
+              />
+            </div>
 
-                            <div>
+            <div>
                                 <label className="block mb-2">
                                     Status <span className="text-red-500">*</span>
-                                </label>
-                                <select
+              </label>
+              <select
                                     name="status"
-                                    required
+                required
                                     className="w-full p-2 border rounded"
                                     onChange={handleInputChange}
-                                >
-                                    <option value="">Select Status</option>
+              >
+                <option value="">Select Status</option>
                                     <option value="available">Available</option>
                                     <option value="rented">Rented</option>
-                                </select>
-                            </div>
+              </select>
+            </div>
 
-                            <div>
+            <div>
                                 <label className="block mb-2">
                                     Number of Bedrooms <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="number"
+              </label>
+              <input
+                type="number"
                                     name="numberOfBedrooms"
-                                    required
+                required
                                     className="w-full p-2 border rounded"
                                     onChange={handleInputChange}
                                     value={formData.numberOfBedrooms}
-                                />
-                            </div>
+              />
+            </div>
 
-                            <div>
+            <div>
                                 <label className="block mb-2">
                                     Area (m²) <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="number"
+              </label>
+              <input
+                type="number"
                                     name="area"
-                                    required
+                required
                                     className="w-full p-2 border rounded"
                                     onChange={handleInputChange}
-                                />
-                            </div>
+              />
+            </div>
 
-                            <div>
+            <div>
                                 <label className="block mb-2">
                                     Phone Number <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="tel"
+              </label>
+              <input
+                type="tel"
                                     name="phoneNumber"
-                                    required
+                required
                                     className="w-full p-2 border rounded"
                                     onChange={handleInputChange}
-                                />
-                            </div>
-                        </div>
+              />
+            </div>
+          </div>
 
-                        <div className="mt-4">
+          <div className="mt-4">
                             <label className="block mb-2">
                                 Address <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
+            </label>
+            <input
+              type="text"
                                 name="address"
-                                required
+              required
                                 className="w-full p-2 border rounded"
                                 onChange={handleInputChange}
-                            />
-                        </div>
+            />
+          </div>
 
-                        <div className="mt-4">
+          <div className="mt-4">
                             <label className="block mb-2">
                                 Description <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
+            </label>
+            <textarea
                                 name="description"
-                                required
+              required
                                 className="w-full p-2 border rounded h-32"
                                 onChange={handleInputChange}
-                            />
-                        </div>
-                    </div>
+            />
+          </div>
+        </div>
 
                     <div className="mb-6">
                         <h3 className="text-lg font-semibold mb-4">Images and Media</h3>
 
-                        <div className="space-y-4">
-                            <div>
+          <div className="space-y-4">
+            <div>
                                 <label className="block mb-2">
                                     Images <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="file"
+              </label>
+              <input
+                type="file"
                                     name="images"
-                                    multiple
-                                    accept="image/*"
+                multiple
+                accept="image/*"
                                     onChange={handleFileChange}
                                     className="w-full"
-                                />
-                            </div>
+              />
+            </div>
 
-                            <div>
+            <div>
                                 <label className="block mb-2">3D Model</label>
-                                <input
-                                    type="file"
+              <input
+                type="file"
                                     name="model3D"
-                                    accept=".glb,.gltf"
+                accept=".glb,.gltf"
                                     onChange={handleFileChange}
                                     className="w-full"
-                                />
-                            </div>
+              />
+            </div>
 
-                            <div>
+            <div>
                                 <label className="block mb-2">360° Images</label>
-                                <input
-                                    type="file"
+              <input
+                type="file"
                                     name="view360"
-                                    multiple
-                                    accept="image/*"
+                multiple
+                accept="image/*"
                                     onChange={handleFileChange}
                                     className="w-full"
-                                />
-                            </div>
+              />
+            </div>
 
-                            <div>
+            <div>
                                 <label className="block mb-2">Video</label>
-                                <input
-                                    type="file"
+              <input
+                type="file"
                                     name="video"
-                                    accept="video/*"
+                accept="video/*"
                                     onChange={handleFileChange}
                                     className="w-full"
-                                />
-                            </div>
-                        </div>
-                    </div>
+              />
+            </div>
+          </div>
+        </div>
 
                     <div className="text-right">
-                        <button
-                            type="submit"
+          <button
+            type="submit"
                             disabled={loading}
                             className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:bg-blue-300"
-                        >
+          >
                             {loading ? 'Processing...' : 'Continue to Payment'}
-                        </button>
-                    </div>
-                </form>
-            </div>
+          </button>
         </div>
-    );
+      </form>
+            </div>
+    </div>
+  );
 };
 
 export default AddRoom;

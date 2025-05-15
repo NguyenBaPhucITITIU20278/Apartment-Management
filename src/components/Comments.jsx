@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 
@@ -95,7 +95,7 @@ const Comments = ({ roomId }) => {
                             <div className="flex justify-between items-start">
                                 <div className="font-medium text-blue-600">{comment.username}</div>
                                 <div className="text-sm text-gray-500">
-                                    {format(new Date(comment.createdAt), 'MMM d, yyyy HH:mm')}
+                                    {format(parseISO(comment.createdAt), 'MMM d, yyyy HH:mm')}
                                 </div>
                             </div>
                             <p className="mt-2 text-gray-700 whitespace-pre-wrap">{comment.content}</p>
