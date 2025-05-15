@@ -44,7 +44,7 @@ const Comments = ({ roomId }) => {
             });
             
             setNewComment('');
-            setComments(prevComments => [...(Array.isArray(prevComments) ? prevComments : []), response.data]);
+            setComments(prevComments => [response.data, ...(Array.isArray(prevComments) ? prevComments : [])]);
             toast.success('Comment posted successfully!');
         } catch (error) {
             console.error('Error posting comment:', error);
@@ -55,12 +55,16 @@ const Comments = ({ roomId }) => {
     };
 
     const formatDate = (dateString) => {
-        if (!dateString) return 'N/A';
+        if (!dateString) return '';
         try {
-            return format(parseISO(dateString), 'MMM d, yyyy HH:mm');
+            const date = parseISO(dateString);
+            if (isNaN(date.getTime())) {
+                return '';
+            }
+            return format(date, 'MMM d, yyyy HH:mm');
         } catch (error) {
             console.error('Error formatting date:', error);
-            return 'Invalid date';
+            return '';
         }
     };
 
