@@ -54,6 +54,16 @@ const Comments = ({ roomId }) => {
         }
     };
 
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        try {
+            return format(parseISO(dateString), 'MMM d, yyyy HH:mm');
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return 'Invalid date';
+        }
+    };
+
     return (
         <div className="mt-8">
             <h3 className="text-xl font-semibold mb-4">Comments</h3>
@@ -95,7 +105,7 @@ const Comments = ({ roomId }) => {
                             <div className="flex justify-between items-start">
                                 <div className="font-medium text-blue-600">{comment.username}</div>
                                 <div className="text-sm text-gray-500">
-                                    {format(parseISO(comment.createdAt), 'MMM d, yyyy HH:mm')}
+                                    {formatDate(comment.createdAt)}
                                 </div>
                             </div>
                             <p className="mt-2 text-gray-700 whitespace-pre-wrap">{comment.content}</p>
