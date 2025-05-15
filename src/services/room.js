@@ -11,9 +11,9 @@ const getHeaders = () => {
     throw new Error("Access token is missing");
   }
   return {
-    Authorization: "Bearer " + token,
-    "Content-Type": "application/json",
-    userName: userName,
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+    'userName': userName || ''
   };
 };
 
@@ -316,11 +316,20 @@ export const updateRoomDetails = async (roomId, roomData) => {
 
 export const getMyRooms = async () => {
   try {
-    const headers = getHeaders(); // Ensure headers include Authorization
-    const response = await axios.get(`${API_URL}/my-rooms`, { headers });
+    const headers = getHeaders();
+    console.log('Fetching my rooms with headers:', headers);
+    const response = await axios.get(`${API_URL}/my-rooms`, { 
+      headers,
+      withCredentials: true 
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching my rooms:", error);
+    if (error.response) {
+      console.error("Response data:", error.response.data);
+      console.error("Response status:", error.response.status);
+      console.error("Response headers:", error.response.headers);
+    }
     throw error;
   }
 };
