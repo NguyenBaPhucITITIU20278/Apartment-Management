@@ -1,31 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
-
+import commentService from '../services/commentService';
 
 const Comments = ({ roomId }) => {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
     const userName = Cookies.get('userName');
 
-
     useEffect(() => {
-        fetchComments();
+        if (roomId) {
+            fetchComments();
+        }
     }, [roomId]);
 
     const fetchComments = async () => {
+        setIsLoading(true);
         try {
-            const response = await axios.get(`/api/comments/room/${roomId}`);
-            setComments(Array.isArray(response.data) ? response.data : []);
+            console.log('Fetching comments for room:', roomId);
+            const data = await commentService.getCommentsByRoomId(roomId);
+            console.log('Comments response:', data);
+            
+            if (Array.isArray(data)) {
+                setComments(data);
+            } else {
+                console.error('Unexpected response format:', data);
+                setComments([]);
+                toast.error('Error loading comments: Invalid data format');
+            }
         } catch (error) {
             console.error('Error fetching comments:', error);
-            toast.error('Failed to load comments');
+            toast.error(error.response?.data?.message || 'Failed to load comments');
             setComments([]);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -35,38 +48,55 @@ const Comments = ({ roomId }) => {
         
         setIsSubmitting(true);
         try {
-            const response = await axios.post(`/api/comments`, null, {
-                params: {
-                    roomId: roomId,
-                    username: userName,
-                    content: newComment.trim()
-                }
+            console.log('Posting comment:', {
+                roomId,
+                username: userName,
+                content: newComment.trim()
             });
+
+            const data = await commentService.createComment(
+                roomId,
+                userName,
+                newComment.trim()
+            );
+            
+            console.log('Comment posted successfully:', data);
             
             setNewComment('');
-            setComments(prevComments => [response.data, ...(Array.isArray(prevComments) ? prevComments : [])]);
+            setComments(prevComments => [data, ...(Array.isArray(prevComments) ? prevComments : [])]);
             toast.success('Comment posted successfully!');
+            
+            // Refresh comments after posting
+            fetchComments();
         } catch (error) {
             console.error('Error posting comment:', error);
-            toast.error('Failed to post comment. Please try again.');
+            toast.error(error.response?.data?.message || 'Failed to post comment. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const formatDate = (dateString) => {
-        if (!dateString) return '';
+        if (!dateString) {
+            console.warn('Empty date string received');
+            return '';
+        }
         try {
             const date = parseISO(dateString);
             if (isNaN(date.getTime())) {
+                console.error('Invalid date:', dateString);
                 return '';
             }
             return format(date, 'MMM d, yyyy HH:mm');
         } catch (error) {
-            console.error('Error formatting date:', error);
+            console.error('Error formatting date:', error, dateString);
             return '';
         }
     };
+
+    if (isLoading) {
+        return <div className="mt-8 text-center">Loading comments...</div>;
+    }
 
     return (
         <div className="mt-8">
