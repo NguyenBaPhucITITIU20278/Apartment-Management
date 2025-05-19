@@ -194,6 +194,8 @@ const RoomDetail = () => {
 
   const handleUpdateRoomDetails = async (updatedRoomData) => {
     console.log("Attempting to update room details with data:", updatedRoomData);
+    console.log("Data type:", typeof updatedRoomData);
+    console.log("Data structure:", JSON.stringify(updatedRoomData, null, 2));
     try {
       const response = await updateRoomDetails(roomId, {
         ...updatedRoomData,
@@ -204,6 +206,7 @@ const RoomDetail = () => {
     } catch (error) {
       alert("Please log in correct account to update the details of the apartment.");
       console.error("Error updating room details:", error);
+      console.error("Error response:", error.response?.data);
       window.location.reload();
     }
   };

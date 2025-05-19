@@ -301,15 +301,32 @@ export const updateRoomWeb360 = async (roomId, web360Files) => {
 
 export const updateRoomDetails = async (roomId, roomData) => {
   try {
-    const headers = getHeaders(); // Ensure headers include Authorization
+    const headers = getHeaders();
     console.log("Updating room details with roomId:", roomId);
-    console.log("Room data being sent:", roomData);
+    
+    // Format the data to match RoomRequest structure
+    const formattedData = {
+      address: roomData.address,
+      price: roomData.price,
+      area: roomData.area,
+      description: roomData.description,
+      title: roomData.title,
+      phoneNumber: roomData.phoneNumber,
+      name: roomData.name
+    };
+    
+    console.log("Formatted room data being sent:", formattedData);
     console.log("Headers being used:", headers);
-    const response = await axios.post(`${API_URL}/update-room/${roomId}`, roomData, { headers });
+    
+    const response = await axios.post(`${API_URL}/update-room/${roomId}`, formattedData, { headers });
     console.log("Response received for updating room details:", response);
     return response.data;
   } catch (error) {
     console.error("Error updating room details:", error);
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+    }
     throw error;
   }
 };
