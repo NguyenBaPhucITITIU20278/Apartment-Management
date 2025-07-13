@@ -1,0 +1,35 @@
+{
+  "name": "Thông tin gói Standard",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "",
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "speech": [
+            "Gói Standard: Đăng tin cơ bản với hình ảnh và video. Giá: 10,000₫/ngày (tối thiểu 5 ngày), 63,000₫/tuần, 240,000₫/tháng (giảm 20%). Không hỗ trợ 3D, 360°, auto approve, featured."
+          ]
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "userSays": [
+    { "data": [{ "text": "Gói Standard là gì?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Gói cơ bản có gì?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Giá gói Standard?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Tôi muốn biết về gói Standard" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Standard package details" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Tell me about the Standard package" }], "isTemplate": false, "count": 0 }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "events": []
+} 

@@ -1,0 +1,35 @@
+{
+  "name": "Thông tin gói VIP 1",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "",
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "speech": [
+            "Gói VIP 1: Tăng hiển thị với hình ảnh, video và hỗ trợ 3D model. Giá: 30,000₫/ngày (tối thiểu 3 ngày), 190,000₫/tuần, 800,000₫/tháng (giảm 11%). Có 3D, auto approve, featured. Không hỗ trợ 360°."
+          ]
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "userSays": [
+    { "data": [{ "text": "Gói VIP 1 là gì?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Gói VIP 1 có gì?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Giá gói VIP 1?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Tôi muốn biết về gói VIP 1" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "VIP 1 package details" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Tell me about the VIP 1 package" }], "isTemplate": false, "count": 0 }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "events": []
+} 

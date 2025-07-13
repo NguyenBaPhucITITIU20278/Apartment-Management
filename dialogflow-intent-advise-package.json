@@ -1,0 +1,38 @@
+{
+  "name": "Tư vấn chọn gói phù hợp",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "",
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "speech": [
+            "Nếu bạn chỉ cần đăng tin cơ bản, hãy chọn gói Standard. Nếu muốn tăng hiển thị và có 3D, chọn VIP 1. Nếu muốn hiển thị cao nhất, có 3D và 360°, chọn VIP 2."
+          ]
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "userSays": [
+    { "data": [{ "text": "Tôi nên chọn gói nào?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Gói nào phù hợp với tôi?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Nên dùng gói nào để hiển thị tốt?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Tôi muốn đăng tin nổi bật" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Tôi chỉ cần đăng cơ bản" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Which package should I choose?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Which package is suitable for me?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "I want to highlight my post" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "I just need basic listing" }], "isTemplate": false, "count": 0 }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "events": []
+} 

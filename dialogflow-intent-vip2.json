@@ -1,0 +1,35 @@
+{
+  "name": "Thông tin gói VIP 2",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "",
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "speech": [
+            "Gói VIP 2: Hiển thị cao cấp với hình ảnh, video, 3D model và 360° view. Giá: 50,000₫/ngày (tối thiểu 3 ngày), 315,000₫/tuần, 1,200,000₫/tháng (giảm 20%). Có 3D, 360°, auto approve, featured."
+          ]
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "userSays": [
+    { "data": [{ "text": "Gói VIP 2 là gì?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Gói VIP 2 có gì?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Giá gói VIP 2?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Tôi muốn biết về gói VIP 2" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "VIP 2 package details" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Tell me about the VIP 2 package" }], "isTemplate": false, "count": 0 }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "events": []
+} 

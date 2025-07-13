@@ -40,7 +40,7 @@ const FloatingButtons = () => {
   const shouldShowChat = isAuthenticated;
 
   return (
-    <div className="fixed bottom-8 right-8 flex flex-col gap-4">
+    <div className="fixed bottom-24 right-6 flex flex-col gap-4">
       {/* Support Modal */}
       {showSupportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

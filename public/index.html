@@ -30,6 +30,21 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+    <df-messenger
+      intent="WELCOME"
+      chat-title="BoxChat AI"
+      agent-id="7ac3fdaa-f1e6-4656-9c27-4f091cd7ca0c"
+      language-code="vi"
+    ></df-messenger>
+    <style>
+      df-messenger {
+      position: fixed !important;
+      top: 100px !important;
+      right: 100px !important;
+      z-index: 50 !important;
+    }
+  </style>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.

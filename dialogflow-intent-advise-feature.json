@@ -1,0 +1,33 @@
+{
+  "name": "Tư vấn theo nhu cầu",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "",
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "speech": [
+            "Nếu bạn muốn có 3D, hãy chọn VIP 1 hoặc VIP 2. Nếu muốn cả 3D và 360°, hãy chọn VIP 2. Giá chi tiết: VIP 1 từ 30,000₫/ngày, VIP 2 từ 50,000₫/ngày."
+          ]
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "userSays": [
+    { "data": [{ "text": "Tôi muốn đăng tin có 3D, nên chọn gói nào?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "Tôi muốn có 360°, giá bao nhiêu?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "I want 3D model, which package?" }], "isTemplate": false, "count": 0 },
+    { "data": [{ "text": "I want 360 view, how much?" }], "isTemplate": false, "count": 0 }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "events": []
+} 
